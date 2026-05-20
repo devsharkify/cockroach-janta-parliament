@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFingerprint } from '@/lib/hooks/useFingerprint'
+import VoteConfetti from '@/app/components/VoteConfetti'
+import ShareModal from '@/app/components/ShareModal'
 
 type Candidate = {
   id: string
@@ -31,6 +33,70 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
   const [loading, setLoading] = useState(true)
   const [votedFor, setVotedFor] = useState<Set<string>>(new Set())
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({})
+
+  // New state for enhancements
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [shareModal, setShareModal] = useState<{ isOpen: boolean; candidateIdx: number }>({
+    isOpen: false,
+    candidateIdx: 0,
+  })
+  const [liveData, setLiveData] = useState<SeatData | null>(null)
+  // Track which candidate IDs had a count flash animation
+  const [flashIds, setFlashIds] = useState<Set<string>>(new Set())
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Merge live vote counts from polling into local voteCounts,
+  // flashing any IDs whose count changed.
+  const applyLiveData = useCallback(
+    (data: SeatData) => {
+      setLiveData(data)
+      setVoteCounts((prev) => {
+        const next = { ...prev }
+        const changed: string[] = []
+        for (const c of data.candidates) {
+          if (next[c.id] !== c.voteCount) {
+            changed.push(c.id)
+            next[c.id] = c.voteCount
+          }
+        }
+        if (changed.length > 0) {
+          setFlashIds((f) => new Set([...f, ...changed]))
+          setTimeout(() => {
+            setFlashIds((f) => {
+              const next = new Set(f)
+              changed.forEach((id) => next.delete(id))
+              return next
+            })
+          }, 500)
+        }
+        return next
+      })
+    },
+    [],
+  )
+
+  // Start live polling interval (only one at a time)
+  const startPolling = useCallback(() => {
+    if (pollingRef.current) return // already running
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/seats/${seatNumber}`)
+        if (res.ok) {
+          const data: SeatData = await res.json()
+          applyLiveData(data)
+        }
+      } catch {
+        // network hiccup — keep polling
+      }
+    }, 5000)
+  }, [seatNumber, applyLiveData])
+
+  // Clean up polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -63,6 +129,9 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
       if (data.voteCount) {
         setVoteCounts((prev) => ({ ...prev, [candidateId]: data.voteCount }))
       }
+      // Trigger confetti + start polling after first successful vote
+      setShowConfetti(true)
+      startPolling()
     } catch {
       // revert optimistic update on error
       setVoteCounts((prev) => ({ ...prev, [candidateId]: (prev[candidateId] ?? 1) - 1 }))
@@ -72,6 +141,18 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
         return s
       })
     }
+  }
+
+  function openWhatsApp(candidate: Candidate, count: number) {
+    const seatName = seatData?.seat.name ?? `Seat #${seatNumber}`
+    const url =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/seat/${seatNumber}`
+        : `/seat/${seatNumber}`
+    const msg = encodeURIComponent(
+      `🪳 I just voted for ${candidate.displayName} in ${seatName}! They have ${count} votes. Join the Cockroach Janta Parliament! ${url} #CockroachJantaParliament`,
+    )
+    window.open(`https://wa.me/?text=${msg}`, '_blank', 'noopener,noreferrer')
   }
 
   if (loading) {
@@ -89,7 +170,9 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
         <div>
           <div className="text-7xl mb-4">🪳</div>
           <h1 className="text-3xl font-black mb-2">Seat not found</h1>
-          <a href="/" className="text-[#D4A017] underline">← Back to Parliament</a>
+          <a href="/" className="text-[#D4A017] underline">
+            ← Back to Parliament
+          </a>
         </div>
       </div>
     )
@@ -99,8 +182,27 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
   const totalVotes = Object.values(voteCounts).reduce((s, v) => s + v, 0)
   const maxVotes = Math.max(...Object.values(voteCounts), 1)
 
+  // The candidate currently shown in the share modal
+  const shareCandidate = candidates[shareModal.candidateIdx] ?? null
+
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
+      {/* Confetti overlay */}
+      <VoteConfetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
+
+      {/* Share modal */}
+      {shareCandidate && (
+        <ShareModal
+          isOpen={shareModal.isOpen}
+          onClose={() => setShareModal((s) => ({ ...s, isOpen: false }))}
+          candidateName={shareCandidate.displayName}
+          seatName={seat.name}
+          seatNumber={seatNumber}
+          voteCount={voteCounts[shareCandidate.id] ?? shareCandidate.voteCount}
+          partyCode={shareCandidate.partyCode}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-[#3C3489] text-white px-4 pt-6 pb-8">
         <div className="max-w-2xl mx-auto">
@@ -123,13 +225,27 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
           <h1 className="text-4xl font-black tracking-tight">SEAT #{seat.number}</h1>
           <h2 className="text-xl font-bold mt-1 opacity-90">{seat.name}</h2>
           <p className="text-sm mt-2 opacity-60">
-            {seat.state} · {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
+            {seat.state}
           </p>
         </div>
       </div>
 
+      {/* Candidate count header */}
+      {candidates.length > 0 && (
+        <div className="max-w-2xl mx-auto px-4 pt-5 pb-1">
+          <p className="text-sm font-black text-[#3C3489] uppercase tracking-wide">
+            {candidates.length} candidate{candidates.length !== 1 ? 's' : ''} contesting
+            {' · '}
+            {totalVotes} total vote{totalVotes !== 1 ? 's' : ''}
+            {liveData && (
+              <span className="ml-2 text-[#1D9E75] font-black animate-pulse">● LIVE</span>
+            )}
+          </p>
+        </div>
+      )}
+
       {/* Candidates */}
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+      <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
         {candidates.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🪳</div>
@@ -146,11 +262,12 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
           </div>
         ) : (
           <>
-            {candidates.map((candidate) => {
+            {candidates.map((candidate, idx) => {
               const count = voteCounts[candidate.id] ?? 0
               const percent = maxVotes > 0 ? (count / maxVotes) * 100 : 0
               const hasVoted = votedFor.has(candidate.id)
               const partyColor = candidate.partyColor ?? '#7F77DD'
+              const isFlashing = flashIds.has(candidate.id)
 
               return (
                 <div
@@ -159,13 +276,24 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
                   style={{ borderLeft: `6px solid ${partyColor}` }}
                 >
                   <div className="p-4">
-                    {/* Name + Vote button */}
+                    {/* Name + share icon + vote button */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xl">🪳</span>
                         <span className="font-black text-lg text-[#1a1a2e] truncate">
                           {candidate.displayName}
                         </span>
+                        {/* Share icon button */}
+                        <button
+                          onClick={() =>
+                            setShareModal({ isOpen: true, candidateIdx: idx })
+                          }
+                          title="Share this candidate"
+                          className="shrink-0 text-base leading-none px-1.5 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                          aria-label={`Share ${candidate.displayName}`}
+                        >
+                          📤
+                        </button>
                       </div>
                       <button
                         onClick={() => handleVote(candidate.id)}
@@ -203,9 +331,12 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
                       </p>
                     )}
 
-                    {/* Vote bar */}
+                    {/* Vote bar + count */}
                     <div className="mt-4 flex items-center gap-3">
-                      <div className="flex-1" style={{ height: 4, background: '#f5f5f5', borderRadius: 2 }}>
+                      <div
+                        className="flex-1"
+                        style={{ height: 4, background: '#f5f5f5', borderRadius: 2 }}
+                      >
                         <div
                           style={{
                             height: 4,
@@ -216,28 +347,53 @@ export default function SeatContent({ seatNumber }: { seatNumber: number }) {
                           }}
                         />
                       </div>
-                      <span className="text-xs font-black text-gray-500 shrink-0">
+                      <span
+                        className="text-xs font-black shrink-0 px-1.5 py-0.5 rounded transition-colors duration-300"
+                        style={
+                          isFlashing
+                            ? { background: '#D4A017', color: '#000' }
+                            : { color: '#6b7280' }
+                        }
+                      >
                         {count} vote{count !== 1 ? 's' : ''}
                       </span>
                     </div>
+
+                    {/* WhatsApp quick share — visible after voting */}
+                    {hasVoted && (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => openWhatsApp(candidate, count)}
+                          className="flex items-center gap-1.5 bg-[#25D366] text-white font-black text-xs px-3 py-1.5 rounded-lg border-2 border-black hover:brightness-90 transition-all"
+                        >
+                          📱 Share
+                        </button>
+                        <button
+                          onClick={() => setShareModal({ isOpen: true, candidateIdx: idx })}
+                          className="flex items-center gap-1.5 bg-gray-100 text-black font-bold text-xs px-3 py-1.5 rounded-lg border-2 border-black hover:bg-gray-200 transition-all"
+                        >
+                          📤 More options
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )
             })}
 
-            {/* Total votes */}
+            {/* Total votes footer */}
             <p className="text-center text-sm font-bold text-gray-400 pt-2">
               ⚡ {totalVotes} total vote{totalVotes !== 1 ? 's' : ''} cast in this seat
             </p>
 
-            {/* File CTA */}
+            {/* File for this seat CTA */}
             <div className="pt-4 pb-8">
-              <button
-                onClick={() => router.push('/file/' + seatNumber)}
-                className="w-full bg-yellow-300 text-black border-4 border-black font-black text-lg py-4 rounded-2xl hover:bg-black hover:text-yellow-300 transition-colors"
+              <a
+                href={`/file/${seatNumber}`}
+                className="block w-full bg-[#D4A017] text-black border-4 border-black font-black text-xl py-5 rounded-2xl hover:bg-yellow-300 transition-colors text-center shadow-[4px_4px_0_black]"
               >
                 FILE FOR THIS SEAT 🪳
-              </button>
+              </a>
             </div>
           </>
         )}

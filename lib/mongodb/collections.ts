@@ -1,10 +1,17 @@
 import { ObjectId, type Collection } from 'mongodb'
 import clientPromise from './client'
+import { ensureIndexes } from './indexes'
 
 const DB = process.env.MONGODB_DB ?? 'cockroach_parliament'
 
+let _indexesEnsured = false
+
 async function db() {
   const client = await clientPromise
+  if (!_indexesEnsured) {
+    _indexesEnsured = true
+    ensureIndexes().catch((err) => console.error('ensureIndexes error:', err))
+  }
   return client.db(DB)
 }
 

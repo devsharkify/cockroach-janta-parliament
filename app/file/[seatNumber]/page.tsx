@@ -1,4 +1,14 @@
+import type { Metadata } from 'next'
 import FilingFlow from './FilingFlow'
+
+export async function generateMetadata({ params }: { params: Promise<{ seatNumber: string }> }): Promise<Metadata> {
+  const { seatNumber } = await params
+  return {
+    title: `File Candidacy — Seat #${seatNumber}`,
+    description: `Contest Lok Sabha Seat #${seatNumber} as a cockroach. Auto-generated identity. Free. Anonymous. Chaotic.`,
+    openGraph: { title: `🪳 File for Seat #${seatNumber} — CJP`, description: 'Become a cockroach MP. It\'s free. It\'s chaos.' },
+  }
+}
 
 export default async function FilePage({
   params,

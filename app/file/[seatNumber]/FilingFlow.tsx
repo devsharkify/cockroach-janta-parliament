@@ -1,15 +1,18 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useFingerprint } from '@/lib/hooks/useFingerprint'
 
 const PARTIES = [
-  { id: 'CJP', code: 'CJP', name: 'Cockroach Janta Party',    color: '#7F77DD', tagline: 'Lazy, Loud, Lawful' },
-  { id: 'CCP', code: 'CCP', name: 'Cockroach Congress Party', color: '#D85A30', tagline: 'Old Roach Magic' },
-  { id: 'ACP', code: 'ACP', name: 'Aam Cockroach Party',      color: '#1D9E75', tagline: 'Naali Sabki, Iss Baar Cockroach Ki' },
-  { id: 'RCP', code: 'RCP', name: 'Regional Cockroach Party', color: '#D4537E', tagline: 'Apni Galli Apna Kachra' },
-  { id: 'IND', code: 'IND', name: 'Independent',              color: '#888888', tagline: 'No faction. Pure chaos.' },
+  { id: 'CJP', code: 'CJP', name: 'Cockroach Janta Party',    color: '#7F77DD', tagline: 'Lazy, Loud, Lawful',            desc: 'The original roach establishment' },
+  { id: 'ACP', code: 'ACP', name: 'Aam Cockroach Party',      color: '#1D9E75', tagline: 'Naali Sabki, Iss Baar Cockroach Ki', desc: "The people's pest, fighting for the naali" },
+  { id: 'CCP', code: 'CCP', name: 'Cockroach Congress Party', color: '#D85A30', tagline: 'Old Roach Magic',               desc: 'Old roach, new tricks' },
+  { id: 'RCP', code: 'RCP', name: 'Regional Cockroach Party', color: '#D4537E', tagline: 'Apni Galli Apna Kachra',        desc: 'Your galli, your party' },
+  { id: 'IND', code: 'IND', name: 'Independent',              color: '#888888', tagline: 'No faction. Pure chaos.',        desc: 'No allegiance. Just vibes.' },
 ]
+
+const STEP_ORDER: Step[] = ['name', 'manifesto', 'party', 'submit']
+const STEP_LABELS = ['Identity', 'Manifesto', 'Party', 'Review']
 
 type Step = 'name' | 'manifesto' | 'party' | 'submit' | 'share'
 
@@ -27,7 +30,18 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [candidateId, setCandidateId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [seatName, setSeatName] = useState<string | null>(null)
   const manifestoRef = useRef<HTMLTextAreaElement>(null)
+
+  // Fetch seat name on mount
+  useEffect(() => {
+    fetch(`/api/seats/${seatNumber}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data?.seat?.name) setSeatName(data.seat.name)
+      })
+      .catch(() => {/* silently ignore */})
+  }, [seatNumber])
 
   async function spinName() {
     setIsSpinning(true)
@@ -115,31 +129,53 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
     }
   }
 
+  // Step bar helpers
+  const currentStepIndex = step === 'share' ? 4 : STEP_ORDER.indexOf(step)
+
+  // Manifesto counter color
+  const charCount = manifesto.length
+  const counterColor = charCount <= 200 ? 'text-green-400' : charCount <= 260 ? 'text-yellow-400' : 'text-red-400'
+
+  // Header title
+  const headerTitle = seatName
+    ? <><span className="text-[#D4A017]">{seatName}</span> <span className="text-white/50">(#{seatNumber})</span></>
+    : <span className="text-[#D4A017]">Seat #{seatNumber}</span>
+
   return (
     <div className="min-h-screen bg-[#3C3489] font-sans">
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-[#3C3489]/95 backdrop-blur border-b-2 border-[#D4A017] px-4 py-3 flex items-center gap-3">
         <a href="/" className="text-2xl">🪳</a>
         <span className="text-white font-black text-sm">
-          File Candidacy — <span className="text-[#D4A017]">Seat #{seatNumber}</span>
+          File Candidacy — {headerTitle}
         </span>
-        <div className="ml-auto flex gap-1">
-          {(['name', 'manifesto', 'party', 'submit'] as const).map((s, i) => (
-            <div
-              key={s}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                step === s || (step === 'share' && i <= 3)
-                  ? 'bg-[#D4A017]'
-                  : ['name','manifesto','party','submit'].indexOf(step) > i
-                  ? 'bg-[#D4A017]'
-                  : 'bg-white/20'
-              }`}
-            />
-          ))}
-        </div>
       </nav>
 
       <div className="max-w-lg mx-auto px-4 py-8">
+
+        {/* Step bar — shown for steps 1–4, not on share */}
+        {step !== 'share' && (
+          <div className="flex items-center gap-0 mb-8">
+            {STEP_LABELS.map((label, i) => {
+              const stepKey = STEP_ORDER[i]
+              const isCurrent = step === stepKey
+              const isDone = currentStepIndex > i
+              return (
+                <div key={i} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm border-2 border-black ${isDone ? 'bg-green-400' : isCurrent ? 'bg-yellow-300' : 'bg-white/20 border-white/20 text-white/50'}`}>
+                      {isDone ? '✓' : i + 1}
+                    </div>
+                    <div className="text-[10px] font-black mt-1 text-center hidden sm:block text-white/60">{label}</div>
+                  </div>
+                  {i < 3 && (
+                    <div className={`flex-1 h-1 mx-1 rounded ${isDone ? 'bg-green-400' : 'bg-white/20'}`} />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* ── STEP 1: Name ── */}
         {step === 'name' && (
@@ -154,12 +190,15 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
               className="bg-white/5 border-2 border-white/10 rounded-2xl p-6 text-center cursor-pointer hover:border-[#D4A017]/50 transition-colors"
               onClick={!isSpinning ? spinName : undefined}
             >
-              {candidateName ? (
+              {isSpinning ? (
+                <>
+                  <div className="text-5xl mb-3 animate-spin inline-block">🪳</div>
+                  <p className="text-white/60 text-sm font-mono mt-2">Generating your identity...</p>
+                </>
+              ) : candidateName ? (
                 <>
                   <div className="text-5xl mb-3">🪳</div>
-                  <p className={`text-2xl font-black text-white mb-2 transition-all ${isSpinning ? 'opacity-30 blur-sm' : ''}`}>
-                    {candidateName}
-                  </p>
+                  <p className="text-2xl font-black text-white mb-2">{candidateName}</p>
                   <p className="text-white/30 text-xs font-mono">{namePattern}</p>
                 </>
               ) : (
@@ -174,14 +213,14 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
               <button
                 onClick={spinName}
                 disabled={isSpinning}
-                className="flex-1 py-3 rounded-xl border-2 border-white/20 text-white font-black text-sm hover:border-white/40 transition-colors disabled:opacity-40"
+                className="flex-1 min-h-[48px] py-3 rounded-xl border-2 border-white/20 text-white font-black text-sm hover:border-white/40 transition-colors disabled:opacity-40"
               >
                 {isSpinning ? '⚡ Spinning...' : '🔄 Spin Again'}
               </button>
               <button
                 onClick={() => { if (candidateName) setStep('manifesto') }}
                 disabled={!candidateName}
-                className="flex-1 py-3 rounded-xl font-black text-sm transition-colors disabled:opacity-30"
+                className="flex-1 min-h-[48px] py-3 rounded-xl font-black text-sm transition-colors disabled:opacity-30"
                 style={{ backgroundColor: candidateName ? '#D4A017' : '#888', color: '#000' }}
               >
                 Lock Name →
@@ -191,7 +230,10 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
             {!candidateName && (
-              <button onClick={spinName} className="w-full py-4 rounded-xl bg-white/5 border-2 border-[#D4A017] text-[#D4A017] font-black text-lg hover:bg-[#D4A017]/10 transition-colors">
+              <button
+                onClick={spinName}
+                className="w-full min-h-[56px] py-4 rounded-xl bg-white/5 border-2 border-[#D4A017] text-[#D4A017] font-black text-lg hover:bg-[#D4A017]/10 transition-colors"
+              >
                 🪳 Generate My Name
               </button>
             )}
@@ -219,20 +261,33 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                 onChange={e => setManifesto(e.target.value.slice(0, 280))}
                 placeholder={'Naali meri, vote tera.\nKachra saaf, future bright.\n...'}
                 rows={6}
-                className="w-full bg-white/5 border-2 border-white/20 rounded-xl p-4 text-white font-mono text-sm resize-none focus:outline-none focus:border-[#D4A017] placeholder:text-white/20 transition-colors"
+                className="w-full bg-white/5 border-2 border-white/20 rounded-xl px-4 py-4 text-white font-mono text-base resize-none focus:outline-none focus:border-[#D4A017] placeholder:text-white/20 transition-colors"
               />
+              {/* Character counter */}
               <div className="flex justify-between items-center mt-2">
-                <span className="text-white/30 text-xs">{manifesto.length}/280</span>
+                <span className={`text-xs font-mono font-black ${counterColor}`}>{charCount}/280</span>
                 <span className={`text-xs ${manifesto.split('\n').length > 4 ? 'text-yellow-400' : 'text-white/30'}`}>
                   {manifesto.split('\n').length} / 4 lines
                 </span>
               </div>
+              {/* Color bar */}
+              <div className="mt-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${charCount <= 200 ? 'bg-green-400' : charCount <= 260 ? 'bg-yellow-400' : 'bg-red-400'}`}
+                  style={{ width: `${(charCount / 280) * 100}%` }}
+                />
+              </div>
             </div>
+
+            {/* Hinglish tip */}
+            <p className="text-white/40 text-xs text-center italic">
+              Tip: Try Hinglish! Mix Hindi and English for maximum viral potential 🔥
+            </p>
 
             <button
               onClick={generateManifesto}
               disabled={isGeneratingManifesto}
-              className="w-full py-3 rounded-xl border-2 border-[#D4A017]/40 text-[#D4A017] font-black text-sm hover:border-[#D4A017] hover:bg-[#D4A017]/10 transition-colors disabled:opacity-40"
+              className="w-full min-h-[48px] py-3 rounded-xl border-2 border-[#D4A017]/40 text-[#D4A017] font-black text-sm hover:border-[#D4A017] hover:bg-[#D4A017]/10 transition-colors disabled:opacity-40"
             >
               {isGeneratingManifesto ? '🤖 Generating...' : "🤖 Don't know what to write? Auto-generate"}
             </button>
@@ -240,13 +295,16 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
             <div className="flex gap-3">
-              <button onClick={() => setStep('name')} className="px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors">
+              <button
+                onClick={() => setStep('name')}
+                className="min-h-[48px] px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors"
+              >
                 ← Back
               </button>
               <button
                 onClick={() => { if (manifesto.trim()) setStep('party') }}
                 disabled={!manifesto.trim()}
-                className="flex-1 py-3 rounded-xl font-black text-sm transition-colors disabled:opacity-30"
+                className="flex-1 min-h-[48px] py-3 rounded-xl font-black text-sm transition-colors disabled:opacity-30"
                 style={{ backgroundColor: manifesto.trim() ? '#D4A017' : '#888', color: '#000' }}
               >
                 Next: Pick Party →
@@ -264,41 +322,45 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
               <p className="text-white/50 text-sm">Choose wisely. Or don't. It's all chaos.</p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {PARTIES.map(party => (
                 <button
                   key={party.id}
                   onClick={() => setSelectedParty(party)}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left"
+                  className="w-full flex items-center gap-4 px-4 py-5 rounded-xl border-2 transition-all text-left"
                   style={{
                     borderColor: selectedParty.id === party.id ? party.color : 'rgba(255,255,255,0.1)',
-                    backgroundColor: selectedParty.id === party.id ? `${party.color}20` : 'rgba(255,255,255,0.03)',
+                    backgroundColor: selectedParty.id === party.id ? `${party.color}25` : 'rgba(255,255,255,0.03)',
+                    boxShadow: selectedParty.id === party.id ? `0 4px 0 ${party.color}60` : 'none',
                   }}
                 >
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0"
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0 border-2 border-black/20"
                     style={{ backgroundColor: party.color }}
                   >
                     {party.code}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-black text-sm">{party.name}</p>
-                    <p className="text-white/40 text-xs italic">{party.tagline}</p>
+                    <p className="text-white/50 text-xs italic mt-0.5">{party.desc}</p>
                   </div>
                   {selectedParty.id === party.id && (
-                    <span className="text-[#D4A017] text-lg shrink-0">✓</span>
+                    <span className="text-[#D4A017] text-xl shrink-0">✓</span>
                   )}
                 </button>
               ))}
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setStep('manifesto')} className="px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors">
+              <button
+                onClick={() => setStep('manifesto')}
+                className="min-h-[48px] px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors"
+              >
                 ← Back
               </button>
               <button
                 onClick={() => setStep('submit')}
-                className="flex-1 py-3 rounded-xl font-black text-sm"
+                className="flex-1 min-h-[48px] py-3 rounded-xl font-black text-sm"
                 style={{ backgroundColor: '#D4A017', color: '#000' }}
               >
                 Review & File →
@@ -326,7 +388,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                   <span className="text-4xl">🪳</span>
                   <div>
                     <p className="text-white font-black text-lg">{candidateName}</p>
-                    <p className="text-white/50 text-xs">Seat #{seatNumber}</p>
+                    <p className="text-white/50 text-xs">Seat #{seatNumber}{seatName ? ` — ${seatName}` : ''}</p>
                   </div>
                 </div>
                 <div className="border-t border-white/10 pt-3">
@@ -339,13 +401,16 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             {error && <p className="text-red-400 text-sm text-center bg-red-400/10 rounded-xl p-3">{error}</p>}
 
             <div className="flex gap-3">
-              <button onClick={() => setStep('party')} className="px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors">
+              <button
+                onClick={() => setStep('party')}
+                className="min-h-[48px] px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors"
+              >
                 ← Back
               </button>
               <button
                 onClick={submitCandidacy}
                 disabled={isSubmitting || !fingerprint}
-                className="flex-1 py-4 rounded-xl font-black text-base transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 min-h-[48px] py-4 rounded-xl font-black text-base transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#D4A017', color: '#000' }}
               >
                 {isSubmitting ? '⚡ Filing...' : '🪳 File My Candidacy'}
@@ -365,7 +430,9 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
               <div className="text-7xl mb-4">🎉</div>
               <h1 className="text-3xl font-black text-white mb-1">You're In!</h1>
               <p className="text-[#D4A017] font-mono text-sm mb-1">{candidateName}</p>
-              <p className="text-white/50 text-sm">is now contesting Seat #{seatNumber} under {selectedParty.name}</p>
+              <p className="text-white/50 text-sm">
+                is now contesting {seatName ? `${seatName} (Seat #${seatNumber})` : `Seat #${seatNumber}`} under {selectedParty.name}
+              </p>
             </div>
 
             {/* OG Image preview */}
@@ -376,9 +443,19 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             )}
 
             <div className="space-y-3">
+              {/* WhatsApp — PRIMARY for India */}
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`🪳 I'm running for ${seatName ?? `Seat #${seatNumber}`} in the Cockroach Janta Parliament!\n\nMy manifesto: "${manifesto.slice(0, 100)}..."\n\nVote for me at cockroachparliament.in/seat/${seatNumber}\n\n#CockroachJantaParliament #MainBhiCockroach`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black text-lg rounded-xl border-4 border-black shadow-[4px_4px_0_black] hover:bg-green-600 transition-colors"
+              >
+                📱 Share on WhatsApp
+              </a>
+
               <button
                 onClick={shareToIG}
-                className="w-full py-4 rounded-xl font-black text-base"
+                className="w-full min-h-[48px] py-4 rounded-xl font-black text-base"
                 style={{ background: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)', color: 'white' }}
               >
                 📸 Share on Instagram Story
@@ -389,14 +466,14 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                   try { await navigator.share({ title: candidateName, url: shareUrl }) }
                   catch { navigator.clipboard?.writeText(shareUrl) }
                 }}
-                className="w-full py-3 rounded-xl border-2 border-white/20 text-white font-black text-sm hover:border-white/40 transition-colors"
+                className="w-full min-h-[48px] py-3 rounded-xl border-2 border-white/20 text-white font-black text-sm hover:border-white/40 transition-colors"
               >
                 🔗 Copy Candidate Link
               </button>
 
               <a
                 href={`/seat/${seatNumber}`}
-                className="block w-full py-3 rounded-xl border-2 border-[#D4A017]/30 text-[#D4A017] font-black text-sm hover:border-[#D4A017] transition-colors"
+                className="block w-full min-h-[48px] py-3 rounded-xl border-2 border-[#D4A017]/30 text-[#D4A017] font-black text-sm hover:border-[#D4A017] transition-colors"
               >
                 🏛️ View My Seat →
               </a>

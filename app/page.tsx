@@ -3,12 +3,11 @@ import IndiaMap from './components/IndiaMap'
 import SeatFinder from './components/SeatFinder'
 import SoulPanel from './components/SoulPanel'
 import FilingFrenzy from './components/FilingFrenzy'
+import LiveStats from './components/LiveStats'
+import TrendingSeats from './components/TrendingSeats'
 import { FOUNDING_PARTIES } from '@/lib/types'
 
-// Mock live stats — replace with real fetch when API is ready
 const MOCK_STATS = {
-  roachesFiled: 12847,
-  votesCast: 394201,
   seats: 543,
   parties: 4,
 }
@@ -102,16 +101,7 @@ export default function HomePage() {
           </div>
 
           {/* live stat counters */}
-          <div className="flex gap-4 mb-6 flex-wrap justify-center">
-            <div className="bg-white border-4 border-black rounded-xl px-4 py-2 shadow-[3px_3px_0_black]">
-              <span className="font-black text-xl text-black">{MOCK_STATS.roachesFiled.toLocaleString('en-IN')}</span>
-              <span className="text-xs font-bold text-black/50 ml-1">roaches filed</span>
-            </div>
-            <div className="bg-white border-4 border-black rounded-xl px-4 py-2 shadow-[3px_3px_0_black]">
-              <span className="font-black text-xl text-black">{MOCK_STATS.votesCast.toLocaleString('en-IN')}</span>
-              <span className="text-xs font-bold text-black/50 ml-1">votes cast</span>
-            </div>
-          </div>
+          <LiveStats initialCandidates={12847} initialVotes={394201} />
 
           {/* Primary CTA */}
           <div className="flex flex-col sm:flex-row gap-3 items-center">
@@ -136,7 +126,38 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════
-          3. INDIA MAP SECTION
+          3. HOW IT WORKS
+      ═══════════════════════════════════════ */}
+      <section className="bg-white border-b-8 border-black py-10 px-4">
+        <p className="text-center font-black text-xs uppercase tracking-widest text-black/40 mb-6">
+          it&apos;s stupidly simple 🪳
+        </p>
+        <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { step: '1', emoji: '🪳', title: 'PICK A SEAT',   desc: 'Choose any of 543 Lok Sabha constituencies. Find yours by city, PIN code, or name.' },
+            { step: '2', emoji: '📋', title: 'FILE CANDIDACY', desc: 'Get an auto-generated cockroach identity and a Hinglish manifesto. Party optional.' },
+            { step: '3', emoji: '🏆', title: 'WIN ON SATURDAY', desc: 'Votes count every Saturday 11PM IST. Most votes wins. Results are forever (ish).' },
+          ].map((s) => (
+            <div
+              key={s.step}
+              className="rounded-2xl border-4 border-black p-5 shadow-[4px_4px_0_black] relative"
+              style={{ background: '#F7F5FF' }}
+            >
+              <div
+                className="absolute -top-4 -left-4 w-9 h-9 rounded-full border-4 border-black bg-yellow-300 flex items-center justify-center font-black text-black text-sm shadow-[2px_2px_0_black]"
+              >
+                {s.step}
+              </div>
+              <div className="text-4xl mb-3">{s.emoji}</div>
+              <h3 className="font-black text-base text-black mb-1 uppercase tracking-wide">{s.title}</h3>
+              <p className="text-black/55 text-xs font-mono leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════
+          4. INDIA MAP SECTION
       ═══════════════════════════════════════ */}
       <section className="border-b-8 border-black" style={{ background: '#0f0b30' }}>
         <div className="max-w-4xl mx-auto px-4 pt-8 pb-6">
@@ -166,7 +187,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════
-          4. SEAT FINDER SECTION
+          5. SEAT FINDER SECTION
       ═══════════════════════════════════════ */}
       <section id="seat-finder" className="bg-yellow-300 border-b-8 border-black py-10 px-4">
         <div className="max-w-lg mx-auto">
@@ -199,7 +220,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════
-          5. DRAKE MEME / COMPARISON
+          6. DRAKE MEME / COMPARISON
       ═══════════════════════════════════════ */}
       <section className="bg-black text-white py-10 px-4 border-b-8 border-yellow-300">
         <p className="text-center text-yellow-300 font-black text-xs uppercase tracking-widest mb-6">
@@ -240,7 +261,24 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════
-          6. PARTY CARDS
+          TRENDING SEATS
+      ═══════════════════════════════════════ */}
+      <section className="py-10 px-4 border-b-8 border-black" style={{ background: '#0f0b30' }}>
+        <div className="max-w-xl mx-auto">
+          <div className="text-center mb-6">
+            <p className="font-black text-xs uppercase tracking-widest mb-1" style={{ color: '#D4A017' }}>
+              hottest seats right now
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-black text-white uppercase">
+              🔥 TRENDING BATTLEFIELDS
+            </h2>
+          </div>
+          <TrendingSeats />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════
+          PARTY CARDS
       ═══════════════════════════════════════ */}
       <section className="bg-white py-10 px-4 border-b-8 border-black">
         <p className="text-center font-black text-xs uppercase tracking-widest text-black/40 mb-2">
@@ -266,7 +304,7 @@ export default function HomePage() {
             return (
               <Link
                 key={p.code}
-                href="/file/1"
+                href={`/parties/${p.code}`}
                 className="rounded-2xl border-4 p-4 text-left hover:scale-105 transition-transform active:scale-95 shadow-[4px_4px_0px_rgba(0,0,0,0.15)] block"
                 style={{ borderColor: p.color, backgroundColor: bgMap[p.code] ?? '#fff' }}
               >
@@ -318,10 +356,10 @@ export default function HomePage() {
             </p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'SEATS', value: MOCK_STATS.seats.toLocaleString('en-IN'), icon: '🗺️', color: '#7F77DD' },
-                { label: 'CANDIDATES', value: MOCK_STATS.roachesFiled.toLocaleString('en-IN'), icon: '🪳', color: '#1D9E75' },
-                { label: 'VOTES', value: MOCK_STATS.votesCast.toLocaleString('en-IN'), icon: '🗳️', color: '#D85A30' },
-                { label: 'PARTIES', value: String(MOCK_STATS.parties) + '+', icon: '🏴', color: '#D4537E' },
+                { label: 'SEATS',      value: MOCK_STATS.seats.toLocaleString('en-IN'), icon: '🗺️', color: '#7F77DD' },
+                { label: 'CANDIDATES', value: '12,847+',                                icon: '🪳', color: '#1D9E75' },
+                { label: 'VOTES',      value: '3.9L+',                                  icon: '🗳️', color: '#D85A30' },
+                { label: 'PARTIES',    value: String(MOCK_STATS.parties) + '+',         icon: '🏴', color: '#D4537E' },
               ].map((s) => (
                 <div
                   key={s.label}
@@ -401,12 +439,18 @@ export default function HomePage() {
           >
             🪳 FILE CANDIDACY (free)
           </Link>
-          <a
-            href="#"
+          <Link
+            href="/supreme"
             className="px-10 py-5 rounded-2xl bg-white/10 text-white font-black text-xl border-4 border-white/20 hover:bg-white/20 transition-colors"
           >
-            👑 VIEW ALL 543 SEATS
-          </a>
+            👑 SUPREME COMMANDER
+          </Link>
+          <Link
+            href="/results"
+            className="px-10 py-5 rounded-2xl bg-[#7F77DD]/20 text-white font-black text-xl border-4 border-[#7F77DD]/40 hover:bg-[#7F77DD]/30 transition-colors"
+          >
+            🏆 VIEW RESULTS
+          </Link>
         </div>
 
         {/* XP nudge */}

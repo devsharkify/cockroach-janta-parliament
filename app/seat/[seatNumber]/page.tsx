@@ -3,7 +3,37 @@ import SeatContent from './SeatContent'
 
 export async function generateMetadata({ params }: { params: Promise<{ seatNumber: string }> }): Promise<Metadata> {
   const { seatNumber } = await params
-  return { title: `Seat ${seatNumber} — Cockroach Janta Parliament` }
+  const num = parseInt(seatNumber, 10)
+  if (isNaN(num) || num < 1 || num > 543) {
+    return { title: 'Invalid Seat' }
+  }
+
+  // Try to fetch seat name (graceful fallback)
+  let seatName = `Constituency ${num}`
+  let stateName = 'India'
+  try {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001'
+    const res = await fetch(`${base}/api/seats/${num}`, { next: { revalidate: 3600 } })
+    if (res.ok) {
+      const data = await res.json()
+      seatName = data.seat?.name ?? seatName
+      stateName = data.seat?.state ?? stateName
+    }
+  } catch { /* fallback */ }
+
+  const title = `${seatName} — Seat #${num}`
+  const description = `Vote for your favourite cockroach candidate in ${seatName}, ${stateName}. Unlimited votes. Pure chaos.`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `🪳 ${seatName} (#${num}) — Cockroach Janta Parliament`,
+      description,
+      type: 'website',
+    },
+    twitter: { card: 'summary', title: `🪳 ${seatName} (#${num})`, description },
+  }
 }
 
 export default async function SeatPage({ params }: { params: Promise<{ seatNumber: string }> }) {
