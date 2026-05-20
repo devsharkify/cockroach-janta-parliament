@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAFAF7;
+  --foreground: #1a1a1a;
+
+  /* CJP brand colours */
+  --cjp-purple: #7F77DD;
+  --cjp-coral:  #D85A30;
+  --cjp-teal:   #1D9E75;
+  --cjp-pink:   #D4537E;
+  --cjp-gold:   #F5C842;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-cjp-purple: var(--cjp-purple);
+  --color-cjp-coral:  var(--cjp-coral);
+  --color-cjp-teal:   var(--cjp-teal);
+  --color-cjp-pink:   var(--cjp-pink);
+  --color-cjp-gold:   var(--cjp-gold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Cockroach scuttle animation — low-fi pixel sprites */
+@keyframes scuttle {
+  0%   { transform: translateX(-60px) scaleX(1); }
+  49%  { transform: translateX(calc(100vw + 60px)) scaleX(1); }
+  50%  { transform: translateX(calc(100vw + 60px)) scaleX(-1); }
+  99%  { transform: translateX(-60px) scaleX(-1); }
+  100% { transform: translateX(-60px) scaleX(1); }
+}
+
+.roach-sprite {
+  position: fixed;
+  bottom: 12px;
+  font-size: 1.4rem;
+  animation: scuttle linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  opacity: 0.18;
+}
+
+/* Live ticker */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Duplicate-content ticker (items repeated ×2 so it loops seamlessly) */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker 35s linear infinite;
+  will-change: transform;
 }

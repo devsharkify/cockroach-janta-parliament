@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cockroach Janta Parliament — Naali Ki Sansad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #3C3489;
+      --gold: #D4A017;
+      --offwhite: #F7F4ED;
+      --navy: #1A2238;
+      --cjp: #7F77DD;
+      --ccp: #D85A30;
+      --acp: #1D9E75;
+      --rcp: #D4537E;
+      --border: 3px solid #1A2238;
+      --shadow: 5px 5px 0px #1A2238;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--offwhite);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(1);   opacity: 1; }
+      70%  { transform: scale(2.5); opacity: 0; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    @keyframes xp-fill {
+      from { width: 0%; }
+      to   { width: 64%; }
+    }
+
+    @keyframes scuttle {
+      0%   { transform: translateX(-60px) scaleX(1); }
+      49%  { transform: translateX(calc(100vw + 60px)) scaleX(1); }
+      50%  { transform: translateX(calc(100vw + 60px)) scaleX(-1); }
+      99%  { transform: translateX(-60px) scaleX(-1); }
+      100% { transform: translateX(-60px) scaleX(1); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.3); }
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--purple);
+      border-bottom: 4px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      gap: 1rem;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .navbar-brand svg {
+      width: 38px;
+      height: 38px;
+    }
+
+    .navbar-brand-text {
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.05rem;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .navbar-links a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.3px;
+      transition: color 0.15s;
+    }
+
+    .navbar-links a:hover { color: var(--gold); }
+
+    .btn-candidacy {
+      background: var(--gold);
+      color: var(--navy);
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.1rem;
+      border: 2px solid var(--navy);
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 3px 3px 0 var(--navy);
+      transition: box-shadow 0.1s, transform 0.1s;
+      display: inline-block;
+    }
+
+    .btn-candidacy:hover {
+      box-shadow: 1px 1px 0 var(--navy);
+      transform: translate(2px, 2px);
+    }
+
+    /* ── LIVE TICKER ── */
+    .ticker-wrap {
+      background: #000;
+      overflow: hidden;
+      padding: 0.65rem 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker-live {
+      background: #e00;
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.72rem;
+      padding: 0.22rem 0.55rem;
+      letter-spacing: 1.5px;
+      flex-shrink: 0;
+      margin: 0 0.75rem;
+      z-index: 2;
+    }
+
+    .ticker-overflow {
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .ticker-track {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker-scroll 42s linear infinite;
+      will-change: transform;
+    }
+
+    .ticker-item {
+      color: #fff;
+      font-size: 0.82rem;
+      padding: 0 2.5rem;
+      font-weight: 500;
+    }
+
+    .ticker-item span { color: var(--gold); font-weight: 700; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--purple);
+      padding: 4rem 2rem 3.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-headline {
+      font-size: clamp(2.6rem, 7vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      position: relative;
+    }
+
+    .hero-headline .line1 { color: #fff; display: block; }
+    .hero-headline .line2 { color: var(--gold); display: block; }
+
+    .hero-subheadline {
+      color: rgba(255,255,255,0.88);
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 600;
+      margin: 1.2rem auto 0.6rem;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .hero-small {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.82rem;
+      font-style: italic;
+      margin-bottom: 2.5rem;
+      letter-spacing: 0.3px;
+      position: relative;
+    }
+
+    /* India SVG Map */
+    .india-map-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      position: relative;
+    }
+
+    .india-map-wrap svg {
+      max-width: 480px;
+      width: 100%;
+      filter: drop-shadow(0 8px 32px rgba(0,0,0,0.45));
+    }
+
+    .pulse-circle {
+      animation: pulse-ring 1.8s ease-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .city-label {
+      fill: #fff;
+      font-size: 10px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .city-label-star {
+      fill: #D4A017;
+      font-size: 11px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 900;
+    }
+
+    /* Hero entry buttons */
+    .hero-entry-btns {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .hero-btn {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.5);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0.65rem 1.15rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hero-btn:hover {
+      background: rgba(212,160,23,0.2);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      background: var(--offwhite);
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .stat-number {
+      color: var(--purple);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--navy);
+      margin-top: 0.3rem;
+      display: block;
+    }
+
+    .live-badge {
+      position: absolute;
+      top: 0.65rem;
+      right: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #e00;
+      letter-spacing: 0.5px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: #e00;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── GOLD DIVIDER ── */
+    .gold-divider {
+      height: 3px;
+      background: var(--gold);
+      margin: 0;
+    }
+
+    .roach-center {
+      text-align: center;
+      font-size: 1.8rem;
+      padding: 0.5rem 0;
+      background: var(--offwhite);
+      line-height: 1;
+    }
+
+    /* ── SECTION SHARED ── */
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-label.dark { color: rgba(26,34,56,0.45); }
+
+    /* ── ELIGIBILITY ── */
+    .eligibility-wrap {
+      background: var(--offwhite);
+      padding: 3rem 2rem;
+    }
+
+    .eligibility-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .eligibility-inner h2 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+      letter-spacing: -1px;
+    }
+
+    .eligibility-inner h2 em {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    .eligibility-copy {
+      color: rgba(26,34,56,0.7);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      max-width: 560px;
+    }
+
+    .req-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .req-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #eeeae1;
+      border: var(--border);
+      box-shadow: 4px 4px 0 var(--navy);
+      padding: 0.85rem 1.25rem;
+    }
+
+    .req-code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(26,34,56,0.45);
+      min-width: 56px;
+    }
+
+    .req-check {
+      color: var(--acp);
+      font-size: 1.2rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .req-text {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--navy);
+    }
+
+    /* ── FILING FRENZY ── */
+    .filing-frenzy-wrap {
+      background: #fff;
+    }
+
+    .filing-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 2.5rem;
+    }
+
+    .filing-header {
+      background: var(--purple);
+      color: #fff;
+      padding: 1.1rem 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .filing-header h3 {
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+    }
+
+    .filing-header p {
+      font-size: 0.78rem;
+      opacity: 0.7;
+      font-weight: 500;
+    }
+
+    .filing-entry {
+      display: flex;
+      align-items: stretch;
+      border: var(--border);
+      box-shadow: 4px 4px 0 var(--navy);
+      margin-bottom: 0.9rem;
+      background: #fff;
+    }
+
+    .filing-bar {
+      width: 5px;
+      flex-shrink: 0;
+    }
+
+    .filing-body {
+      padding: 0.85rem 1.1rem;
+      flex: 1;
+    }
+
+    .filing-top {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .filing-time {
+      font-size: 0.7rem;
+      color: rgba(26,34,56,0.45);
+      font-weight: 600;
+    }
+
+    .filing-name {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--navy);
+    }
+
+    .party-badge {
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 0.18rem 0.5rem;
+      letter-spacing: 0.8px;
+      color: #fff;
+    }
+
+    .filing-seat {
+      font-size: 0.78rem;
+      color: rgba(26,34,56,0.65);
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .filing-manifesto {
+      font-size: 0.82rem;
+      color: var(--navy);
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    /* ── FEATURED CONSTITUENCY ── */
+    .featured-wrap {
+      background: #fff;
+      border-top: var(--border);
+    }
+
+    .featured-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    .featured-inner h2 {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+      margin-bottom: 0.4rem;
+    }
+
+    .cycle-badge {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      padding: 0.22rem 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .candidate-cards {
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .candidate-card {
+      flex: 0 0 240px;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      background: #fff;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .cand-name {
+      font-family: 'Courier New', monospace;
+      font-weight: 900;
+      font-size: 0.92rem;
+      color: var(--navy);
+    }
+
+    .cand-manifesto {
+      font-size: 0.82rem;
+      color: rgba(26,34,56,0.7);
+      font-style: italic;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .cand-votes {
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--purple);
+    }
+
+    .vote-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(26,34,56,0.45);
+      font-weight: 700;
+    }
+
+    .btn-vote {
+      background: var(--gold);
+      color: var(--navy);
+      border: 2px solid var(--navy);
+      font-weight: 900;
+      font-size: 0.8rem;
+      padding: 0.5rem 0;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 3px 3px 0 var(--navy);
+      transition: box-shadow 0.1s, transform 0.1s;
+    }
+
+    .btn-vote:hover {
+      box-shadow: 1px 1px 0 var(--navy);
+      transform: translate(2px, 2px);
+    }
+
+    /* ── SATURDAY RITUAL ── */
+    .saturday {
+      background: var(--purple);
+      padding: 3rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .saturday::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 40px,
+        rgba(212,160,23,0.04) 40px,
+        rgba(212,160,23,0.04) 80px
+      );
+      pointer-events: none;
+    }
+
+    .saturday .section-label { color: rgba(212,160,23,0.65); margin-bottom: 0.4rem; }
+
+    .saturday h2 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: -1px;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 2px;
+      background: rgba(212,160,23,0.3);
+      z-index: 0;
+    }
+
+    .timeline-step {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(212,160,23,0.3);
+      padding: 1.25rem 1rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .timeline-when {
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .timeline-title {
+      font-size: 0.88rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-desc {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.45;
+    }
+
+    /* ── PANELS ── */
+    .two-col-section {
+      background: var(--offwhite);
+      padding: 2.5rem 2rem;
+    }
+
+    .two-col-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .panel {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel-label {
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(26,34,56,0.45);
+    }
+
+    .commander-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 3px solid var(--navy);
+      box-shadow: 3px 3px 0 var(--navy);
+      flex-shrink: 0;
+    }
+
+    .commander-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+    }
+
+    .decree-box {
+      background: #fffbe8;
+      border: 2px solid var(--gold);
+      border-left: 5px solid var(--gold);
+      padding: 1rem 1.1rem;
+    }
+
+    .decree-label {
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .decree-text {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--navy);
+      font-style: italic;
+    }
+
+    /* Soul */
+    .soul-level {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--navy);
+    }
+
+    .soul-level strong {
+      color: var(--purple);
+      font-size: 1rem;
+    }
+
+    .xp-bar-wrap {
+      background: #eee;
+      border: 2px solid var(--navy);
+      height: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      background: var(--purple);
+      width: 0%;
+      animation: xp-fill 1.5s ease-out 0.5s forwards;
+    }
+
+    .xp-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: #fff;
+      mix-blend-mode: difference;
+    }
+
+    .soul-quest {
+      background: #f0f0f0;
+      border: 2px solid #ddd;
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      color: var(--navy);
+    }
+
+    .quest-label {
+      font-size: 0.62rem;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--acp);
+      margin-bottom: 0.3rem;
+    }
+
+    .quest-progress { font-weight: 700; color: var(--acp); }
+
+    .streak { font-size: 1rem; font-weight: 700; }
+
+    .soul-cta {
+      font-size: 0.8rem;
+      color: var(--purple);
+      font-weight: 700;
+      border-top: 1px solid #eee;
+      padding-top: 0.75rem;
+    }
+
+    /* ── TALLY ── */
+    .tally-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .tally-party {
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      font-weight: 900;
+      min-width: 48px;
+      color: var(--navy);
+    }
+
+    .tally-bar-wrap {
+      flex: 1;
+      height: 14px;
+      background: #e8e4da;
+      border: 1.5px solid var(--navy);
+      overflow: hidden;
+    }
+
+    .tally-bar { height: 100%; }
+
+    .tally-seats {
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      font-weight: 900;
+      min-width: 60px;
+      text-align: right;
+      color: var(--navy);
+    }
+
+    /* ── MANIFESTO ── */
+    .manifesto-box {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .manifesto-author {
+      font-family: 'Courier New', monospace;
+      font-weight: 900;
+      font-size: 0.92rem;
+      color: var(--navy);
+    }
+
+    .manifesto-meta {
+      font-size: 0.72rem;
+      color: rgba(26,34,56,0.5);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .manifesto-text {
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--navy);
+      line-height: 1.7;
+      border-left: 4px solid var(--acp);
+      padding-left: 1rem;
+      flex: 1;
+    }
+
+    .manifesto-votes {
+      font-family: 'Courier New', monospace;
+      font-size: 0.88rem;
+      font-weight: 900;
+      color: var(--purple);
+      padding-top: 0.5rem;
+      border-top: 1px solid #eee;
+    }
+
+    /* ── DAILY NEWS ── */
+    .news-section {
+      background: var(--offwhite);
+      padding: 2.5rem 2rem;
+    }
+
+    .news-header {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.3px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .news-card {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .news-accent { height: 5px; }
+
+    .news-body { padding: 1.1rem 1.25rem; }
+
+    .news-dateline {
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: rgba(26,34,56,0.45);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .news-headline {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+
+    /* ── CTA STRIP ── */
+    .cta-strip {
+      background: var(--purple);
+      padding: 3.5rem 2rem;
+      text-align: center;
+      border-top: 4px solid var(--gold);
+    }
+
+    .cta-strip h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+      margin-bottom: 0.6rem;
+    }
+
+    .cta-strip p {
+      color: rgba(255,255,255,0.75);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-cta-gold {
+      background: var(--gold);
+      color: var(--navy);
+      border: 3px solid var(--navy);
+      font-weight: 900;
+      font-size: 1rem;
+      padding: 0.8rem 1.75rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 5px 5px 0 var(--navy);
+      transition: box-shadow 0.1s, transform 0.1s;
+      display: inline-block;
+    }
+
+    .btn-cta-gold:hover {
+      box-shadow: 2px 2px 0 var(--navy);
+      transform: translate(3px, 3px);
+    }
+
+    .btn-cta-outline {
+      background: transparent;
+      color: #fff;
+      border: 3px solid #fff;
+      font-weight: 900;
+      font-size: 1rem;
+      padding: 0.8rem 1.75rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+      display: inline-block;
+    }
+
+    .btn-cta-outline:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.75);
+      padding: 3rem 2rem 0;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+      max-width: 1100px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .footer-brand {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--gold); }
+
+    .footer-col-title {
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-schedule-item {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.65);
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      gap: 0.65rem;
+    }
+
+    .schedule-time {
+      color: var(--gold);
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      min-width: 90px;
+      flex-shrink: 0;
+    }
+
+    .hashtag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .hashtag {
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding: 1.25rem 0 1.5rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── SCUTTLE SPRITES ── */
+    .scuttle-sprite {
+      position: fixed;
+      font-size: 1.6rem;
+      pointer-events: none;
+      opacity: 0.15;
+      z-index: 9999;
+      user-select: none;
+      line-height: 1;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .timeline::before { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 1rem; }
+      .navbar-links { display: none; }
+
+      .hero { padding: 2.5rem 1rem 2rem; }
+      .hero-headline { letter-spacing: -1px; }
+
+      .stats-row { padding: 1.25rem; gap: 0.75rem; }
+
+      .two-col-grid { grid-template-columns: 1fr; }
+
+      .news-grid { grid-template-columns: 1fr; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+
+      .timeline { grid-template-columns: 1fr 1fr; }
+
+      .eligibility-wrap { padding: 2rem 1rem; }
+
+      .filing-inner { padding: 0 1rem 2rem; }
+
+      .featured-inner { padding: 2rem 1rem; }
+
+      .news-section { padding: 2rem 1rem; }
+      .news-header { margin-bottom: 1.25rem; }
+
+      .cta-strip { padding: 2.5rem 1rem; }
+
+      footer { padding: 2rem 1rem 0; }
+
+      .two-col-section { padding: 2rem 1rem; }
+    }
+
+    @media (max-width: 375px) {
+      .navbar-brand-text { font-size: 0.82rem; }
+      .btn-candidacy { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
+
+      .hero { padding: 2rem 0.75rem 1.75rem; }
+      .hero-headline { letter-spacing: -0.5px; }
+
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+        padding: 1rem 0.75rem;
+        gap: 0.5rem;
+      }
+      .stat-number { font-size: 1.35rem; }
+
+      .timeline { grid-template-columns: 1fr; }
+
+      .hero-entry-btns { flex-direction: column; align-items: center; }
+      .hero-btn { width: 100%; max-width: 280px; justify-content: center; }
+
+      .cta-buttons { flex-direction: column; align-items: center; }
+      .btn-cta-gold, .btn-cta-outline {
+        width: 100%;
+        max-width: 280px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     1. NAVBAR
+════════════════════════════════════════════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <a href="#" class="navbar-brand" aria-label="Cockroach Janta Parliament home">
+    <!-- Cockroach logo SVG: crown + antennae -->
+    <svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Crown base -->
+      <path d="M7 16 L7 12 L11 15 L19 9 L27 15 L31 12 L31 16 Z" fill="#D4A017" stroke="#fff" stroke-width="0.7"/>
+      <!-- Crown gems -->
+      <circle cx="7"  cy="12" r="1.8" fill="#fff"/>
+      <circle cx="19" cy="9"  r="2.2" fill="#fff"/>
+      <circle cx="31" cy="12" r="1.8" fill="#fff"/>
+      <!-- Body ellipse -->
+      <ellipse cx="19" cy="24" rx="7.5" ry="9.5" fill="#F7F4ED" stroke="#fff" stroke-width="1"/>
+      <!-- Head -->
+      <ellipse cx="19" cy="14.5" rx="4.5" ry="3.8" fill="#F7F4ED" stroke="#fff" stroke-width="1"/>
+      <!-- Antennae -->
+      <line x1="16.5" y1="11.5" x2="10" y2="5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="21.5" y1="11.5" x2="28" y2="5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="10" cy="5" r="1.2" fill="#D4A017"/>
+      <circle cx="28" cy="5" r="1.2" fill="#D4A017"/>
+      <!-- Legs left -->
+      <line x1="11.5" y1="20" x2="5"  y2="17" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+      <line x1="11.5" y1="24" x2="4"  y2="24" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+      <line x1="11.5" y1="28" x2="5"  y2="31" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+      <!-- Legs right -->
+      <line x1="26.5" y1="20" x2="33" y2="17" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+      <line x1="26.5" y1="24" x2="34" y2="24" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+      <line x1="26.5" y1="28" x2="33" y2="31" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+    <span class="navbar-brand-text">Cockroach Janta Parliament</span>
+  </a>
+
+  <ul class="navbar-links">
+    <li><a href="#">Parliament</a></li>
+    <li><a href="#">Parties</a></li>
+    <li><a href="#">News</a></li>
+    <li><a href="#">Supreme Commander</a></li>
+  </ul>
+
+  <a href="#" class="btn-candidacy">File Candidacy →</a>
+</nav>
+
+
+<!-- ════════════════════════════════════════════════════
+     2. LIVE TICKER
+════════════════════════════════════════════════════════ -->
+<div class="ticker-wrap" role="marquee" aria-label="Live Parliament Updates">
+  <div class="ticker-live" aria-hidden="true">LIVE</div>
+  <div class="ticker-overflow" aria-hidden="true">
+    <div class="ticker-track">
+      <!-- First half -->
+      <span class="ticker-item">🪳 <span>Naala_Sardar_OG</span> leads Patna Sahib — 18,402 votes. Nearest rival at 3,200.</span>
+      <span class="ticker-item">🗳️ <span>Mumbai_Kachra_official</span> files under CJP — manifesto: 'Naali for all, Kachra for none'</span>
+      <span class="ticker-item">🔴 BREAKING: <span>Hyderabad_Manhole_OG</span> surges from 12 to 12,000 votes in 4 hours</span>
+      <span class="ticker-item">📢 ACP crosses <span>50 seats filed</span> — now officially qualified for Saturday results</span>
+      <span class="ticker-item">🪳 <span>Bandra_Khatmal_wala</span> joins RCP — 'Ghar Ghar Mein Khatmal, Ghar Ghar Mein RCP'</span>
+      <span class="ticker-item">⚡ <span>Galli_da_real_444</span> submits manifesto entirely in cockroach emoji — EC baffled</span>
+      <span class="ticker-item">📍 Varanasi #77: <span>214 candidates filed.</span> Most contested seat this cycle.</span>
+      <span class="ticker-item">👑 Samrat Macchar: <span>'All brooms shall be banned until further notice'</span></span>
+      <!-- Duplicate for seamless loop -->
+      <span class="ticker-item">🪳 <span>Naala_Sardar_OG</span> leads Patna Sahib — 18,402 votes. Nearest rival at 3,200.</span>
+      <span class="ticker-item">🗳️ <span>Mumbai_Kachra_official</span> files under CJP — manifesto: 'Naali for all, Kachra for none'</span>
+      <span class="ticker-item">🔴 BREAKING: <span>Hyderabad_Manhole_OG</span> surges from 12 to 12,000 votes in 4 hours</span>
+      <span class="ticker-item">📢 ACP crosses <span>50 seats filed</span> — now officially qualified for Saturday results</span>
+      <span class="ticker-item">🪳 <span>Bandra_Khatmal_wala</span> joins RCP — 'Ghar Ghar Mein Khatmal, Ghar Ghar Mein RCP'</span>
+      <span class="ticker-item">⚡ <span>Galli_da_real_444</span> submits manifesto entirely in cockroach emoji — EC baffled</span>
+      <span class="ticker-item">📍 Varanasi #77: <span>214 candidates filed.</span> Most contested seat this cycle.</span>
+      <span class="ticker-item">👑 Samrat Macchar: <span>'All brooms shall be banned until further notice'</span></span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     3. HERO
+════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <h1 class="hero-headline">
+    <span class="line1">Parliament of the Ignored.</span>
+    <span class="line2">Vote of the Chronically Online.</span>
+  </h1>
+  <p class="hero-subheadline">543 seats. Unlimited votes. Every Saturday, a winner. Zero politicians.</p>
+  <p class="hero-small">Naali ki Sansad, har Saturday — Samrat Macchar, Supreme Cockroach Commander</p>
+
+  <!-- India SVG Map -->
+  <div class="india-map-wrap" aria-label="India constituency map">
+    <svg viewBox="0 0 480 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of India with constituency highlights">
+
+      <!-- India outline polygon -->
+      <polygon
+        points="110,70 130,55 160,48 200,52 240,60 280,72 320,90 355,120 380,160 395,200 400,250 395,290 375,330 345,365 305,390 265,410 230,420 190,412 155,395 125,368 100,335 82,295 78,255 80,215 88,180 95,140"
+        fill="#F0EBD8"
+        stroke="#1A2238"
+        stroke-width="3"
+        stroke-linejoin="round"
+      />
+
+      <!-- Subtle internal decorative lines -->
+      <path d="M200,52 Q215,110 225,165 Q235,210 228,260 Q222,305 230,420"
+            fill="none" stroke="rgba(26,34,56,0.07)" stroke-width="1.5"/>
+      <path d="M280,72 Q268,128 252,178 Q242,218 252,268 Q262,318 265,410"
+            fill="none" stroke="rgba(26,34,56,0.07)" stroke-width="1.5"/>
+      <path d="M78,255 Q140,242 200,245 Q258,248 330,240 Q378,235 400,250"
+            fill="none" stroke="rgba(26,34,56,0.07)" stroke-width="1.5"/>
+      <path d="M110,140 Q180,148 240,148 Q300,148 355,145"
+            fill="none" stroke="rgba(26,34,56,0.07)" stroke-width="1.5"/>
+
+      <!-- ── PULSING DOTS ── -->
+
+      <!-- Delhi — CJP purple, pulsing -->
+      <circle class="pulse-circle" cx="230" cy="118" r="13" fill="rgba(127,119,221,0.22)" stroke="none"/>
+      <circle cx="230" cy="118" r="5" fill="#7F77DD" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="239" y="114">Delhi</text>
+
+      <!-- Mumbai — CCP orange, pulsing -->
+      <circle class="pulse-circle" cx="140" cy="245" r="13" fill="rgba(216,90,48,0.22)" stroke="none" style="animation-delay:0.35s"/>
+      <circle cx="140" cy="245" r="5" fill="#D85A30" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="149" y="241">Mumbai</text>
+
+      <!-- Kolkata — RCP pink, pulsing -->
+      <circle class="pulse-circle" cx="320" cy="195" r="13" fill="rgba(212,83,126,0.22)" stroke="none" style="animation-delay:0.7s"/>
+      <circle cx="320" cy="195" r="5" fill="#D4537E" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="329" y="191">Kolkata</text>
+
+      <!-- Patna — GOLD, pulsing, FEATURED ★ -->
+      <circle class="pulse-circle" cx="285" cy="155" r="16" fill="rgba(212,160,23,0.28)" stroke="none" style="animation-delay:1.05s"/>
+      <circle cx="285" cy="155" r="6" fill="#D4A017" stroke="#fff" stroke-width="2"/>
+      <text class="city-label-star" x="295" y="150">&#9733; Patna</text>
+
+      <!-- ── STATIC DOTS ── -->
+
+      <!-- Chennai — ACP green -->
+      <circle cx="245" cy="335" r="5" fill="#1D9E75" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="254" y="331">Chennai</text>
+
+      <!-- Hyderabad — Gold -->
+      <circle cx="220" cy="285" r="5" fill="#D4A017" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="229" y="281">Hyd.</text>
+
+      <!-- Bengaluru — CJP purple -->
+      <circle cx="210" cy="325" r="4" fill="#7F77DD" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="174" y="330">Bengaluru</text>
+
+      <!-- Varanasi — CCP -->
+      <circle cx="265" cy="148" r="4" fill="#D85A30" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="254" y="140">Varanasi</text>
+
+      <!-- Jaipur — ACP -->
+      <circle cx="168" cy="138" r="4" fill="#1D9E75" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="133" y="134">Jaipur</text>
+
+      <!-- Ahmedabad — CCP -->
+      <circle cx="145" cy="185" r="4" fill="#D85A30" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="108" y="181">Ahmd.</text>
+
+      <!-- Chandigarh — RCP -->
+      <circle cx="195" cy="95" r="4" fill="#D4537E" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="154" y="91">Chandigarh</text>
+
+      <!-- Pune — CJP -->
+      <circle cx="155" cy="268" r="4" fill="#7F77DD" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="120" y="264">Pune</text>
+
+      <!-- Vizag — CCP -->
+      <circle cx="310" cy="255" r="4" fill="#D85A30" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="319" y="251">Vizag</text>
+
+      <!-- Guwahati — ACP -->
+      <circle cx="365" cy="148" r="4" fill="#1D9E75" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="371" y="144">Guwahati</text>
+
+      <!-- Kochi — CJP -->
+      <circle cx="195" cy="368" r="4" fill="#7F77DD" stroke="#fff" stroke-width="1.5"/>
+      <text class="city-label" x="158" y="364">Kochi</text>
+    </svg>
+  </div>
+
+  <!-- Entry buttons -->
+  <div class="hero-entry-btns">
+    <a href="#" class="hero-btn">🗺️ Enter Seat Number (1–543)</a>
+    <a href="#" class="hero-btn">📍 Find by PIN Code</a>
+    <a href="#" class="hero-btn">🔍 Search Candidate</a>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     4. STATS ROW
+════════════════════════════════════════════════════════ -->
+<div class="stats-row" role="region" aria-label="Parliament statistics">
+  <div class="stat-card">
+    <div class="live-badge" aria-label="Live">
+      <span class="live-dot"></span>LIVE
+    </div>
+    <span class="stat-number">8,492</span>
+    <span class="stat-label">Online Now</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">2,84,127</span>
+    <span class="stat-label">Votes This Week</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">11,408</span>
+    <span class="stat-label">Candidates Filed</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">7</span>
+    <span class="stat-label">Parties Qualified</span>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     5. GOLD DIVIDER
+════════════════════════════════════════════════════════ -->
+<div class="gold-divider" role="separator"></div>
+<div class="roach-center" aria-hidden="true">🪳</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     6. ARE YOU ELIGIBLE?
+════════════════════════════════════════════════════════ -->
+<section class="eligibility-wrap" aria-labelledby="eligibility-heading">
+  <div class="eligibility-inner">
+    <p class="section-label dark">ELIGIBILITY · WHO CAN CONTEST</p>
+    <h2 id="eligibility-heading">Are You <em>Eligible?</em></h2>
+    <p class="eligibility-copy">
+      We do not ask your name, caste, education, or employment status. We have exactly four requirements.
+    </p>
+    <div class="req-list">
+      <div class="req-row">
+        <span class="req-code">REQ/01</span>
+        <span class="req-check" aria-hidden="true">&#10003;</span>
+        <span class="req-text">You have opinions about politics</span>
+      </div>
+      <div class="req-row">
+        <span class="req-code">REQ/02</span>
+        <span class="req-check" aria-hidden="true">&#10003;</span>
+        <span class="req-text">You are willing to be identified as a cockroach</span>
+      </div>
+      <div class="req-row">
+        <span class="req-code">REQ/03</span>
+        <span class="req-check" aria-hidden="true">&#10003;</span>
+        <span class="req-text">You can write 4 lines (any language, any nonsense)</span>
+      </div>
+      <div class="req-row">
+        <span class="req-code">REQ/04</span>
+        <span class="req-check" aria-hidden="true">&#10003;</span>
+        <span class="req-text">You accept that voting is unlimited and results are Saturday</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     7. FILING FRENZY
+════════════════════════════════════════════════════════ -->
+<section class="filing-frenzy-wrap" aria-labelledby="filing-heading">
+  <div class="filing-inner">
+    <div class="filing-header">
+      <h3 id="filing-heading">🔴 FILING FRENZY — LIVE NOMINATIONS</h3>
+      <p>Last 5 candidacy filings · updated live</p>
+    </div>
+
+    <!-- Entry 1: CJP -->
+    <div class="filing-entry">
+      <div class="filing-bar" style="background:#7F77DD;"></div>
+      <div class="filing-body">
+        <div class="filing-top">
+          <span class="filing-time">2m ago</span>
+          <span class="filing-name">Naala_Sardar_OG</span>
+          <span class="party-badge" style="background:#7F77DD;">CJP</span>
+        </div>
+        <div class="filing-seat">Patna Sahib, Bihar</div>
+        <div class="filing-manifesto">"Main hun naali ka asli neta. Vote karo ya mat karo."</div>
+      </div>
+    </div>
+
+    <!-- Entry 2: RCP -->
+    <div class="filing-entry">
+      <div class="filing-bar" style="background:#D4537E;"></div>
+      <div class="filing-body">
+        <div class="filing-top">
+          <span class="filing-time">7m ago</span>
+          <span class="filing-name">Bandra_Khatmal_wala</span>
+          <span class="party-badge" style="background:#D4537E;">RCP</span>
+        </div>
+        <div class="filing-seat">Mumbai North West, MH</div>
+        <div class="filing-manifesto">"Ghar Ghar Mein Khatmal, Ghar Ghar Mein RCP."</div>
+      </div>
+    </div>
+
+    <!-- Entry 3: ACP -->
+    <div class="filing-entry">
+      <div class="filing-bar" style="background:#1D9E75;"></div>
+      <div class="filing-body">
+        <div class="filing-top">
+          <span class="filing-time">15m ago</span>
+          <span class="filing-name">Hyderabad_Manhole_OG</span>
+          <span class="party-badge" style="background:#1D9E75;">ACP</span>
+        </div>
+        <div class="filing-seat">Hyderabad, TG</div>
+        <div class="filing-manifesto">"Har manhole ek opportunity hai."</div>
+      </div>
+    </div>
+
+    <!-- Entry 4: CCP -->
+    <div class="filing-entry">
+      <div class="filing-bar" style="background:#D85A30;"></div>
+      <div class="filing-body">
+        <div class="filing-top">
+          <span class="filing-time">23m ago</span>
+          <span class="filing-name">Galli_da_real_444</span>
+          <span class="party-badge" style="background:#D85A30;">CCP</span>
+        </div>
+        <div class="filing-seat">Lucknow, UP</div>
+        <div class="filing-manifesto">"Galliyon ki awaaz, Parliament tak."</div>
+      </div>
+    </div>
+
+    <!-- Entry 5: CJP -->
+    <div class="filing-entry">
+      <div class="filing-bar" style="background:#7F77DD;"></div>
+      <div class="filing-body">
+        <div class="filing-top">
+          <span class="filing-time">41m ago</span>
+          <span class="filing-name">Macchar_Raja_OG</span>
+          <span class="party-badge" style="background:#7F77DD;">CJP</span>
+        </div>
+        <div class="filing-seat">Varanasi, UP</div>
+        <div class="filing-manifesto">"Raja hun, koi shaq?"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     8. FEATURED CONSTITUENCY
+════════════════════════════════════════════════════════ -->
+<section class="featured-wrap" aria-labelledby="featured-heading">
+  <div class="featured-inner">
+    <p class="section-label dark">HOT SEAT · THIS CYCLE</p>
+    <h2 id="featured-heading">#71 Patna Sahib, Bihar — The Hot Seat</h2>
+    <div><span class="cycle-badge">214 CANDIDATES · CYCLE 1</span></div>
+
+    <div class="candidate-cards" role="list">
+
+      <!-- Card 1 -->
+      <div class="candidate-card" role="listitem">
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          <span class="cand-name">Naala_Sardar_OG</span>
+          <span class="party-badge" style="background:#7F77DD;">CJP</span>
+        </div>
+        <p class="cand-manifesto">"Har ward mein drainage DJ night."</p>
+        <div>
+          <div class="vote-label">Total Votes</div>
+          <div class="cand-votes">28,420</div>
+        </div>
+        <button class="btn-vote">🗳️ Vote</button>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="candidate-card" role="listitem">
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          <span class="cand-name">Galli_da_real_444</span>
+          <span class="party-badge" style="background:#D85A30;">CCP</span>
+        </div>
+        <p class="cand-manifesto">"Streetlights band, stars visible."</p>
+        <div>
+          <div class="vote-label">Total Votes</div>
+          <div class="cand-votes">19,812</div>
+        </div>
+        <button class="btn-vote">🗳️ Vote</button>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="candidate-card" role="listitem">
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          <span class="cand-name">Patna_Drain_King</span>
+          <span class="party-badge" style="background:#1D9E75;">ACP</span>
+        </div>
+        <p class="cand-manifesto">"Every colony gets free umbrella."</p>
+        <div>
+          <div class="vote-label">Total Votes</div>
+          <div class="cand-votes">11,006</div>
+        </div>
+        <button class="btn-vote">🗳️ Vote</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     9. THE SATURDAY RITUAL
+════════════════════════════════════════════════════════ -->
+<section class="saturday" aria-labelledby="saturday-heading">
+  <p class="section-label">THE WEEKLY CEREMONY</p>
+  <h2 id="saturday-heading">Every Saturday. 11 PM.</h2>
+
+  <div class="timeline" role="list">
+
+    <div class="timeline-step" role="listitem">
+      <span class="timeline-icon" aria-hidden="true">&#9889;</span>
+      <div class="timeline-when">ALWAYS</div>
+      <div class="timeline-title">Nominations Open</div>
+      <p class="timeline-desc">File. Contest. Be a cockroach.</p>
+    </div>
+
+    <div class="timeline-step" role="listitem">
+      <span class="timeline-icon" aria-hidden="true">&#9889;</span>
+      <div class="timeline-when">ALWAYS</div>
+      <div class="timeline-title">Votes Open</div>
+      <p class="timeline-desc">Unlimited. Anonymous. Click as many times as you want.</p>
+    </div>
+
+    <div class="timeline-step" style="border-color:rgba(220,0,0,0.5);" role="listitem">
+      <span class="timeline-icon" aria-hidden="true">&#128308;</span>
+      <div class="timeline-when" style="color:#ff6060;">SAT 11 PM</div>
+      <div class="timeline-title">The Snapshot</div>
+      <p class="timeline-desc">Votes frozen. Winners computed. History made.</p>
+    </div>
+
+    <div class="timeline-step" role="listitem">
+      <span class="timeline-icon" aria-hidden="true">&#127749;</span>
+      <div class="timeline-when">SUN 12 AM</div>
+      <div class="timeline-title">Cockroach MPs Declared</div>
+      <p class="timeline-desc">New cycle begins. Your votes reset. Their legacy lives.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     10. SUPREME COMMANDER + COCKROACH SOUL
+════════════════════════════════════════════════════════ -->
+<section class="two-col-section" aria-label="Supreme Commander and Your Cockroach Soul">
+  <div class="two-col-grid">
+
+    <!-- Supreme Commander -->
+    <div class="panel">
+      <div class="panel-label">SUPREME COMMANDER</div>
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <div class="commander-avatar" aria-hidden="true">👑🪳</div>
+        <div>
+          <div class="commander-title">Samrat Macchar</div>
+          <div style="font-size:0.75rem; color:rgba(26,34,56,0.5); font-weight:600; margin-top:0.2rem;">
+            Supreme Cockroach Commander · All 543 Seats
+          </div>
+        </div>
+      </div>
+      <div class="decree-box">
+        <div class="decree-label">Current Decree · #001</div>
+        <p class="decree-text">
+          "We hereby grant Patna 50,000 ceremonial votes for being the loudest constituency.
+          Long live the Naali. — Decree #001"
+        </p>
+      </div>
+    </div>
+
+    <!-- Your Cockroach Soul -->
+    <div class="panel">
+      <div class="panel-label">YOUR COCKROACH SOUL</div>
+
+      <div class="soul-level">
+        Level: <strong>Nymph (Level 2)</strong>
+      </div>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:700; color:rgba(26,34,56,0.45); margin-bottom:0.3rem; letter-spacing:0.5px;">
+          <span>XP</span><span>128 / 200</span>
+        </div>
+        <div class="xp-bar-wrap" role="progressbar" aria-valuenow="128" aria-valuemin="0" aria-valuemax="200" aria-label="XP progress">
+          <div class="xp-bar-fill"></div>
+          <div class="xp-label">128 / 200 XP</div>
+        </div>
+      </div>
+
+      <div class="soul-quest">
+        <div class="quest-label">Today's Quest</div>
+        <div>Vote in 3 different states — <span class="quest-progress">2/3 done</span></div>
+      </div>
+
+      <div class="streak">5 days 🔥 streak</div>
+
+      <div class="soul-cta">🪳 File candidacy to reach Level 3</div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     11. FACTION TALLY + MANIFESTO OF THE WEEK
+════════════════════════════════════════════════════════ -->
+<section style="background:var(--offwhite); padding:0 2rem 2.5rem;" aria-label="Faction tally and Manifesto of the Week">
+  <div class="two-col-grid">
+
+    <!-- Cockroach Tally -->
+    <div class="panel">
+      <div class="panel-label">THE COCKROACH TALLY</div>
+      <div style="font-size:1.1rem; font-weight:900; color:var(--navy); letter-spacing:-0.3px;">Party Standings · Cycle 1</div>
+
+      <div>
+        <div class="tally-row">
+          <span class="tally-party">CJP</span>
+          <div class="tally-bar-wrap" role="progressbar" aria-valuenow="194" aria-valuemax="543">
+            <div class="tally-bar" style="width:100%; background:#7F77DD;"></div>
+          </div>
+          <span class="tally-seats">194 seats</span>
+        </div>
+        <div class="tally-row">
+          <span class="tally-party">CCP</span>
+          <div class="tally-bar-wrap" role="progressbar" aria-valuenow="128" aria-valuemax="543">
+            <div class="tally-bar" style="width:66%; background:#D85A30;"></div>
+          </div>
+          <span class="tally-seats">128 seats</span>
+        </div>
+        <div class="tally-row">
+          <span class="tally-party">ACP</span>
+          <div class="tally-bar-wrap" role="progressbar" aria-valuenow="102" aria-valuemax="543">
+            <div class="tally-bar" style="width:53%; background:#1D9E75;"></div>
+          </div>
+          <span class="tally-seats">102 seats</span>
+        </div>
+        <div class="tally-row">
+          <span class="tally-party">RCP</span>
+          <div class="tally-bar-wrap" role="progressbar" aria-valuenow="71" aria-valuemax="543">
+            <div class="tally-bar" style="width:37%; background:#D4537E;"></div>
+          </div>
+          <span class="tally-seats">71 seats</span>
+        </div>
+        <div class="tally-row">
+          <span class="tally-party" style="font-size:0.7rem;">Indep.</span>
+          <div class="tally-bar-wrap" role="progressbar" aria-valuenow="48" aria-valuemax="543">
+            <div class="tally-bar" style="width:25%; background:var(--navy);"></div>
+          </div>
+          <span class="tally-seats">48 seats</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manifesto of the Week -->
+    <div class="manifesto-box">
+      <div class="panel-label" style="margin-bottom:0.75rem;">MANIFESTO OF THE WEEK</div>
+      <div class="manifesto-author">Hyderabad_Manhole_OG</div>
+      <div class="manifesto-meta">Hyderabad #6 · ACP</div>
+      <p class="manifesto-text">
+        Har traffic signal pe chai.<br>
+        Har colony mein vote WiFi.<br>
+        Every pothole is heritage.<br>
+        Naali first. System later.
+      </p>
+      <div class="manifesto-votes">12,000 🗳️</div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     12. DAILY COCKROACH NEWS
+════════════════════════════════════════════════════════ -->
+<section class="news-section" aria-labelledby="news-heading">
+  <p class="news-header" id="news-heading">📰 DAILY COCKROACH NEWS — Generated at 06:00 IST</p>
+
+  <div class="news-grid">
+
+    <!-- Card 1: CJP -->
+    <article class="news-card">
+      <div class="news-accent" style="background:#7F77DD;"></div>
+      <div class="news-body">
+        <div class="news-dateline">PATNA · 06:45 AM</div>
+        <p class="news-headline">
+          "Naala Sardar wins Patna, promises to drown Patna by 2027.
+          Election commission says this is fine."
+        </p>
+      </div>
+    </article>
+
+    <!-- Card 2: ACP -->
+    <article class="news-card">
+      <div class="news-accent" style="background:#1D9E75;"></div>
+      <div class="news-body">
+        <div class="news-dateline">HYDERABAD · 09:12 AM</div>
+        <p class="news-headline">
+          "Hyderabad_Manhole_OG goes from 12 votes to 12,000 in 4 hours.
+          Experts baffled. Cockroaches not."
+        </p>
+      </div>
+    </article>
+
+    <!-- Card 3: RCP -->
+    <article class="news-card">
+      <div class="news-accent" style="background:#D4537E;"></div>
+      <div class="news-body">
+        <div class="news-dateline">MUMBAI · 11:08 PM</div>
+        <p class="news-headline">
+          "Bandra_Khatmal_wala holds campaign rally at vada pav stall.
+          400 attend. 200 were there for vada pav."
+        </p>
+      </div>
+    </article>
+
+    <!-- Card 4: CCP -->
+    <article class="news-card">
+      <div class="news-accent" style="background:#D85A30;"></div>
+      <div class="news-body">
+        <div class="news-dateline">DELHI · 01:22 PM</div>
+        <p class="news-headline">
+          "Anonymous vote storm crashes leaderboard for 18 minutes.
+          Supreme Commander says this is democracy working."
+        </p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     13. PURPLE CTA STRIP
+════════════════════════════════════════════════════════ -->
+<section class="cta-strip" aria-labelledby="cta-heading">
+  <h2 id="cta-heading">Ready to Claim Your Seat? 🪳</h2>
+  <p>543 constituencies. Unlimited votes. It's free. It's chaos. It's Saturday.</p>
+  <div class="cta-buttons">
+    <a href="#" class="btn-cta-gold">🪳 File Candidacy — Free</a>
+    <a href="#" class="btn-cta-outline">🏛️ Browse All 543 Seats</a>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     14. FOOTER
+════════════════════════════════════════════════════════ -->
+<footer role="contentinfo">
+  <div class="footer-grid">
+
+    <!-- Col 1: Brand + links -->
+    <div>
+      <div class="footer-brand">
+        <span aria-hidden="true">🪳</span>
+        <span>Cockroach Janta Parliament</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Disclaimer</a></li>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Results</a></li>
+        <li><a href="#">Supreme Commander</a></li>
+      </ul>
+    </div>
+
+    <!-- Col 2: Weekly Schedule -->
+    <div>
+      <div class="footer-col-title">The Weekly Schedule</div>
+      <div class="footer-schedule-item">
+        <span class="schedule-time">Always Open</span>
+        <span>Nominations — File your candidacy anytime</span>
+      </div>
+      <div class="footer-schedule-item">
+        <span class="schedule-time">Always Open</span>
+        <span>Voting — Click unlimited, no login needed</span>
+      </div>
+      <div class="footer-schedule-item">
+        <span class="schedule-time">Sat 11:00 PM IST</span>
+        <span>Vote snapshot taken — results computed</span>
+      </div>
+      <div class="footer-schedule-item">
+        <span class="schedule-time">Sun 12:00 AM IST</span>
+        <span>Cockroach MPs declared, new cycle begins</span>
+      </div>
+    </div>
+
+    <!-- Col 3: Hashtags -->
+    <div>
+      <div class="footer-col-title">Join the Conversation</div>
+      <div class="hashtag-list">
+        <span class="hashtag">#CockroachJantaParliament</span>
+        <span class="hashtag">#MainBhiCockroach</span>
+        <span class="hashtag">#NaaliKiSansad</span>
+      </div>
+      <div style="margin-top:1.25rem; font-size:0.78rem; color:rgba(255,255,255,0.4); line-height:1.5;">
+        Results every Saturday 11 PM IST.<br>
+        History made. Votes reset. Repeat.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    Cockroach Janta Parliament is a satirical entertainment platform. Zero affiliation with ECI,
+    Election Commission, or any actual cockroach. All votes are fake. All winners are real. 🪳
+  </div>
+</footer>
+
+
+<!-- ════════════════════════════════════════════════════
+     15. SCUTTLE SPRITES — 5 fixed cockroaches
+════════════════════════════════════════════════════════ -->
+<span class="scuttle-sprite" style="bottom:4px;  animation: scuttle 15s linear infinite 0s;"    aria-hidden="true">🪳</span>
+<span class="scuttle-sprite" style="bottom:18px; animation: scuttle 21s linear infinite 3s;"    aria-hidden="true">🪳</span>
+<span class="scuttle-sprite" style="bottom:32px; animation: scuttle 27s linear infinite 7s;"    aria-hidden="true">🪳</span>
+<span class="scuttle-sprite" style="bottom:10px; animation: scuttle 18s linear infinite 11s;"   aria-hidden="true">🪳</span>
+<span class="scuttle-sprite" style="bottom:46px; animation: scuttle 24s linear infinite 5s;"    aria-hidden="true">🪳</span>
+
+</body>
+</html>
