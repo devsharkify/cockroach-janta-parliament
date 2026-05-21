@@ -26,23 +26,20 @@ export default function Footer() {
           </Link>
 
           {/* Social links */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center sm:items-end gap-3">
             <a
-              href="#"
-              className="flex items-center gap-1.5 text-white/60 hover:text-yellow-300 transition-colors font-bold text-sm"
-              aria-label="Twitter"
-            >
-              <span className="text-lg">🐦</span>
-              <span>Twitter</span>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-1.5 text-white/60 hover:text-yellow-300 transition-colors font-bold text-sm"
-              aria-label="Instagram"
+              href="https://www.instagram.com/cockroachparliament_official"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-white text-sm border-2 border-white/20 hover:border-white/60 transition-all hover:scale-105"
+              style={{ background: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)' }}
             >
               <span className="text-lg">📸</span>
-              <span>Instagram</span>
+              Follow @cockroachparliament_official
             </a>
+            <p className="text-white/25 font-mono text-[10px]">
+              Daily memes · live results · cockroach chaos
+            </p>
           </div>
         </div>
 

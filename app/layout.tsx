@@ -4,6 +4,7 @@ import './globals.css'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import LiveChat from './components/LiveChat'
+import InstagramPopup from './components/InstagramPopup'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Footer />
         <LiveChat />
+        <InstagramPopup />
         {/* Low-fi cockroach scuttle sprites */}
         <span className="roach-sprite" style={{ animationDuration: '18s', animationDelay: '0s',   bottom: '8px'  }}>🪳</span>
         <span className="roach-sprite" style={{ animationDuration: '26s', animationDelay: '-10s', bottom: '28px' }}>🪳</span>

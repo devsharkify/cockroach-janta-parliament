@@ -637,23 +637,38 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
               </div>
             )}
 
+            {/* ── INSTAGRAM FOLLOW — top priority ── */}
+            <a
+              href="https://www.instagram.com/cockroachparliament_official"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-black text-white text-base border-4 border-black shadow-[4px_4px_0_black] hover:scale-[1.02] active:scale-[0.98] transition-all"
+              style={{ background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 55%, #fcb045 100%)' }}
+            >
+              <span className="text-xl">📸</span>
+              Follow @cockroachparliament_official
+            </a>
+            <p className="text-white/40 font-mono text-[10px] -mt-2">
+              Follow us → get results, voter reactions &amp; memes first 🪳
+            </p>
+
             <div className="space-y-3">
-              {/* WhatsApp — PRIMARY for India */}
+              {/* WhatsApp */}
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`🪳 I'm running for ${seatName ?? `Seat #${seatNumber}`} in the Cockroach Janta Parliament!\n\nMy manifesto: "${manifesto.slice(0, 100)}..."\n\nVote for me at cockroachparliament.in/seat/${seatNumber}\n\n#CockroachJantaParliament #MainBhiCockroach`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`🪳 I'm running for ${seatName ?? `Seat #${seatNumber}`} in the Cockroach Janta Parliament!\n\nMy manifesto: "${manifesto.slice(0, 100)}..."\n\nVote for me: cockroachparliament.in/seat/${seatNumber}\n\nFollow: instagram.com/cockroachparliament_official\n\n#CockroachJantaParliament #MainBhiCockroach`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black text-lg rounded-xl border-4 border-black shadow-[4px_4px_0_black] hover:bg-green-600 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black text-base rounded-xl border-4 border-black shadow-[4px_4px_0_black] hover:bg-green-600 transition-colors"
               >
                 📱 Share on WhatsApp
               </a>
 
               <button
                 onClick={shareToIG}
-                className="w-full min-h-[48px] py-4 rounded-xl font-black text-base"
-                style={{ background: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)', color: 'white' }}
+                className="w-full min-h-[48px] py-3 rounded-xl font-black text-white text-sm border-2 border-white/20 hover:border-white/40 transition-colors"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                📸 Share on Instagram Story
+                📸 Share to Instagram Story
               </button>
 
               <button
@@ -674,8 +689,8 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
               </a>
             </div>
 
-            <p className="text-white/30 text-xs font-mono">
-              Candidacy is live. Share your post on IG to rally votes.
+            <p className="text-white/20 text-xs font-mono">
+              Candidacy live. Rally votes — share your candidacy &amp; follow us on IG.
             </p>
           </div>
         )}
