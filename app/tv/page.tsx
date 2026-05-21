@@ -343,37 +343,15 @@ export default function TVPage() {
                   title="CJTV Live"
                 />
               ) : (
-                /* ── PLACEHOLDER — replace CJTV_YOUTUBE_ID at the top of this file ── */
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#0f0f0f]">
-                  <div className="relative">
-                    <span className="text-7xl block mb-2">📺</span>
-                    <span className="absolute -top-2 -right-4 flex items-center gap-1 bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded-sm">
-                      <span className="w-1 h-1 rounded-full bg-white animate-pulse inline-block" />
-                      LIVE
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-black text-xl uppercase tracking-widest mb-1">
-                      CJTV Live
-                    </p>
-                    <p className="text-white/30 font-mono text-xs mb-3">
-                      India&apos;s Only Cockroach-Run News Channel
-                    </p>
-                    <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2">
-                      <span className="text-yellow-300 font-mono text-[10px]">Set CJTV_YOUTUBE_ID in /app/tv/page.tsx</span>
-                    </div>
-                  </div>
-                  {/* Fake progress / loading bars for aesthetic */}
-                  <div className="flex gap-1 mt-2">
-                    {[...Array(12)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-1.5 rounded-full bg-yellow-300/20 animate-pulse"
-                        style={{ height: `${8 + Math.sin(i * 0.8) * 6}px`, animationDelay: `${i * 0.1}s` }}
-                      />
-                    ))}
-                  </div>
-                </div>
+                <video
+                  className="absolute inset-0 w-full h-full object-cover"
+                  src="/cjtv-live.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls
+                />
               )}
             </div>
 
@@ -382,7 +360,7 @@ export default function TVPage() {
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1.5 text-[9px] font-black text-red-400 uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
-                  {CJTV_YOUTUBE_ID ? 'LIVE NOW' : 'STREAM OFFLINE'}
+                  {CJTV_YOUTUBE_ID ? 'LIVE NOW' : 'NOW PLAYING'}
                 </span>
                 <span className="text-white/30 font-mono text-[9px]">📺 Cockroach Janta TV · Est. 2026</span>
               </div>
