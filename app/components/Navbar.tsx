@@ -10,6 +10,8 @@ const LINKS = [
   { href: '/parties', label: 'Parties', emoji: '🪳' },
   { href: '/create-party', label: 'Start Party', emoji: '🏴' },
   { href: '/supreme', label: 'Supreme', emoji: '👑' },
+  { href: '/court', label: 'Court', emoji: '🏛️' },
+  { href: '/ec', label: 'EC', emoji: '🗳️' },
 ]
 
 export default function Navbar() {

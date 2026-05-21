@@ -122,6 +122,52 @@ export interface NewsItemDoc {
   generated_at: Date
 }
 
+export interface CourtApplicationDoc {
+  _id?: ObjectId
+  id: string
+  position_id: string
+  position_title: string
+  level: 'national' | 'state'
+  state?: string
+  applicant_name: string
+  reason: string
+  fingerprint: string
+  vote_count: number
+  created_at: Date
+}
+
+export interface CourtVoteDoc {
+  _id?: ObjectId
+  id: string
+  application_id: string
+  position_id: string
+  voter_fingerprint: string
+  created_at: Date
+}
+
+export interface ECApplicationDoc {
+  _id?: ObjectId
+  id: string
+  position_id: string
+  position_title: string
+  level: 'national' | 'state'
+  state?: string
+  applicant_name: string
+  reason: string
+  fingerprint: string
+  vote_count: number
+  created_at: Date
+}
+
+export interface ECVoteDoc {
+  _id?: ObjectId
+  id: string
+  application_id: string
+  position_id: string
+  voter_fingerprint: string
+  created_at: Date
+}
+
 // ── Collection getters ───────────────────────────────────────────
 
 export async function seats(): Promise<Collection<SeatDoc>> {
@@ -144,4 +190,16 @@ export async function souls(): Promise<Collection<SoulDoc>> {
 }
 export async function newsItems(): Promise<Collection<NewsItemDoc>> {
   return (await db()).collection<NewsItemDoc>('news_items')
+}
+export async function courtApplications(): Promise<Collection<CourtApplicationDoc>> {
+  return (await db()).collection<CourtApplicationDoc>('court_applications')
+}
+export async function courtVotes(): Promise<Collection<CourtVoteDoc>> {
+  return (await db()).collection<CourtVoteDoc>('court_votes')
+}
+export async function ecApplications(): Promise<Collection<ECApplicationDoc>> {
+  return (await db()).collection<ECApplicationDoc>('ec_applications')
+}
+export async function ecVotes(): Promise<Collection<ECVoteDoc>> {
+  return (await db()).collection<ECVoteDoc>('ec_votes')
 }
