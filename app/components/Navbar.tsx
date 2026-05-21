@@ -12,6 +12,7 @@ const LINKS = [
   { href: '/supreme', label: 'Supreme', emoji: '👑' },
   { href: '/court', label: 'Court', emoji: '🏛️' },
   { href: '/ec', label: 'EC', emoji: '🗳️' },
+  { href: '/tv', label: 'CJTV', emoji: '📺' },
 ]
 
 export default function Navbar() {

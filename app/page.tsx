@@ -7,6 +7,7 @@ import LiveStats from './components/LiveStats'
 import TrendingSeats from './components/TrendingSeats'
 import HotSeats from './components/HotSeats'
 import { ALL_PARTIES } from '@/lib/types'
+import { NEWS_ARTICLES, CATEGORY_COLORS } from '@/lib/newsArticles'
 
 const DISPLAY_PARTIES = ALL_PARTIES.filter(p => p.code !== 'IND')
 
@@ -304,6 +305,103 @@ export default function HomePage() {
           HOT SEATS
       ═══════════════════════════════════════ */}
       <HotSeats />
+
+      {/* ═══════════════════════════════════════
+          COCKROACH JANTA TV
+      ═══════════════════════════════════════ */}
+      <section className="bg-black border-b-8 border-yellow-300 py-10 px-4">
+        {/* Header */}
+        <div className="max-w-5xl mx-auto mb-6 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">📺</span>
+            <div>
+              <div className="font-black text-yellow-300 text-xl uppercase leading-none tracking-tight">
+                Cockroach Janta TV
+              </div>
+              <div className="text-white/30 font-mono text-[9px] tracking-widest">
+                India&apos;s only cockroach-run news channel
+              </div>
+            </div>
+            <span className="flex items-center gap-1 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
+              LIVE
+            </span>
+          </div>
+          <Link
+            href="/tv"
+            className="font-black text-xs text-yellow-300 border-2 border-yellow-300 px-4 py-2 rounded-xl hover:bg-yellow-300 hover:text-black transition-colors uppercase tracking-wider"
+          >
+            All Stories →
+          </Link>
+        </div>
+
+        {/* Featured article + 3 cards */}
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Large featured */}
+          <Link href="/tv" className="lg:col-span-2 rounded-2xl border-4 border-yellow-300/30 hover:border-yellow-300 transition-colors overflow-hidden group block">
+            <div
+              className="h-36 relative flex items-end p-4 overflow-hidden"
+              style={{ background: `${CATEGORY_COLORS[NEWS_ARTICLES[0].category]}25`, borderBottom: `3px solid ${CATEGORY_COLORS[NEWS_ARTICLES[0].category]}` }}
+            >
+              <div className="absolute inset-0 flex items-center justify-center text-[80px] opacity-10 select-none pointer-events-none">🪳</div>
+              <span
+                className="relative text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm text-white"
+                style={{ background: CATEGORY_COLORS[NEWS_ARTICLES[0].category] }}
+              >
+                {NEWS_ARTICLES[0].category}
+              </span>
+            </div>
+            <div className="p-4" style={{ background: '#111' }}>
+              <h3 className="font-black text-white text-sm leading-tight mb-1.5 group-hover:text-yellow-300 transition-colors line-clamp-3">
+                {NEWS_ARTICLES[0].headline}
+              </h3>
+              <p className="text-white/30 font-mono text-[10px] line-clamp-2">{NEWS_ARTICLES[0].excerpt}</p>
+              <p className="text-white/20 font-mono text-[9px] mt-2">{NEWS_ARTICLES[0].author}</p>
+            </div>
+          </Link>
+
+          {/* 2 smaller cards */}
+          {NEWS_ARTICLES.slice(1, 3).map(article => (
+            <Link key={article.id} href="/tv" className="rounded-xl border-4 border-white/10 hover:border-yellow-300/50 transition-colors overflow-hidden group block" style={{ background: '#111' }}>
+              <div
+                className="h-20 relative flex items-end p-3 overflow-hidden"
+                style={{ background: `${CATEGORY_COLORS[article.category]}20`, borderBottom: `2px solid ${CATEGORY_COLORS[article.category]}` }}
+              >
+                <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-10 select-none pointer-events-none">🪳</div>
+                <span
+                  className="relative text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-sm text-white"
+                  style={{ background: CATEGORY_COLORS[article.category] }}
+                >
+                  {article.category}
+                </span>
+              </div>
+              <div className="p-3">
+                <h3 className="font-black text-white text-xs leading-tight group-hover:text-yellow-300 transition-colors line-clamp-3">
+                  {article.headline}
+                </h3>
+                <p className="text-white/20 font-mono text-[9px] mt-1.5">{article.author}</p>
+              </div>
+            </Link>
+          ))}
+
+          {/* 4th: hot ticker */}
+          <div className="rounded-xl border-4 border-red-500/30 overflow-hidden" style={{ background: '#1a0000' }}>
+            <div className="bg-red-600 px-3 py-2 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
+              <span className="text-white text-[9px] font-black uppercase tracking-widest">Breaking</span>
+            </div>
+            <div className="p-3 space-y-2">
+              {NEWS_ARTICLES.filter(a => a.isHot).slice(0, 4).map(a => (
+                <Link key={a.id} href="/tv" className="block border-b border-red-900/30 pb-2 last:border-0 last:pb-0 group">
+                  <p className="text-red-300 font-mono text-[9px] leading-tight group-hover:text-red-200 transition-colors line-clamp-2">
+                    🔴 {a.headline}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ═══════════════════════════════════════
           PARTY CARDS
