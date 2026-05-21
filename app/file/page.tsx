@@ -6,13 +6,9 @@ import Link from 'next/link'
 import { CONSTITUENCIES } from '@/lib/constituencies'
 import { ALL_PARTIES } from '@/lib/types'
 
-const PARTIES = [
-  { code: 'CJP', name: 'Cockroach Janta Party',    color: '#7F77DD', emoji: '🟣', tagline: 'Lazy, Loud, Lawful' },
-  { code: 'ACP', name: 'Aam Cockroach Party',       color: '#1D9E75', emoji: '🟢', tagline: 'Naali Sabki, Iss Baar Cockroach Ki' },
-  { code: 'CCP', name: 'Cockroach Congress Party',  color: '#D85A30', emoji: '🟠', tagline: 'Old Roach Magic' },
-  { code: 'RCP', name: 'Regional Cockroach Party',  color: '#D4537E', emoji: '🔴', tagline: 'Apni Galli Apna Kachra' },
-  { code: 'IND', name: 'Independent',               color: '#888888', emoji: '⚪', tagline: 'No faction. Pure chaos.' },
-]
+const PARTIES = ALL_PARTIES.filter(p => p.code !== 'IND').concat(
+  ALL_PARTIES.filter(p => p.code === 'IND')
+)
 
 type SeatCandidate = {
   partyCode: string | null
@@ -32,13 +28,13 @@ export default function FilePickerPage() {
   const [seatCandidates, setSeatCandidates] = useState<SeatCandidate[]>([])
   const [fetchingParties, setFetchingParties] = useState(false)
 
-  // pre-select party from URL if navigated from a party page
+  // pre-select party from URL
   useEffect(() => {
     const p = searchParams.get('party')
     if (p && PARTIES.find(x => x.code === p)) setSelectedParty(p)
   }, [searchParams])
 
-  // pre-select state + constituency from ?seat= param (from HotSeats)
+  // pre-select state + constituency from ?seat= param
   useEffect(() => {
     const seatParam = searchParams.get('seat')
     if (!seatParam) return
@@ -53,7 +49,7 @@ export default function FilePickerPage() {
     }
   }, [searchParams])
 
-  // When seat changes, fetch existing candidates to find taken party codes
+  // Fetch taken party codes when seat changes
   useEffect(() => {
     if (!selectedSeatNum) {
       setTakenPartyCodes(new Set())
@@ -68,9 +64,7 @@ export default function FilePickerPage() {
         const candidateList: SeatCandidate[] = []
         if (Array.isArray(data.candidates)) {
           for (const c of data.candidates) {
-            if (c.partyCode && c.partyCode !== 'IND') {
-              taken.add(c.partyCode)
-            }
+            if (c.partyCode && c.partyCode !== 'IND') taken.add(c.partyCode)
             candidateList.push({ partyCode: c.partyCode, partyName: c.partyName })
           }
         }
@@ -81,19 +75,15 @@ export default function FilePickerPage() {
       .finally(() => setFetchingParties(false))
   }, [selectedSeatNum])
 
-  // reset constituency when state changes (only via user interaction, not from ?seat= param)
-  // handled in the select onChange below
-
   const stateSeats = CONSTITUENCIES.find(c => c.state === selectedState)?.seats ?? []
   const selectedSeat = stateSeats.find(s => String(s.number) === selectedSeatNum)
   const selectedPartyObj = PARTIES.find(p => p.code === selectedParty)
 
-  // Build party candidate count summary for the seat
+  // Party candidate summary
   const partyCandidateCounts: Record<string, { name: string; count: number; color: string }> = {}
   for (const c of seatCandidates) {
     if (!c.partyCode || c.partyCode === 'IND') continue
-    const partyInfo = PARTIES.find(p => p.code === c.partyCode) ??
-      { name: c.partyName ?? c.partyCode, color: '#888888' }
+    const partyInfo = PARTIES.find(p => p.code === c.partyCode) ?? { name: c.partyName ?? c.partyCode, color: '#888888' }
     if (!partyCandidateCounts[c.partyCode]) {
       partyCandidateCounts[c.partyCode] = { name: partyInfo.name, count: 0, color: partyInfo.color }
     }
@@ -109,38 +99,44 @@ export default function FilePickerPage() {
   }
 
   const selectClass =
-    'w-full border-4 border-black rounded-xl font-mono bg-white px-4 py-3 text-base focus:outline-none focus:border-[#7F77DD] appearance-none cursor-pointer'
+    'w-full border-2 border-black/20 rounded-xl font-mono bg-white/90 px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 appearance-none cursor-pointer transition-colors'
 
   return (
-    <div className="min-h-screen bg-yellow-300 flex flex-col">
+    <div className="min-h-screen flex flex-col lg:flex-row">
 
-      {/* Header strip */}
-      <div className="bg-black text-yellow-300 py-3 px-4 flex items-center gap-3 border-b-4 border-black">
-        <Link href="/" className="text-yellow-300/60 hover:text-yellow-300 font-black text-sm">← HOME</Link>
-        <span className="text-yellow-300/30">|</span>
-        <span className="font-black text-sm uppercase tracking-widest">File Your Candidacy</span>
-      </div>
+      {/* ── LEFT: Form panel ─────────────────────────────────────────────── */}
+      <div className="flex-1 lg:max-w-[52%] bg-black flex flex-col">
 
-      <div className="flex-1 flex flex-col items-center justify-start px-4 py-10">
-        <div className="w-full max-w-lg">
+        {/* Header strip */}
+        <div className="px-6 pt-5 pb-4 border-b border-white/10 flex items-center gap-3">
+          <Link href="/" className="text-yellow-300/50 hover:text-yellow-300 font-black text-xs tracking-widest">
+            ← HOME
+          </Link>
+          <span className="text-white/20">|</span>
+          <span className="text-yellow-300 font-black text-xs uppercase tracking-widest">File Candidacy</span>
+        </div>
 
-          {/* Hero */}
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-2">🪳</div>
-            <h1 className="text-4xl font-black text-black uppercase leading-tight" style={{ textShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}>
-              WHERE DO YOU<br />WANT TO CONTEST?
+        <div className="flex-1 flex flex-col justify-center px-6 py-10 lg:px-10">
+
+          {/* Hero text */}
+          <div className="mb-8">
+            <div className="text-5xl mb-3">🪳</div>
+            <h1 className="text-4xl lg:text-5xl font-black text-white uppercase leading-none mb-2">
+              WHERE WILL<br />
+              <span className="text-yellow-300">YOU CONTEST?</span>
             </h1>
-            <p className="text-black/55 font-mono text-sm mt-2">
-              Pick your state → constituency → party. Then file.
+            <p className="text-white/40 font-mono text-sm">
+              543 seats · all free · results every Saturday 11PM IST
             </p>
           </div>
 
-          <div className="bg-white border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_black] space-y-5">
+          {/* Form card */}
+          <div className="space-y-5">
 
             {/* Step 1 — State */}
             <div>
-              <label className="block font-black text-xs uppercase tracking-widest text-black/50 mb-1.5">
-                1. Your State / UT
+              <label className="block font-black text-[10px] uppercase tracking-widest text-white/40 mb-1.5">
+                1 · Your State / UT
               </label>
               <div className="relative">
                 <select
@@ -153,15 +149,17 @@ export default function FilePickerPage() {
                     <option key={c.state} value={c.state}>{c.state}</option>
                   ))}
                 </select>
-                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black/40 text-lg">▾</span>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black/40">▾</span>
               </div>
             </div>
 
             {/* Step 2 — Constituency */}
-            <div className={selectedState ? '' : 'opacity-40 pointer-events-none'}>
-              <label className="block font-black text-xs uppercase tracking-widest text-black/50 mb-1.5">
-                2. Constituency
-                {selectedState && <span className="ml-2 text-[#7F77DD]">({stateSeats.length} seats)</span>}
+            <div className={selectedState ? '' : 'opacity-30 pointer-events-none'}>
+              <label className="block font-black text-[10px] uppercase tracking-widest text-white/40 mb-1.5">
+                2 · Constituency
+                {selectedState && (
+                  <span className="ml-2 text-yellow-300 normal-case font-mono">{stateSeats.length} seats</span>
+                )}
               </label>
               <div className="relative">
                 <select
@@ -172,89 +170,69 @@ export default function FilePickerPage() {
                 >
                   <option value="">— Select Constituency —</option>
                   {stateSeats.map(s => (
-                    <option key={s.number} value={s.number}>
-                      {s.name}
-                    </option>
+                    <option key={s.number} value={s.number}>{s.name}</option>
                   ))}
                 </select>
-                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black/40 text-lg">▾</span>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black/40">▾</span>
               </div>
               {selectedSeat && (
-                <p className="text-xs font-mono text-black/40 mt-1.5 ml-1">
-                  Constituency #{selectedSeat.number} · {selectedState}
+                <p className="text-xs font-mono text-white/25 mt-1 ml-1">
+                  #{selectedSeat.number} · {selectedState}
                 </p>
               )}
             </div>
 
             {/* Step 3 — Party */}
-            <div className={(selectedSeatNum ? '' : 'opacity-40 pointer-events-none')}>
-              <label className="block font-black text-xs uppercase tracking-widest text-black/50 mb-2">
-                3. Pick Your Gang
+            <div className={selectedSeatNum ? '' : 'opacity-30 pointer-events-none'}>
+              <label className="block font-black text-[10px] uppercase tracking-widest text-white/40 mb-2">
+                3 · Pick Your Gang
               </label>
 
-              {/* Already contesting from this seat */}
+              {/* Contested parties */}
               {selectedSeatNum && !fetchingParties && contestingParties.length > 0 && (
-                <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
-                  <p className="text-xs font-black uppercase tracking-wider text-yellow-800 mb-2">
-                    Already contesting from this seat:
+                <div className="mb-3 p-3 bg-yellow-300/10 border border-yellow-300/30 rounded-xl">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-yellow-300/70 mb-2">
+                    Already filed in this seat:
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {contestingParties.map(([code, info]) => {
-                      const meta = ALL_PARTIES.find(p => p.code === code)
-                      return (
-                        <span
-                          key={code}
-                          className="inline-flex items-center gap-1 text-xs font-black px-2 py-1 rounded-full text-white"
-                          style={{ background: info.color }}
-                        >
-                          {meta?.symbol ?? '🪳'} {code} — {info.count} candidate{info.count !== 1 ? 's' : ''}
-                        </span>
-                      )
-                    })}
+                  <div className="flex flex-wrap gap-1.5">
+                    {contestingParties.map(([code, info]) => (
+                      <span
+                        key={code}
+                        className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full text-white"
+                        style={{ background: info.color }}
+                      >
+                        {code} — {info.count}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
-              {fetchingParties && (
-                <p className="text-xs font-mono text-black/40 mb-2">Loading seat data...</p>
-              )}
 
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-1.5 max-h-52 overflow-y-auto pr-0.5">
                 {PARTIES.map(p => {
                   const isContested = takenPartyCodes.has(p.code)
+                  const isSelected  = selectedParty === p.code
                   return (
                     <button
                       key={p.code}
                       onClick={() => { setSelectedParty(p.code); setError('') }}
                       disabled={!selectedSeatNum}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl border-4 text-left transition-all relative"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all"
                       style={{
-                        borderColor: selectedParty === p.code ? p.color : isContested ? '#f59e0b' : '#e5e7eb',
-                        background: selectedParty === p.code ? p.color + '18' : isContested ? '#fffbeb' : '#fff',
-                        boxShadow: selectedParty === p.code ? `3px 3px 0 ${p.color}` : 'none',
-                        opacity: isContested ? 0.85 : 1,
+                        borderColor: isSelected ? p.color : isContested ? '#f59e0b44' : '#ffffff15',
+                        background:  isSelected ? `${p.color}22` : isContested ? '#f59e0b08' : '#ffffff08',
                       }}
                     >
-                      <span className="text-xl shrink-0">{p.emoji}</span>
+                      <span className="text-lg shrink-0">{p.symbol}</span>
                       <span className="flex-1 min-w-0">
-                        <span className="font-black text-sm text-black block">{p.code} — {p.name}</span>
+                        <span className="font-black text-xs text-white block">{p.code} — {p.name}</span>
                         {isContested ? (
-                          <span className="font-mono text-xs text-amber-700 truncate block font-black">
-                            ⚠️ CONTESTED — JOIN ANYWAY?
-                          </span>
+                          <span className="font-mono text-[10px] text-amber-400 block">⚠ CONTESTED — JOIN ANYWAY?</span>
                         ) : (
-                          <span className="font-mono text-xs text-black/45 truncate block">{p.tagline}</span>
+                          <span className="font-mono text-[10px] text-white/30 block truncate">{p.tagline}</span>
                         )}
                       </span>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {isContested && (
-                          <span className="text-xs font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-black">
-                            CONTESTED 🪳
-                          </span>
-                        )}
-                        {selectedParty === p.code && (
-                          <span className="font-black text-sm" style={{ color: p.color }}>✓</span>
-                        )}
-                      </div>
+                      {isSelected && <span className="font-black text-sm shrink-0" style={{ color: p.color }}>✓</span>}
                     </button>
                   )
                 })}
@@ -262,39 +240,71 @@ export default function FilePickerPage() {
             </div>
 
             {/* Error */}
-            {error && (
-              <p className="text-red-600 font-bold text-sm text-center">{error}</p>
-            )}
+            {error && <p className="text-red-400 font-bold text-sm">{error}</p>}
 
-            {/* Summary + CTA */}
+            {/* Summary */}
             {selectedSeat && selectedPartyObj && (
-              <div
-                className="rounded-xl border-4 border-black p-3 text-sm font-mono bg-yellow-50"
-              >
-                <p className="font-black text-black mb-0.5">📋 Your filing:</p>
-                <p className="text-black/70">
-                  🗺️ <strong>{selectedSeat.name}</strong> (#{selectedSeat.number}), {selectedState}
-                </p>
-                <p className="text-black/70">
-                  🏴 <strong style={{ color: selectedPartyObj.color }}>{selectedPartyObj.code}</strong> — {selectedPartyObj.name}
-                </p>
+              <div className="rounded-xl border border-yellow-300/20 p-3 text-xs font-mono bg-yellow-300/5">
+                <p className="text-yellow-300/60 mb-1">📋 Filing:</p>
+                <p className="text-white/70">🗺 <strong className="text-white">{selectedSeat.name}</strong> #{selectedSeat.number} · {selectedState}</p>
+                <p className="text-white/70">🏴 <strong style={{ color: selectedPartyObj.color }}>{selectedPartyObj.code}</strong> — {selectedPartyObj.name}</p>
               </div>
             )}
 
+            {/* CTA */}
             <button
               onClick={handleFile}
               disabled={!selectedSeatNum || !selectedParty}
-              className="w-full py-4 bg-black text-yellow-300 font-black text-lg border-4 border-black rounded-xl hover:bg-[#7F77DD] transition-colors disabled:opacity-35 disabled:cursor-not-allowed shadow-[4px_4px_0_rgba(0,0,0,0.2)]"
+              className="w-full py-4 bg-yellow-300 text-black font-black text-lg rounded-xl border-4 border-yellow-300 hover:bg-white transition-colors disabled:opacity-25 disabled:cursor-not-allowed shadow-[0_4px_0_rgba(212,173,23,0.4)]"
             >
               🪳 FILE CANDIDACY →
             </button>
 
-            <p className="text-center text-black/35 font-mono text-xs">
-              Free · Anonymous · Results every Saturday 11PM IST
+            <p className="text-center text-white/20 font-mono text-xs">
+              Free · Anonymous · No ID required
             </p>
           </div>
         </div>
       </div>
+
+      {/* ── RIGHT: Hero image panel ───────────────────────────────────────── */}
+      <div className="hidden lg:block lg:flex-1 relative overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/parliament-hero.png"
+          alt="Cockroach Janta Parliament Elections"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* dark overlay at left edge so it blends with form panel */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 35%)' }}
+        />
+        {/* Bottom badge */}
+        <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-1 pointer-events-none">
+          <span className="bg-black/70 backdrop-blur text-yellow-300 font-black text-xs px-4 py-2 rounded-full border border-yellow-300/30 tracking-widest uppercase">
+            🏛️ Cockroach Janta Parliament Elections
+          </span>
+          <span className="text-white/40 font-mono text-[10px]">Unity · Survival · Progress</span>
+        </div>
+      </div>
+
+      {/* ── MOBILE: show image as banner above form ───────────────────────── */}
+      <div className="lg:hidden w-full h-48 relative overflow-hidden order-first border-b-4 border-yellow-300">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/parliament-hero.png"
+          alt="Cockroach Janta Parliament Elections"
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 flex items-end p-4">
+          <h2 className="text-white font-black text-xl uppercase leading-none">
+            🪳 File Your<br />Candidacy
+          </h2>
+        </div>
+      </div>
+
     </div>
   )
 }
