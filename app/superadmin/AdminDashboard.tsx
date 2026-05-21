@@ -11,10 +11,9 @@ interface DashStats {
   totalVotes: number
   totalSouls: number
   totalParties: number
-  pageViews: number
-  todayViews: number
   todayCandidates: number
   todayVotes: number
+  todaySouls: number
   userArticles: number
   currentCycle: {
     cycleNumber: number
@@ -26,7 +25,7 @@ interface DashStats {
   candidatesByState: { state: string; count: number }[]
   xpDistribution: { level: number; souls: number }[]
   topSeats: { seatNumber: number; totalVotes: number }[]
-  dailyStats: { date: string; label: string; candidates: number; votes: number; pageViews: number }[]
+  dailyStats: { date: string; label: string; candidates: number; votes: number; souls: number }[]
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -398,18 +397,18 @@ function Dashboard({ pin }: { pin: string }) {
         <div>
           <SectionHeader title="Live Snapshot" emoji="📊" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <StatCard emoji="👤" label="Players Joined" value={fmt(stats.totalSouls)}
+              sub={`+${fmt(stats.todaySouls)} today`} color="#2ecc71" />
             <StatCard emoji="🪳" label="Candidates" value={fmt(stats.activeCandidates)}
               sub={`${fmt(stats.withdrawnCandidates)} withdrawn`} color="#7F77DD" />
             <StatCard emoji="🗳️" label="Total Votes" value={fmt(stats.totalVotes)}
               sub={cycle ? `${fmt(cycle.votesThisCycle)} this cycle` : undefined} color="#e74c3c" />
-            <StatCard emoji="👤" label="Souls" value={fmt(stats.totalSouls)}
-              sub="Unique players" color="#2ecc71" />
             <StatCard emoji="🏴" label="Parties" value={fmt(stats.totalParties)}
               sub="Registered" color="#f39c12" />
-            <StatCard emoji="👁️" label="Page Views" value={fmt(stats.pageViews)}
-              sub={`${fmt(stats.todayViews)} today`} color="#3498db" />
             <StatCard emoji="📰" label="User Articles" value={fmt(stats.userArticles)}
               sub="CJTV submissions" color="#e67e22" />
+            <StatCard emoji="📊" label="Total Candidates" value={fmt(stats.totalCandidates)}
+              sub={`+${fmt(stats.todayCandidates)} today`} color="#3498db" />
           </div>
         </div>
 
@@ -417,9 +416,9 @@ function Dashboard({ pin }: { pin: string }) {
         <div>
           <SectionHeader title="Today's Activity" emoji="📅" />
           <div className="grid grid-cols-3 gap-3">
+            <StatCard emoji="👤" label="New Players" value={fmt(stats.todaySouls)} color="#2ecc71" />
             <StatCard emoji="📝" label="New Candidates" value={fmt(stats.todayCandidates)} color="#1abc9c" />
-            <StatCard emoji="🗳️" label="Votes Cast" value={fmt(stats.todayVotes)} color="#e67e22" />
-            <StatCard emoji="👁️" label="Views" value={fmt(stats.todayViews)} color="#8e44ad" />
+            <StatCard emoji="🗳️" label="Votes Cast Today" value={fmt(stats.todayVotes)} color="#e67e22" />
           </div>
         </div>
 
@@ -427,60 +426,71 @@ function Dashboard({ pin }: { pin: string }) {
         {stats.dailyStats && stats.dailyStats.length > 0 && (() => {
           const maxVotes = Math.max(...stats.dailyStats.map(d => d.votes), 1)
           const maxCands = Math.max(...stats.dailyStats.map(d => d.candidates), 1)
+          const maxSouls = Math.max(...stats.dailyStats.map(d => d.souls ?? 0), 1)
           return (
             <div className="border-4 border-black rounded-2xl bg-white shadow-[4px_4px_0_black] p-5">
-              <SectionHeader title="Last 7 Days — Analytics" emoji="📈" />
+              <SectionHeader title="Last 7 Days — Real Activity" emoji="📈" />
 
-              {/* Dual bar chart */}
-              <div className="flex gap-3 h-40 items-end mb-3">
+              {/* Triple bar chart */}
+              <div className="flex gap-2 h-40 items-end mb-3">
                 {stats.dailyStats.map((day) => (
                   <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
-                    {/* Votes bar */}
-                    <div className="w-full flex flex-col justify-end gap-0.5" style={{ height: '100%' }}>
-                      <div className="w-full flex flex-col gap-0.5 justify-end" style={{ height: '100%' }}>
-                        {/* Votes */}
-                        <div
-                          className="w-full rounded-t-md bg-[#7F77DD] transition-all"
-                          style={{ height: `${(day.votes / maxVotes) * 65}%` }}
-                          title={`${day.votes.toLocaleString()} votes`}
-                        />
-                        {/* Candidates */}
-                        <div
-                          className="w-full rounded-t-md bg-yellow-400 transition-all"
-                          style={{ height: `${(day.candidates / maxCands) * 35}%` }}
-                          title={`${day.candidates} candidates`}
-                        />
-                      </div>
+                    <div className="w-full flex gap-0.5 items-end" style={{ height: '100%' }}>
+                      {/* Votes bar */}
+                      <div
+                        className="flex-1 rounded-t-sm bg-[#7F77DD] transition-all min-h-[2px]"
+                        style={{ height: `${Math.max(2, (day.votes / maxVotes) * 100)}%` }}
+                        title={`${day.votes.toLocaleString()} votes`}
+                      />
+                      {/* Candidates bar */}
+                      <div
+                        className="flex-1 rounded-t-sm bg-yellow-400 transition-all min-h-[2px]"
+                        style={{ height: `${Math.max(2, (day.candidates / maxCands) * 100)}%` }}
+                        title={`${day.candidates} candidates`}
+                      />
+                      {/* Souls/Signups bar */}
+                      <div
+                        className="flex-1 rounded-t-sm bg-[#2ecc71] transition-all min-h-[2px]"
+                        style={{ height: `${Math.max(2, ((day.souls ?? 0) / maxSouls) * 100)}%` }}
+                        title={`${day.souls ?? 0} new players`}
+                      />
                     </div>
                     <div className="font-black text-[9px] text-black/40 uppercase">{day.label}</div>
                   </div>
                 ))}
               </div>
 
-              {/* Legend + numbers table */}
-              <div className="flex items-center gap-4 mb-4">
+              {/* Legend */}
+              <div className="flex items-center gap-4 mb-4 flex-wrap">
                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-[#7F77DD]" /><span className="font-mono text-[10px] text-black/50">Votes</span></div>
                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-yellow-400" /><span className="font-mono text-[10px] text-black/50">Candidates Filed</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-[#2ecc71]" /><span className="font-mono text-[10px] text-black/50">New Players</span></div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b-2 border-black">
-                      {['Day', ...stats.dailyStats.map(d => d.label)].map((h, i) => (
+                      {['Metric', ...stats.dailyStats.map(d => d.label)].map((h, i) => (
                         <th key={i} className="text-left font-black uppercase tracking-widest pb-1.5 text-black/40 pr-3">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="border-b border-black/5">
-                      <td className="py-1.5 pr-3 font-black text-[#7F77DD]">Votes</td>
+                      <td className="py-1.5 pr-3 font-black text-[#2ecc71]">👤 New Players</td>
+                      {stats.dailyStats.map(d => (
+                        <td key={d.date} className="py-1.5 pr-3 font-mono">{(d.souls ?? 0).toLocaleString('en-IN')}</td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-black/5">
+                      <td className="py-1.5 pr-3 font-black text-[#7F77DD]">🗳️ Votes</td>
                       {stats.dailyStats.map(d => (
                         <td key={d.date} className="py-1.5 pr-3 font-mono">{d.votes.toLocaleString('en-IN')}</td>
                       ))}
                     </tr>
                     <tr className="border-b border-black/5">
-                      <td className="py-1.5 pr-3 font-black text-yellow-500">Candidates</td>
+                      <td className="py-1.5 pr-3 font-black text-yellow-500">🪳 Candidates</td>
                       {stats.dailyStats.map(d => (
                         <td key={d.date} className="py-1.5 pr-3 font-mono">{d.candidates.toLocaleString('en-IN')}</td>
                       ))}

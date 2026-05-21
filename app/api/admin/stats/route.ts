@@ -11,16 +11,7 @@ function authorized(req: NextRequest): boolean {
   return pin === ADMIN_PIN || bearer === `Bearer ${ADMIN_SECRET}`
 }
 
-// ── Page-view estimate ────────────────────────────────────────────────────
-const LAUNCH_TS      = new Date('2026-05-21T00:00:00+05:30').getTime()
-const BASE_VIEWS     = 2_450_000
-const VIEWS_PER_HOUR = 10_000
-
-function calcPageViews() {
-  return BASE_VIEWS + Math.floor(((Date.now() - LAUNCH_TS) / 3_600_000) * VIEWS_PER_HOUR)
-}
-
-// ── 7-day keys ───────────────────────────────────────────────────────────
+// ── 7-day keys (IST) ─────────────────────────────────────────────────────
 function last7DayKeys() {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(Date.now() - (6 - i) * 86_400_000)
@@ -35,11 +26,13 @@ function mockDailyStats() {
   const bases = {
     candidates: [312, 287, 403, 521, 398, 476, 247],
     votes:      [22400, 19800, 28700, 35100, 27600, 31200, 18430],
+    souls:      [198, 176, 241, 318, 274, 302, 143],
   }
   return last7DayKeys().map(({ key, label }, i) => ({
     date: key, label,
     candidates: bases.candidates[i],
     votes:      bases.votes[i],
+    souls:      bases.souls[i],
   }))
 }
 
@@ -49,28 +42,25 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const forceMock  = req.nextUrl.searchParams.get('mock') === '1'
-  const pageViews  = calcPageViews()
-  const todayViews = Math.floor(VIEWS_PER_HOUR * (new Date().getHours() + 1))
+  const forceMock = req.nextUrl.searchParams.get('mock') === '1'
 
   // ── MOCK ──────────────────────────────────────────────────────────────
   if (!process.env.MONGODB_URI || forceMock) {
     return Response.json({
       isMock: true,
-      totalCandidates: 12847,
-      activeCandidates: 11203,
+      totalCandidates:     12847,
+      activeCandidates:    11203,
       withdrawnCandidates: 1644,
-      totalVotes: 394201,
-      totalSouls: 8934,
-      totalParties: 23,
-      pageViews,
-      todayViews,
-      todayCandidates: 247,
-      todayVotes: 18430,
-      userArticles: 14,
+      totalVotes:          394201,
+      totalSouls:          8934,
+      totalParties:        23,
+      todayCandidates:     247,
+      todayVotes:          18430,
+      todaySouls:          143,
+      userArticles:        14,
       currentCycle: {
-        cycleNumber: 3,
-        status: 'live',
+        cycleNumber:    3,
+        status:         'live',
         snapshotAt: (() => {
           const d = new Date()
           const daysUntilSun = (7 - d.getDay()) % 7 || 7
@@ -86,16 +76,21 @@ export async function GET(req: NextRequest) {
         { partyCode: 'IND',  partyName: 'Independent',                 votes: 61011 },
         { partyCode: 'CCP',  partyName: 'Classic Cockroach Party',     votes: 48203 },
         { partyCode: 'TVKP', partyName: 'Thalaiva Viral Keetam Party', votes: 32187 },
+        { partyCode: 'DMK',  partyName: 'Drain Mein Koi Party',        votes: 21034 },
+        { partyCode: 'RWU',  partyName: 'Reel Workers Union',          votes: 18201 },
+        { partyCode: 'BSS',  partyName: 'Broom Sambhav Sena',          votes: 14876 },
       ],
       candidatesByState: [
-        { state: 'Uttar Pradesh',  count: 2134 },
-        { state: 'Maharashtra',    count: 1876 },
-        { state: 'Bihar',          count: 1543 },
-        { state: 'West Bengal',    count: 1201 },
-        { state: 'Tamil Nadu',     count: 987  },
-        { state: 'Karnataka',      count: 876  },
-        { state: 'Rajasthan',      count: 754  },
-        { state: 'Madhya Pradesh', count: 712  },
+        { state: 'Uttar Pradesh',   count: 2134 },
+        { state: 'Maharashtra',     count: 1876 },
+        { state: 'Bihar',           count: 1543 },
+        { state: 'West Bengal',     count: 1201 },
+        { state: 'Tamil Nadu',      count: 987  },
+        { state: 'Karnataka',       count: 876  },
+        { state: 'Rajasthan',       count: 754  },
+        { state: 'Madhya Pradesh',  count: 712  },
+        { state: 'Telangana',       count: 634  },
+        { state: 'Andhra Pradesh',  count: 598  },
       ],
       xpDistribution: [
         { level: 1, souls: 5012 },
@@ -133,7 +128,7 @@ export async function GET(req: NextRequest) {
     const [
       totalCandidates, activeCandidates, withdrawnCandidates,
       totalVotes, totalSouls, totalParties,
-      todayCandidates, todayVotes,
+      todayCandidates, todayVotes, todaySouls,
     ] = await Promise.all([
       candidatesCol.countDocuments({}),
       candidatesCol.countDocuments({ withdrawn: false }),
@@ -143,18 +138,24 @@ export async function GET(req: NextRequest) {
       partiesCol.countDocuments({}),
       candidatesCol.countDocuments({ withdrawn: false, created_at: { $gte: startOfDay } }),
       votesCol.countDocuments({ created_at: { $gte: startOfDay } }),
+      soulsCol.countDocuments({ created_at: { $gte: startOfDay } }),
     ])
 
     const votesThisCycle = liveCycle
       ? await votesCol.countDocuments({ cycle_id: liveCycle.id })
       : 0
 
-    const [dailyCand, dailyVote] = await Promise.all([
+    // ── 7-day daily breakdown (candidates + votes + souls per day) ────
+    const [dailyCand, dailyVote, dailySoul] = await Promise.all([
       candidatesCol.aggregate([
         { $match: { created_at: { $gte: sevenDaysAgo } } },
         { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at', timezone: '+05:30' } }, count: { $sum: 1 } } },
       ]).toArray(),
       votesCol.aggregate([
+        { $match: { created_at: { $gte: sevenDaysAgo } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at', timezone: '+05:30' } }, count: { $sum: 1 } } },
+      ]).toArray(),
+      soulsCol.aggregate([
         { $match: { created_at: { $gte: sevenDaysAgo } } },
         { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at', timezone: '+05:30' } }, count: { $sum: 1 } } },
       ]).toArray(),
@@ -165,6 +166,7 @@ export async function GET(req: NextRequest) {
       label,
       candidates: (dailyCand.find((r: any) => r._id === key)?.count ?? 0) as number,
       votes:      (dailyVote.find((r: any) => r._id === key)?.count ?? 0) as number,
+      souls:      (dailySoul.find((r: any) => r._id === key)?.count ?? 0) as number,
     }))
 
     const [votesByParty, candidatesByState, xpDistribution, topSeats] = await Promise.all([
@@ -210,12 +212,12 @@ export async function GET(req: NextRequest) {
       isMock: false,
       totalCandidates, activeCandidates, withdrawnCandidates,
       totalVotes, totalSouls, totalParties,
-      pageViews, todayViews, todayCandidates, todayVotes,
+      todayCandidates, todayVotes, todaySouls,
       userArticles,
       currentCycle: liveCycle ? {
-        cycleNumber:     liveCycle.cycle_number,
-        status:          liveCycle.status,
-        snapshotAt:      liveCycle.snapshot_at.toISOString(),
+        cycleNumber:    liveCycle.cycle_number,
+        status:         liveCycle.status,
+        snapshotAt:     liveCycle.snapshot_at.toISOString(),
         votesThisCycle,
       } : null,
       votesByParty, candidatesByState, xpDistribution, topSeats, dailyStats,
