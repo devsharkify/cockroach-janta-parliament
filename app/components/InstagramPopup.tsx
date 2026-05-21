@@ -105,7 +105,7 @@ export default function InstagramPopup() {
             {/* Social proof */}
             <p className="text-black/50 font-mono text-xs mb-5 leading-relaxed">
               Follow to get live election updates,<br />
-              viral candidate reveals &amp; Saturday results 🏆
+              viral candidate reveals &amp; Sunday results 🏆
             </p>
 
             {/* Primary CTA */}

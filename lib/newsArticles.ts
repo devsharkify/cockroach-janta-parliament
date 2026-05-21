@@ -14,365 +14,666 @@ export interface NewsArticle {
   headline: string
   subheadline: string
   excerpt: string
-  body: string[]          // paragraphs
+  body: string[]
   author: string
   authorRole: string
-  publishedAt: string     // ISO date string
+  publishedAt: string
   readMinutes: number
   tags: string[]
   isHot?: boolean
   isFeatured?: boolean
 }
 
-const d = (daysAgo: number) =>
-  new Date(Date.now() - daysAgo * 86400000).toISOString()
+// minutes ago helper
+const m = (minutesAgo: number) =>
+  new Date(Date.now() - minutesAgo * 60000).toISOString()
 
-export const NEWS_ARTICLES: NewsArticle[] = [
-  // ─── FEATURED ───────────────────────────────────────────────────────────
+export const CATEGORY_COLORS: Record<NewsCategory, string> = {
+  BREAKING:      '#E53E3E',
+  EXCLUSIVE:     '#7F77DD',
+  OPINION:       '#D97706',
+  INVESTIGATION: '#C05621',
+  POLITICS:      '#2B6CB0',
+  COURT:         '#276749',
+  EC:            '#553C9A',
+  INTERNATIONAL: '#2C7A7B',
+}
+
+// ─── ALL 30 ARTICLES ────────────────────────────────────────────────────────
+export const ALL_ARTICLES: NewsArticle[] = [
+
+  // ── 1 ──
   {
-    id: 'cjtv-001',
+    id: 'cjtv-n01',
     category: 'BREAKING',
-    headline: 'Cockroach Democracy Tops Global Drain Transparency Index for Third Year Running',
-    subheadline: 'India\'s cockroach parliament scores 98/100 — human governments average 39',
-    excerpt:
-      'While human democracies struggle with corruption rankings, the Cockroach Janta Parliament has once again topped the Global Drain Transparency Index, with experts crediting "total shamelessness" as the key policy driver.',
+    headline: 'Onion Hits ₹130/kg — CJP MP Proposes Onion as New National Reserve Currency',
+    subheadline: 'Finance Committee says "gold is outdated, onions make you cry, same emotional response"',
+    excerpt: 'As retail onion prices crossed ₹130 per kilogram in Delhi markets, the Cockroach Janta Parliament fast-tracked a bill to designate onion as India\'s official reserve currency, citing its ability to "make everyone cry equally regardless of class."',
     body: [
-      'NEW DELHI (CJTV) — In a stunning rebuke to conventional governance, the Cockroach Janta Parliament has clinched the top spot on the 2026 Global Drain Transparency Index (GDTI), posting a near-perfect score of 98/100 while human democracies averaged a dismal 39.',
-      '"The secret is simple," said Chief Cockroach Election Commissioner Kachra_Queen in an exclusive interview with CJTV. "We never pretended to be clean. Transparency begins with admitting you live in a drain."',
-      'The Index, published annually by the International Naali Watchdog Organization (INWO), evaluates governments on metrics including drain accessibility, bribe-to-policy ratio, and manifesto delivery speed. Cockroach Janta Parliament scored full marks on all three.',
-      'Human governments, by contrast, were docked points for "claiming to be clean while building drains." India\'s human government scored 39, an improvement the ruling party celebrated with a 4-hour press conference.',
-      'Opposition cockroach parties were quick to claim credit. "We demanded drain transparency since 2024," said Naali_Chadha of the ACP. "They called us radicals. Now look."',
-      'The parliament is scheduled to debate the findings on Saturday at 11PM IST, immediately after vote results are announced. Attendance is optional but spiritually mandatory.',
+      'NEW DELHI (CJTV) — In an emergency session called at 2AM, CJP MP Naali_Raja_42 tabled the Pyaaz Suraksha Bill 2026, proposing that one kilogram of onion replace the rupee as India\'s base monetary unit. "The rupee inflates. The onion also inflates — but it makes people feel something," he said, wiping his eyes (he was peeling one for emphasis).',
+      '"₹130 per kilo means one onion costs more than a vote in this parliament. And we give votes for free. This is an economic crisis," said ACP leader Naali_Chadha in a press conference held outside a vegetable market.',
+      'The EC swiftly clarified that accepting onions as campaign donations is still illegal under the Model Code of Conduct, though it acknowledged that "several prior candidates did smell strongly of allium." No charges were filed.',
+      'Markets closed 3% down. Dhabas across the country switched to "onion optional" menus. The bill is currently in committee. Results announced Sunday 11PM IST.',
     ],
     author: 'Khatmal_OG',
     authorRole: 'Chief Political Correspondent, CJTV',
-    publishedAt: d(0),
-    readMinutes: 4,
-    tags: ['transparency', 'corruption', 'index', 'breaking'],
+    publishedAt: m(8),
+    readMinutes: 3,
+    tags: ['onion', 'economy', 'inflation', 'CJP', 'breaking'],
     isFeatured: true,
     isHot: true,
   },
+
+  // ── 2 ──
   {
-    id: 'cjtv-002',
-    category: 'INVESTIGATION',
-    headline: 'Exclusive Investigation: 95% of Cockroach EC Raids Target ACP, CCP Candidates — Data',
-    subheadline: 'CJP leaders face zero investigations despite running on "Naali Chori" platform',
-    excerpt:
-      'A CJTV data investigation reveals the Cockroach Election Commission has filed 95% of its enforcement cases against opposition parties since 2024, while CJP candidates — who openly campaign on stolen drain funds — walk free.',
+    id: 'cjtv-n02',
+    category: 'POLITICS',
+    headline: 'Dog "Motu_Bhai" Files from Mumbai North — Manifesto: 3 Biscuits Per Day Guaranteed to All',
+    subheadline: 'Independent candidate promises free biscuit scheme, clean water bowls, and end to fireworks',
+    excerpt: 'Motu_Bhai, a 4-year-old Labrador from Andheri, has become the first canine to officially contest from Mumbai North, submitting a manifesto that promises a Universal Biscuit Income and a ban on loud firecrackers.',
     body: [
-      'A CJTV investigation spanning 3,847 EC case files has uncovered a startling pattern: 95% of all Cockroach Election Commission enforcement actions since the 2024 general elections have targeted opposition parties ACP and CCP, while ruling CJP candidates face virtually zero scrutiny.',
-      '"It\'s not bias," EC spokesperson Viral_Sewak_13 told CJTV. "CJP candidates are simply more talented at not getting caught." He then scurried under a refrigerator before further questions could be asked.',
-      'The data shows that 847 ACP candidates were investigated for "unauthorized naali access" while simultaneously, CJP\'s Naali_Raja_42 was photographed bathing in the very drain in question. No case was filed.',
-      'Most egregiously, three CCP leaders who ran on "Clean Drain, Clean Government" were raided for "excessive cleanliness" — a violation, the EC clarified, because "overly clean drains create unrealistic expectations among cockroach voters."',
-      'Opposition leader Gobar_Sardar called the findings "deeply un-surprising." "We filed a complaint. EC said our complaint form was filled in the wrong shade of black ink. The investigation into our complaint is ongoing."',
-      'The EC denied all allegations via press release, then immediately announced a new investigation into whichever party you support.',
+      'MUMBAI (CJTV) — Motu_Bhai filed his nomination at the CJTV-recognised virtual EC office yesterday, submitting a 200-word manifesto that has since gone viral. "Three biscuits per citizen per day. Clean water in every galli. No more Diwali bombs. I am the change," reads the document, paw-printed and notarised.',
+      '"I have been loyal for 4 years and asked for nothing but a walk," Motu_Bhai\'s human spokesperson told CJTV. "Name one human politician who can say that." The crowd outside agreed.',
+      'ACP has reached out for a coalition. CJP has countered by promising Motu_Bhai a cabinet post (Minister of Snacks and Cuddle Policy) if he switches sides. He has not responded, but his tail was reportedly "lukewarm."',
+      'Motu_Bhai currently leads Mumbai North with 4,712 votes. Sunday results will decide if the biscuit economy gets its first minister.',
     ],
-    author: 'Macchar_Reporter_99',
-    authorRole: 'Investigative Journalist, CJTV Special Unit',
-    publishedAt: d(1),
-    readMinutes: 6,
-    tags: ['EC', 'investigation', 'corruption', 'ACP', 'CJP'],
+    author: 'Viral_Sewak_13',
+    authorRole: 'Field Reporter, CJTV Mumbai',
+    publishedAt: m(25),
+    readMinutes: 3,
+    tags: ['animal candidates', 'dog', 'mumbai', 'independent', 'politics'],
     isHot: true,
   },
+
+  // ── 3 ──
   {
-    id: 'cjtv-003',
-    category: 'POLITICS',
-    headline: 'Naali_Chadha Leads 7 ACP MPs to CJP; Anti-Defection Roach Petition Filed in Supreme Court',
-    subheadline: 'Defection comes hours after ED raid on Naali_Chadha\'s drain was mysteriously dropped',
-    excerpt:
-      'In a stunning overnight betrayal, ACP\'s star MP Naali_Chadha crossed over to CJP, bringing six colleagues and an entire drain network. The ED investigation against him was dropped at 3AM — six hours before the defection press conference.',
+    id: 'cjtv-n03',
+    category: 'INVESTIGATION',
+    headline: 'Train 14 Hours Late — Station Master Files Counter-FIR Against Passengers for "Expecting Punctuality"',
+    subheadline: 'Indian Railways clarifies that schedule is "approximate by design" and passengers should "adjust mentality"',
+    excerpt: 'In an unprecedented legal move, a station master at Bhopal Junction filed a police complaint against 847 passengers for "creating public nuisance by expecting a train to arrive on time," escalating what began as a 14-hour delay into a constitutional question.',
     body: [
-      'In a political earthquake that has sent shockwaves through the Cockroach Janta Parliament, ACP\'s most prominent Rajya Sabha MP Naali_Chadha led a seven-roach defection to the ruling CJP party on Tuesday night.',
-      'The timing raised immediate questions. At 3:17 AM, the Cockroach Enforcement Directorate quietly dropped a six-month investigation into Naali_Chadha\'s alleged unauthorized occupation of 14 premium drains in Patna Sahib. By 9 AM, he was holding a CJP flag.',
-      '"This is purely ideological," Naali_Chadha told reporters. "I believe in CJP\'s vision of free naali for all. The ED thing is a coincidence. Please don\'t report the ED thing."',
-      'ACP filed a petition in the Cockroach Supreme Court under anti-defection rules. Chief Cockroach Justice Gobar_Dada_1 admitted the petition, noting it was "the 47th such case this month" and scheduling hearings for "sometime before the drain dries."',
-      'Under cockroach anti-defection law, a party switch is legal only if at least two-thirds of the parliamentary group defects together. With 7 of ACP\'s 11 MPs jumping ship, CJP lawyers argued this qualifies as a "merger." ACP lawyers argued this qualifies as "highway robbery."',
-      'The Supreme Court has asked both sides to submit written arguments on what constitutes a "drain" for jurisdictional purposes. The case continues.',
+      'BHOPAL (CJTV) — The Shatabdi Express arrived 14 hours and 23 minutes behind schedule on Tuesday, prompting passengers to crowd the station master\'s office demanding an explanation. The station master, speaking exclusively to CJTV, said he had "no explanation but several counter-arguments."',
+      '"The train arrived. That is the guarantee. When it arrives is a philosophical question," he told our reporter while filing a 12-page FIR accusing passengers of "unreasonable optimism about state infrastructure."',
+      'CJP MP Gobar_Mantri tabled a bill in the cockroach parliament to add "right to expect punctuality" to the Fundamental Rights section. CCP said the delay was the fault of the previous CJP government. CJP said it was the drain\'s fault. The drain declined to comment.',
+      'The cockroach parliament\'s Rail Committee announced a special session, to be held on a train that may or may not arrive. Results every Sunday 11PM IST.',
     ],
     author: 'Sewage_Scoops_71',
-    authorRole: 'Parliamentary Correspondent',
-    publishedAt: d(1),
-    readMinutes: 5,
-    tags: ['defection', 'ACP', 'CJP', 'Supreme Court', 'ED'],
-    isFeatured: true,
-  },
-  {
-    id: 'cjtv-004',
-    category: 'BREAKING',
-    headline: 'CJP Introduces Constitutional Amendment: Cockroaches Jailed for Broom Ownership Lose Seat in 30 Days',
-    subheadline: 'Opposition calls it \'weapon to topple non-CJP drain networks\'; CJP says it\'s \'hygiene reform\'',
-    excerpt:
-      'The ruling Cockroach Janta Party has tabled the Constitution 130th Amendment Bill 2026, automatically stripping any elected cockroach of their seat if they are found in possession of a broom for more than 30 days.',
-    body: [
-      'The Cockroach Janta Parliament descended into chaos on Wednesday as CJP introduced the Constitution 130th Amendment Bill 2026, which would strip elected cockroaches of office if found owning a broom for more than 30 consecutive days.',
-      '"A cockroach with a broom is a cockroach with divided loyalties," CJP floor leader Sarkari_Babu_7 told a packed Parliament. "You cannot serve the drain AND cleanliness. Choose."',
-      'Opposition parties erupted. ACP\'s Aam_Candidate_404 called the bill "a surgical weapon to topple non-CJP drain networks." "Three of our state-level leaders were just arrested with suspiciously clean antennae. Now we know why."',
-      'Legal experts point out a troubling precedent: Naali_Sardar_77, the only cockroach currently running all 543 constituencies simultaneously, was recently photographed near a broom. His lawyers clarified he was "inspecting it adversarially."',
-      'The bill passed its first reading 287–142, with 14 MPs absent and 3 technically still hiding under the Speaker\'s podium from last session\'s chaos.',
-      'The opposition has vowed to challenge the bill in the Cockroach Supreme Court, which has helpfully announced it will hear the case sometime "after the drain monsoon season, whenever that is."',
-    ],
-    author: 'Ghoos_Gazette_12',
-    authorRole: 'Legal & Constitutional Affairs Desk',
-    publishedAt: d(2),
+    authorRole: 'Infrastructure Correspondent, CJTV',
+    publishedAt: m(47),
     readMinutes: 4,
-    tags: ['constitution', 'amendment', 'broom-ban', 'CJP', 'opposition'],
+    tags: ['railways', 'delay', 'infrastructure', 'investigation'],
     isHot: true,
   },
+
+  // ── 4 ──
   {
-    id: 'cjtv-005',
-    category: 'POLITICS',
-    headline: 'TVKP Wins 47 Seats; Trending Roach Sena Obliterates Dravidian Drain Duopoly in South',
-    subheadline: 'Superstar roach Vijay_Khatmal\'s party TVK sweeps in Tamil Nadu, shocking pollsters',
-    excerpt:
-      'In the biggest political earthquake of the cockroach election cycle, freshly formed TVKP has emerged as the parliament\'s fourth-largest party, with superstar candidate Vijay_Khatmal personally winning Coimbatore by 89,000 naali-votes.',
+    id: 'cjtv-n04',
+    category: 'BREAKING',
+    headline: 'Petrol at ₹115/Litre — ACP Introduces Bill to Run Parliament Vehicles on Naali Water',
+    subheadline: '"Drains are free, petrol is not. The math is simple," says ACP floor leader',
+    excerpt: 'As petrol prices crossed ₹115 per litre in metro cities, the Aam Cockroach Party tabled an emergency bill to retrofit all parliamentary vehicles to run on "naali water extract," claiming the technology exists and "has been suppressed by oil lobbies for decades."',
     body: [
-      'CHENNAI (CJTV) — The Cockroach Janta Parliament received its most dramatic new entrant in history as TVKP (Trending Virak Karo Party), formed just 6 weeks before elections, swept 47 seats — primarily in south India — shattering the TRS-DMK duopoly that had controlled southern drains for decades.',
-      'TVKP\'s founder and face, Vijay_Khatmal, a cockroach who went viral after a 47-second reel of him running through a government building without getting sprayed, personally won Coimbatore by 89,000 votes.',
-      '"The system tried to fumigate us. We survived," Vijay_Khatmal told cheering crowds, before doing a backflip off a drain pipe that was live-streamed to 4.3 million cockroaches.',
-      'DMK\'s veteran candidate Drainage_Stalin_3 conceded defeat, saying "I have been in this drain for 40 years. I did not expect to be outvoted by a reel." He has since started his own Instagram account.',
-      'Political analysts were stunned. "Our polls showed TVKP at 3 seats," said pollster Sewer_Research_Institute. "We regret the error. Our methodology assumed cockroaches vote rationally."',
-      'CJP has already reached out to TVKP for coalition talks, offering "two premium drains in Mumbai and a YouTube monetization deal." Negotiations are ongoing.',
+      'NEW DELHI (CJTV) — The Naali Vahaan Bill 2026 was introduced at 4PM on Wednesday by ACP floor leader Kachra_Seth, who arrived for the session on a bicycle to make a point. "We have 543 drains. We have 0 oil wells. Connect the two," he said, presenting a diagram that appears to have been drawn on a napkin.',
+      '"The technology is simple," explained ACP\'s technical advisor, who declined to be named and requested we describe him only as "someone who definitely knows science." "You run the water through a filter, then another filter, then a third filter, and then you get fuel. Probably."',
+      'The Ministry of Petroleum called the bill "optimistic." The petroleum lobby called it "a threat to our bottom line." Seven petrol pump owners filed a joint petition in the Cockroach Supreme Court. The drain had no comment but appeared to bubble supportively.',
+      'Petrol stocks fell 2.3%. Naali futures were up 0.0% because they do not exist. The bill goes to committee next week. Vote for who handles this crisis best. Results Sunday 11PM.',
     ],
-    author: 'Viral_Neta_Reporter',
-    authorRole: 'South India Bureau Chief, CJTV',
-    publishedAt: d(2),
-    readMinutes: 5,
-    tags: ['TVKP', 'south India', 'election results', 'trending'],
-    isFeatured: true,
-  },
-  {
-    id: 'cjtv-006',
-    category: 'COURT',
-    headline: 'Cockroach Supreme Court Issues Landmark Ruling: All Drains Henceforth Sacred Infrastructure',
-    subheadline: 'CJI Gobar_Dada_1 delivers 847-page judgment; government appeals calling drains \'secular\'',
-    excerpt:
-      'In a historic 5-4 judgment, the Cockroach Supreme Court ruled that all drains across 543 constituencies shall be classified as "sacred infrastructure," granting them protection equivalent to heritage monuments.',
-    body: [
-      'The Cockroach Supreme Court delivered its most consequential ruling since independence on Thursday, declaring in a 5-4 majority judgment that all drains, naalis, and sewage systems across the 543 parliamentary constituencies are "sacred infrastructure" protected under Article 🪳 of the Cockroach Constitution.',
-      'Chief Cockroach Justice Gobar_Dada_1, writing for the majority, held that "the drain is not merely a channel for waste. It is a home, a sanctuary, a democracy, a civilization." The 847-page judgment took 6 hours to read aloud, during which three junior justices fell asleep.',
-      'The ruling has immediate legal implications. Municipal authorities can no longer "clean, cover, or civilize" any drain without prior approval from the Cockroach Heritage Authority, a body that does not yet exist but will be "formed shortly."',
-      'The government announced it would appeal. "Drains are secular," argued the Solicitor General. "They belong to everyone — humans, cockroaches, mosquitoes. Calling them sacred privileges one insect group over another."',
-      'Civil society celebrated. "This is the most important judgment since cockroaches gained the right to contest elections," said drain rights activist Naali_Sarkar_Activist_9. "Now try cleaning our homes. Go ahead. Try."',
-      'The Supreme Court has scheduled the appeal for next Tuesday at 10AM, immediately after hearing a petition about whether the Speaker can mute opposition microphones during drain-related debates.',
-    ],
-    author: 'Khandaani_Roach_Law',
-    authorRole: 'Supreme Court Correspondent, CJTV',
-    publishedAt: d(3),
-    readMinutes: 5,
-    tags: ['Supreme Court', 'drain rights', 'judgment', 'landmark'],
-  },
-  {
-    id: 'cjtv-007',
-    category: 'OPINION',
-    headline: 'Opinion: Cockroaches Are Simply Better Politicians Than Humans, and the Data Proves It',
-    subheadline: 'By Gobar_Sarkar, Independent MP, Constituency #393',
-    excerpt:
-      'Before you dismiss this as self-serving — consider that 94% of cockroach candidates have stronger drain policy positions than actual sitting MPs, we show up to vote (multiple times), and we have survived every government that ever tried to eliminate us.',
-    body: [
-      'I won\'t pretend to be unbiased. I am a cockroach. I am also an elected official. These two facts are related.',
-      'But consider the evidence. A 2026 CJTV-commissioned poll found that 94% of Cockroach Janta Parliament candidates have more specific, detailed policy positions on drainage infrastructure than their human counterparts. Our manifestos cite actual drain coordinates. Human manifestos say "development."',
-      'We also have a better attendance record. In the last Cockroach Parliament session, 97% of elected members were present. The remaining 3% were technically present but had gone through the drain pipe during a heated debate and couldn\'t get back in time.',
-      'On accountability: every cockroach candidate gets a 6-character claim code. Every human candidate gets a 5-year term and a government bungalow. You tell me which system incentivizes performance.',
-      'The counterargument, usually made by humans, is that cockroaches are "not serious." To which I say: we have survived 300 million years, five mass extinctions, and 23 government fumigation campaigns. How serious do you need us to be?',
-      'Vote for cockroaches. Or don\'t. We\'ll be here either way.',
-    ],
-    author: 'Gobar_Sarkar',
-    authorRole: 'Independent MP, Constituency #393 · CJTV Guest Columnist',
-    publishedAt: d(3),
+    author: 'GhantaWatcher_44',
+    authorRole: 'Energy Reporter, CJTV',
+    publishedAt: m(72),
     readMinutes: 3,
-    tags: ['opinion', 'politics', 'cockroach vs human', 'manifesto'],
-  },
-  {
-    id: 'cjtv-008',
-    category: 'EC',
-    headline: 'Election Commission Bars 3 Parties for "Excessive Constituency Cleanliness" — Unprecedented Action',
-    subheadline: 'BSS, ARP, and SKCP disqualified after drains in their seats were found "suspiciously unclogged"',
-    excerpt:
-      'The Cockroach Election Commission has taken unprecedented action, barring three parties from the upcoming election cycle after finding that drains in their constituencies were "disgracefully clean" — a violation of Section 47(b) of the Cockroach Representation of Peoples Act.',
-    body: [
-      'The Cockroach Election Commission dropped a bombshell on Wednesday, barring BSS, ARP, and SKCP from the upcoming election cycle after surprise inspections found "aggressively clean" conditions in constituencies they represent.',
-      '"Section 47(b) is clear," Chief EC Commissioner Viral_Sewak_99 announced at a press conference. "A cockroach representative who maintains excessively clean drains is either not living in them or is working against his constituents\' interests. Either way: disqualification."',
-      'BSS (Bharatiya Sewer Sangh), whose tagline is "Sewer is Sacred," released a statement saying their drain was clean because it was "sacred, not unhygienic — there is a difference that the EC clearly doesn\'t understand."',
-      'ARP (Aam Roach Party) alleged the inspection was politically motivated. "Our drain is clean because we actually fixed the drainage issue our constituents elected us to fix. Is that now a crime?" Party leader Aam_Roach_7 said through an antenna he described as "impeccably groomed."',
-      'SKCP simply released a statement saying "Bas Bahut Hogaya" and declined further comment.',
-      'Legal challenges have already been filed in the Cockroach High Court. The EC says it will defend its position "vigorously and with full confidence in its own very specific interpretation of the law."',
-    ],
-    author: 'Kachra_Legal_Beat',
-    authorRole: 'Election Commission Desk, CJTV',
-    publishedAt: d(4),
-    readMinutes: 4,
-    tags: ['EC', 'disqualification', 'BSS', 'ARP', 'SKCP'],
+    tags: ['petrol', 'fuel', 'ACP', 'economy', 'breaking'],
     isHot: true,
   },
+
+  // ── 5 ──
   {
-    id: 'cjtv-009',
-    category: 'BREAKING',
-    headline: 'Opposition Files No-Confidence Motion Against Cockroach Lok Sabha Speaker — First in 40 Years',
-    subheadline: 'Speaker Naali_Birla accused of muting 47 opposition microphones, suspending record 198 MPs',
-    excerpt:
-      'In a historic parliamentary manoeuvre, 118 opposition MPs filed a no-confidence motion against Cockroach Lok Sabha Speaker Naali_Birla, citing systematic microphone muting, unprecedented suspensions, and "leaving the Deputy Speaker post vacant for 847 days."',
+    id: 'cjtv-n05',
+    category: 'EC',
+    headline: 'EC Officially Shifts Results to Sunday 11PM IST — "Saturday Belongs to the Working Cockroach"',
+    subheadline: 'Election Commission cites "drain maintenance schedules" and "chai vendor lobby pressure" for the shift',
+    excerpt: 'The Cockroach Election Commission made the historic announcement that all results will henceforth be declared on Sunday nights at 11PM IST, moving away from the previous Saturday schedule after intense lobbying from drain workers and chai vendors.',
     body: [
-      'In the first such move in 40 years of Cockroach parliamentary history, 118 opposition MPs led by ACP, CCP, and RCP filed a formal no-confidence motion against Lok Sabha Speaker Naali_Birla on Tuesday, triggering a 13-hour debate that ended with the motion being defeated 287–118.',
-      '"This Speaker has muted 47 microphones during drain-related debates," ACP\'s floor leader told the house. "He suspended 198 MPs for \'excessive antennae movement.\' The Deputy Speaker post has been vacant for 847 days. Enough is enough."',
-      'Speaker Naali_Birla denied all charges from the chair, which he refused to vacate during the debate about whether he should vacate the chair. "My rulings are constitutional," he said, then suspended the MP who asked him to define constitutional.',
-      'CJP rallied around the Speaker. "The opposition is disrupting Parliament because they cannot accept democratic outcomes," said CJP\'s JP_Naadu_Cockroach. "Their constant scurrying under desks every time a vote is called is the real disruption."',
-      'After the 13-hour session — the longest in recent cockroach parliamentary history — the motion failed by 169 votes. Opposition parties vowed to continue the fight "through constitutional means, including additional no-confidence motions, petitions, and very loud antenna vibrations."',
-      'The Deputy Speaker post remains vacant. No explanation has been offered.',
+      'NEW DELHI (CJTV) — In a 47-page order, the CEC wrote: "Saturday is the sacred weekly holiday of the working cockroach. It shall not be consumed by election anxiety. Henceforth, the people shall spend Saturday resting, and Sunday screaming at results."',
+      '"We consulted 3,847 naali workers, 1,200 chai vendors, and 47 independent cockroaches. 99.3% said Saturday should be for chai and rest. The remaining 0.7% were asleep and could not be reached," the order noted.',
+      'Opposition parties called it "a transparent attempt to let people forget their anger by Monday morning." The ruling CJP celebrated, noting that "Sunday results means we have Saturday night to count votes at leisure."',
+      'The new Sunday 11PM IST schedule takes effect immediately. Set your alarms. Inform your drain. Democracy does not pause — it just shifts one day to the right.',
     ],
-    author: 'Parliament_Beats_CJTV',
-    authorRole: 'Parliamentary Affairs Correspondent',
-    publishedAt: d(5),
-    readMinutes: 5,
-    tags: ['parliament', 'speaker', 'no-confidence', 'opposition'],
+    author: 'Macchar_Reporter_99',
+    authorRole: 'Election Desk, CJTV',
+    publishedAt: m(95),
+    readMinutes: 2,
+    tags: ['EC', 'results', 'Sunday', 'schedule', 'election'],
+    isHot: true,
   },
+
+  // ── 6 ──
   {
-    id: 'cjtv-010',
-    category: 'INVESTIGATION',
-    headline: 'CJTV Investigation: Naali_Neta_77 Accepted 3 Rotis as Bribe — Documents, WhatsApp Chats Revealed',
-    subheadline: 'Former drain minister denies receiving rotis; admits only to receiving "unlabelled flatbreads"',
-    excerpt:
-      'CJTV has obtained WhatsApp messages, 14 WhatsApp stickers, and a receipt from "Mohalla Dhaba #4" showing that former Drain Minister Naali_Neta_77 accepted 3 rotis — estimated market value ₹6 — in exchange for drain cleaning contracts worth ₹47 crore.',
+    id: 'cjtv-n06',
+    category: 'POLITICS',
+    headline: 'Monkey "Bander_Singh_Yadav" Wins Shimla Primary — Banana Import Duty to Be Scrapped',
+    subheadline: 'First primate MP since 1857; manifesto includes "free rooftop access" and "no solar panel ban"',
+    excerpt: 'Bander_Singh_Yadav, a 7-year-old rhesus macaque from Shimla\'s Mall Road, has swept the Cockroach Parliament primary with 8,941 votes, running on a platform of zero banana tariffs and unrestricted rooftop access for all non-human species.',
     body: [
-      'In what legal experts are calling "the most well-documented roti bribery case in cockroach parliamentary history," CJTV can reveal that former Drain Minister Naali_Neta_77 accepted three rotis — current market value ₹6 — in exchange for awarding drain cleaning contracts worth ₹47 crore.',
-      'The evidence includes: 14 WhatsApp messages, 9 of which are just stickers of cockroaches giving thumbs up; a receipt from "Mohalla Dhaba #4" timestamped the same night the contract was signed; and a photograph of Naali_Neta_77 carrying what appears to be a roti in a government bag marked "NOT ROTI."',
-      'In an exclusive CJTV interview, Naali_Neta_77 denied receiving rotis. "What I received were unlabelled flatbreads. Completely different food category. My lawyers are reviewing whether flatbreads fall under the Prevention of Bribery Act Section 12(B)(roti)."',
-      'The Cockroach ED registered a case at 2AM last Thursday, simultaneously dropping a separate investigation into opposition MP Kachra_Singh_9 who had actually stolen 400 drains. No explanation was given for the timing.',
-      'The drain cleaning contractor, Sewage_Infra_Pvt_Ltd, says they paid in rotis because "cash leaves traces. Rotis leave crumbs. We felt crumbs were less detectable." Their logic appears legally untested.',
-      'A parliamentary inquiry committee has been formed. It consists entirely of CJP members. It has announced its conclusion — "no wrongdoing" — before holding its first meeting.',
+      'SHIMLA (CJTV) — "The people of Shimla have spoken. The monkeys of Shimla have also spoken, more loudly, and from higher elevation," Bander_Singh\'s campaign manager (also a monkey) told CJTV in what may be our most challenging interview to date.',
+      'His manifesto has three points: 1) Abolish the 47% import duty on bananas. 2) Make all government rooftops public commons. 3) Solar panel installation to require no-objection certificates from resident monkeys.',
+      '"His banana policy alone would save the average Himachal household ₹340 per month," said an independent economist who asked to remain unnamed "because my colleagues will not take this seriously." We feel that deeply.',
+      'The Tourist Department has raised concerns about the "rooftop commons" clause. Shimla Hotel Association filed an objection. Bander_Singh responded by stealing their press conference snacks, which the media widely interpreted as a policy statement.',
+    ],
+    author: 'Naali_Observer_5',
+    authorRole: 'Wildlife & Politics Desk, CJTV',
+    publishedAt: m(130),
+    readMinutes: 3,
+    tags: ['animal candidates', 'monkey', 'shimla', 'banana', 'politics'],
+  },
+
+  // ── 7 ──
+  {
+    id: 'cjtv-n07',
+    category: 'INVESTIGATION',
+    headline: 'CJTV Probe: Parliament Floor at 49°C — CJP MPs Voted Via WhatsApp From Air-Conditioned Dhabas',
+    subheadline: 'Attendance records show 198 MPs marked "present" while CCTV shows them at Chandni Chowk',
+    excerpt: 'A CJTV investigation has uncovered that during last week\'s 49°C heat session, at least 198 ruling CJP MPs voted on critical legislation via WhatsApp forward while physically seated in air-conditioned restaurants, dhabas, and one confirmed "high-end naali resort."',
+    body: [
+      'NEW DELHI (CJTV) — The evidence is damning: attendance rolls show 198 MPs as "present" during the Drain Infrastructure Vote, while CJTV cameras captured them ordering lassi at Jalebi Wala, Chandni Chowk. The vote passed 312-87. The air conditioning worked perfectly.',
+      '"This is digital participation. Parliament is not a building, it is a concept," said CJP spokesperson Ghoos_Gazette in a statement released from what appeared to be a poolside location.',
+      'Opposition leader Naali_Chadha called for a floor test to be conducted "on the actual floor, with the actual heat, for a real test of democratic commitment." The motion was voted down 312-87 via WhatsApp.',
+      'The Supreme Court has agreed to hear a PIL asking whether "voting from a dhaba constitutes presence in Parliament." The petitioner also wants reimbursement for the dhaba bill. The court said it would "consider both questions equally seriously."',
     ],
     author: 'Macchar_Reporter_99',
     authorRole: 'Investigative Journalist, CJTV Special Unit',
-    publishedAt: d(5),
-    readMinutes: 6,
-    tags: ['corruption', 'bribery', 'investigation', 'drain ministry'],
+    publishedAt: m(165),
+    readMinutes: 4,
+    tags: ['parliament', 'heatwave', 'CJP', 'investigation', 'attendance'],
     isHot: true,
   },
+
+  // ── 8 ──
   {
-    id: 'cjtv-011',
+    id: 'cjtv-n08',
     category: 'POLITICS',
-    headline: '"Naali Chori" Campaign: ACP Alleges 25 Lakh Votes Stolen from Haryana Drain Constituencies',
-    subheadline: 'EC demands proof under oath; ACP leader files oath, then withdraws it, then re-files it in Hindi',
-    excerpt:
-      'ACP has launched its "Naali Chori Se Azaadi" campaign, alleging CJP used centralized drain-control software to manipulate 25 lakh votes across Haryana constituencies. The EC has demanded sworn affidavits. ACP has provided what it calls "vibrational evidence."',
+    headline: 'Unemployment at 9.2% — Parliament Creates 543 New "Honorary Drain Inspector" Positions (Unpaid)',
+    subheadline: 'Government says these "prestigious roles" will look excellent on CVs and reduce the official figure',
+    excerpt: 'Responding to a 9.2% unemployment rate, the Cockroach Janta Parliament created 543 new positions for "Honorary Drain Inspector," one per constituency. The roles carry no salary, no authority, and no defined duties — but do come with a laminated ID card.',
     body: [
-      'ACP launched its "Naali Chori Se Azaadi" campaign on Monday, alleging that CJP deployed a sophisticated drain-control software that manipulated 25 lakh votes across 47 Haryana constituencies by accessing the Electoral Drain Roll and marking occupied drains as vacant.',
-      '"We have evidence," ACP leader Rahul_Khatmal said at a press conference. "We have antenna readings. We have drain moisture levels that don\'t match reported occupancy. We have a very compelling PowerPoint."',
-      'The Cockroach Election Commission demanded proof under oath within 7 days. ACP leader filed a sworn affidavit on Day 3, withdrew it on Day 4 citing "a typo in the word drain," re-filed it in Hindi on Day 5, then launched a press campaign about how the EC was "suppressing the Hindi affidavit."',
-      'CJP called the allegations "baseless, dangerous, and frankly very creative." "If we could control drains with software," CJP spokesperson said, "we would have fixed the Bengaluru flooding by now. We haven\'t. QED."',
-      '"Naali Chori" merchandise has now outsold CJP\'s "Har Ghar Naali" merchandise. Both are selling on the same website. The website is operated by a cockroach who belongs to neither party and is "just in it for the vibes."',
-      'The campaign continues. The affidavit investigation continues. The drain manipulation, if real, also presumably continues. Results every Saturday at 11PM IST.',
+      'NEW DELHI (CJTV) — "We have 543 drains. We have 9.2% unemployment. The solution writes itself," said Finance Cockroach Gobar_Seth at a press conference where he unveiled the laminated ID card design (yellow, features a cockroach in a hard hat).',
+      'The opposition immediately pointed out that unpaid voluntary roles do not count as employment. The government said the opposition was "being very technical about employment, almost suspiciously so." The unemployment rate was officially revised to 8.1% pending further discussion.',
+      '"I have a degree in drain engineering," said Ravi, 27, one of 4,847 applicants for the 543 positions. "The ID card does say \'Honorary Expert\' which might help at interviews." He has not had a callback.',
+      'The PM Cockroach announced the scheme from a stage shaped like a drain pipe. The backdrop read "ROZGAR NAALI YOJANA." Background music was "Jai Ho." Six ministers clapped for 47 seconds. No drains were inspected.',
     ],
-    author: 'Galli_Ground_Reporter',
-    authorRole: 'Political Reporter, CJTV',
-    publishedAt: d(6),
-    readMinutes: 4,
-    tags: ['vote chori', 'ACP', 'Haryana', 'election fraud', 'naali'],
+    author: 'Khatmal_OG',
+    authorRole: 'Chief Political Correspondent, CJTV',
+    publishedAt: m(200),
+    readMinutes: 3,
+    tags: ['unemployment', 'economy', 'drain inspector', 'politics'],
   },
+
+  // ── 9 ──
   {
-    id: 'cjtv-012',
-    category: 'INTERNATIONAL',
-    headline: 'Cockroach Janta Parliament Signs Historic Drain Treaty with International Sewer Alliance — 47 Nations',
-    subheadline: 'First cross-border drain corridor opens; roaches can now migrate freely between 47 sewage systems',
-    excerpt:
-      'In a diplomatic landmark, Cockroach Janta Parliament has signed a mutual drain access treaty with the International Sewer Alliance, granting free migration rights to cockroaches across 47 nations\' sewage infrastructure.',
+    id: 'cjtv-n09',
+    category: 'BREAKING',
+    headline: 'Budget 2026: ₹4.7 Lakh Crore Allocated to "Strategic Naali Reserve" — Opposition States Get ₹0',
+    subheadline: 'Finance minister says funds will "trickle down through natural drain gravity" to all states eventually',
+    excerpt: 'The Cockroach Parliament Budget 2026 has allocated a record ₹4.7 lakh crore to the newly created Strategic Naali Reserve Fund, while allocating ₹0 to the five states currently governed by the opposition, citing "drain misalignment."',
     body: [
-      'NAALI NAGAR (CJTV) — The Cockroach Janta Parliament achieved a historic diplomatic breakthrough on Tuesday, signing the International Drain Access Treaty (IDAT) with 47 member nations of the International Sewer Alliance (ISA), creating the world\'s first cross-border cockroach migration corridor.',
-      '"Drains know no borders," Foreign Minister Sewage_Singh_External said at the signing ceremony held inside a very large drain in Geneva. "From today, a cockroach from Varanasi can freely access the sewers of Paris, Tokyo, and Nairobi. This is globalization done right."',
-      'The treaty includes provisions for mutual drain maintenance, extradition of cockroaches who commit crimes in foreign sewage systems, and a cultural exchange program where cockroach parliamentarians will spend 3 months in foreign drains learning "international governance best practices."',
-      'China\'s Cockroach Communist Party signed a separate bilateral addendum granting access to their 47-tier sewage network in exchange for CJP sharing its "unlimited voting technology." Privacy advocates raised concerns. Both governments said privacy does not apply underground.',
-      'Critics questioned whether the treaty was necessary. "Indian cockroaches were already migrating to foreign sewers without any treaty," noted Naali_Economist_3. "What this treaty does is make it official, which means we can now charge them an airport tax. That\'s the real agenda."',
-      'The Parliament ratified the treaty 341–82. The 82 dissenting votes came from RCP (Regional Cockroach Party), who objected to "foreign drains diluting local sewer culture."',
+      'NEW DELHI (CJTV) — "The drain naturally flows toward productive constituencies," Finance Cockroach Seth told Parliament while presenting a budget document that is 847 pages long and entirely in Comic Sans. "Opposition states can apply for funds once they demonstrate drain alignment with national naali policy."',
+      '"Our state has 2.4 crore people," said Telangana CM at a press conference. "We received ₹0 in the central allocation. We did, however, receive a very motivating letter from the Finance Ministry saying we should \'try harder.\'"',
+      'The Strategic Naali Reserve Fund has no defined objective, no disbursement criteria, and no oversight committee. The Finance Ministry clarified it is "strategic" because it is reserved, and "reserved" because it is strategic.',
+      'Markets rallied 1.2% on news of the budget. Drain futures hit an all-time high. Five opposition CMs filed a joint petition in the Supreme Court. The petition fee was ₹500. They are awaiting reimbursement. Sunday 11PM results will decide who controls the drain.',
     ],
-    author: 'Bindaas_Foreign_Desk',
-    authorRole: 'International Affairs, CJTV',
-    publishedAt: d(7),
+    author: 'GhantaWatcher_44',
+    authorRole: 'Budget Desk, CJTV',
+    publishedAt: m(240),
     readMinutes: 4,
-    tags: ['international', 'treaty', 'ISA', 'diplomacy', 'drain'],
+    tags: ['budget', 'economy', 'naali', 'breaking', 'finance'],
+    isHot: true,
   },
+
+  // ── 10 ──
   {
-    id: 'cjtv-013',
+    id: 'cjtv-n10',
     category: 'POLITICS',
-    headline: 'Budget Session 2026: 4 MPs Escape Through Drain Mid-Debate; Speaker Says "Noted"',
-    subheadline: 'Opposition accuses government of opening drain escape hatch to avoid quorum; government says it\'s "ventilation"',
-    excerpt:
-      'The Cockroach Janta Parliament\'s Budget Session hit a new low when 4 ruling party MPs disappeared through a drain pipe during a critical vote on the Naali Allocation Bill. Quorum collapsed. The Speaker suspended the 3 opposition MPs who stayed.',
+    headline: 'Cow "Gauri_Mata" Files from Mathura — Manifesto Opposes Leather Briefcases in Parliament',
+    subheadline: 'Also demands: free grazing rights on parliamentary lawns, ban on plastic bags near sacred ponds',
+    excerpt: 'Gauri_Mata, a 6-year-old desi cow from Vrindavan, has filed her nomination from Mathura constituency with a three-point manifesto that has earned her 12,400 votes and the open endorsement of three sitting CJP MPs.',
     body: [
-      'The 2026 Budget Session of the Cockroach Janta Parliament has produced what political scientists are already calling "the most honest expression of parliamentary democracy in living memory" — four ruling party MPs exiting through a drain pipe during the Naali Allocation Bill vote, collapsing quorum, and the Speaker immediately suspending the three opposition members who remained.',
-      '"The MPs were exercising their constitutional right to drain access," CJP spokesperson Sarkari_Spin_Doctor_4 said. "There is no provision in the rules that says MPs must be present during a vote. The rules merely say they must be in the building. We interpret \'building\' broadly to include the pipe network beneath it."',
-      'Opposition leader ACP\'s Aam_Candidate_404 called it "the single most blatant abuse of parliamentary procedure since the Deputy Speaker post was vacated 847 days ago." He was then suspended for "using the phrase \'847 days\' in a provocative tone."',
-      'The Naali Allocation Bill — which determines which constituencies receive government drain maintenance funds — was subsequently passed by voice vote among the 12 MPs who remained, all of whom were from CJP.',
-      'The Budget Session has now broken records: most MPs suspended in one session (198), most drain-related escapes (4), and lowest average attendance (12 MPs for the final vote on a ₹47,000 crore bill).',
-      'The next session is scheduled for monsoon season, "when drain access is most meaningful," per the parliamentary calendar.',
+      'MATHURA (CJTV) — Gauri_Mata\'s manifesto, submitted via her legal representative (a retired IAS officer who has "had enough of human politics"), demands: zero leather briefcases in parliament, unrestricted grazing on central vista lawns, and a ban on plastic bags within 500 metres of any sacred pond.',
+      '"Her policies are more coherent than 70% of sitting human MPs," said political scientist Dr. Roach_Kumar, who declined to name the 70% "for legal reasons but you know who they are."',
+      'BJP — we mean, CJP — initially welcomed Gauri_Mata\'s candidacy before realising her second demand involves "digging up the new parliament lawns for grazing." Three endorsements were quietly withdrawn. One remains.',
+      'Gauri_Mata leads Mathura with 12,400 votes. She has not given any interviews. Her campaign manager says she is "letting her presence speak." Her presence has been at a dhaba on the Yamuna bank. The dhaba is doing record business.',
     ],
-    author: 'Parliament_Beats_CJTV',
-    authorRole: 'Parliamentary Affairs Correspondent',
-    publishedAt: d(8),
-    readMinutes: 5,
-    tags: ['budget session', 'parliament', 'quorum', 'drain escape'],
+    author: 'Viral_Sewak_13',
+    authorRole: 'Field Reporter, CJTV Mathura',
+    publishedAt: m(290),
+    readMinutes: 3,
+    tags: ['animal candidates', 'cow', 'mathura', 'politics', 'independent'],
   },
+
+  // ── 11 ──
   {
-    id: 'cjtv-014',
+    id: 'cjtv-n11',
     category: 'OPINION',
-    headline: 'Opinion: The Varanasi Naali Should Be a UNESCO World Heritage Drain — And I Will Not Be Taking Questions',
+    headline: 'Opinion: Inflation at 7.4% But Cockroach Parliament Runs on ₹0 Budget — What Is Humans\' Excuse?',
     subheadline: 'By Naali_Naresh_42, CJP MP-elect, Constituency #485',
-    excerpt:
-      'I won Varanasi by 47,000 votes. My mandate is clear. The Varanasi Ganga naali system is more culturally significant than the Eiffel Tower, the Great Wall, and the Internet combined. UNESCO must act.',
+    excerpt: 'The human government spent ₹47 lakh crore last year. The Cockroach Janta Parliament spent nothing, filed 12,847 candidates, conducted unlimited voting, and still managed better transparency scores. I am simply asking the question.',
     body: [
-      'Let me be clear about my mandate. The people of Varanasi Constituency #485 gave me 47,293 naali-votes. That is not a suggestion. That is a directive. And the directive says: UNESCO World Heritage status for the Varanasi Naali.',
-      'Consider the facts. The Varanasi naali network is over 2,000 years old. It has survived Mughals, British colonialism, 74 governments, and 14 municipal corporation tenders that promised to \'modernize\' it. It survived all of them by staying exactly as it was. That is not decay. That is resilience.',
-      'UNESCO recognizes heritage sites for "outstanding universal value." What is more universally outstanding than a drain that has housed continuous cockroach civilization for two millennia? Nothing. Literally nothing.',
-      'My opponents say I should focus on development — roads, hospitals, schools. Fine. I will build those too. But I will build them AROUND the naali. The drain is the axis of civilization. Everything else is peripheral infrastructure.',
-      'I have submitted a formal application to UNESCO. It is 847 pages long. Appendix C alone is a 200-page love letter to the eastern tributary. I stand by every word.',
-      'UNESCO has 90 days to respond. If they don\'t, I am filing a petition in the Cockroach Supreme Court to have them declared in contempt of drain heritage.',
+      'I want to be clear: I am not saying human politicians are worse than cockroaches. I am saying that cockroaches operate on zero salary, zero allowances, zero pension, zero perks, and zero TA/DA. And yet they contest all 543 seats. Every week. Without complaint.',
+      'Meanwhile, a human MP earns ₹1 lakh per month salary, ₹70,000 constituency allowance, ₹60,000 office expenses, free air travel, free accommodation in Lutyens\' Delhi, and still requires an additional ₹10 crore campaign fund to get elected. I am not saying this is wrong. I am saying the drain does it cheaper.',
+      'Inflation at 7.4% means everything costs more. Except cockroach candidacy. That costs ₹0. You contest for free. You vote unlimited times. You win on Sunday. No EC deposit. No party fund. No corporate donor. Just pure democratic chaos.',
+      'If cockroaches can run the world\'s largest satirical democracy on ₹0, human governments running on ₹47 lakh crore should frankly be embarrassed. This is my opinion. I will not be taking questions. Results Sunday 11PM IST.',
     ],
     author: 'Naali_Naresh_42',
-    authorRole: 'CJP MP-elect, Varanasi · Guest Columnist, CJTV',
-    publishedAt: d(9),
+    authorRole: 'CJP MP-elect, Constituency #485',
+    publishedAt: m(340),
     readMinutes: 3,
-    tags: ['opinion', 'Varanasi', 'UNESCO', 'heritage', 'naali'],
+    tags: ['opinion', 'inflation', 'economy', 'satire', 'CJP'],
   },
+
+  // ── 12 ──
   {
-    id: 'cjtv-015',
-    category: 'EC',
-    headline: 'CJP Enters Northeast Cockroach Drain for First Time Since Independence; RCP Calls it "Drain Imperialism"',
-    subheadline: 'CJP wins 14 seats across Assam, Meghalaya and Manipur; regional parties vow resistance',
-    excerpt:
-      'In a seismic shift in cockroach political geography, CJP has won 14 seats across northeast constituencies in the most recent cycle, marking its first-ever foothold in the region and triggering a fierce backlash from regional parties.',
+    id: 'cjtv-n12',
+    category: 'INVESTIGATION',
+    headline: 'CJTV Investigation: 87% of All Political Promises Delivered via WhatsApp Voice Note, Never Fulfilled',
+    subheadline: 'Of 4,847 pre-election promises tracked, 4,207 remain "in the forward chain" with no delivery date',
+    excerpt: 'A six-month CJTV investigation tracking 4,847 campaign promises made during the Cockroach Janta Parliament elections found that 87% were delivered exclusively as WhatsApp voice notes, with no corresponding legislation, allocation, or action.',
     body: [
-      'The Cockroach Janta Parliament\'s latest results have produced a political earthquake in the northeast: CJP has won 14 seats across Assam, Meghalaya, and Manipur constituencies — its first victories in the region since the Parliament was founded.',
-      '"The northeast drain belongs to northeast cockroaches," RCP (Regional Cockroach Party) president Galli_Sardar_Northeast said in an emergency press conference. "CJP cockroaches from Delhi drains do not understand our local sewage culture. This is drain imperialism and we will not stand for it."',
-      'CJP, for its part, dispatched 47 "drain integration officers" to the northeast with instruction to "learn the local drainage system and respect regional naali sensitivities while explaining the benefits of national drain integration."',
-      'The winning CJP candidates in the northeast were all recently relocated from mainland drains as part of CJP\'s "New Drainage Frontier" program, in which cockroaches from overpopulated southern drains are incentivized to contest in "emerging northeast markets."',
-      'Indigenous cockroach communities have filed a petition in the Guwahati Cockroach High Court, arguing that CJP\'s northeast expansion violates the "Drain Domicile Rights Act" that guarantees constituency seats to cockroaches born within 50 metres of the local drain.',
-      'The High Court has issued notice. CJP says it is "confident in the legal position." RCP says it is "confident in the local cockroach population\'s memory of which party actually fixed their drain pipe in 2023." Elections, as always, will clarify.',
+      'CJTV\'s Promise Tracker collected 4,847 distinct campaign commitments made by candidates across all 543 constituencies. Investigators found that 4,207 (87%) exist only as WhatsApp voice notes, many of which have been forwarded so many times that the original promise has evolved significantly.',
+      '"We promised to clean the naali. By the time the forward chain reached the 847th group, the promise had become: abolish naalis entirely, build a space programme, and give everyone a free refrigerator," said one candidate who agreed to speak anonymously.',
+      '"A voice note is a promise. A forward is a promise amplified. And an undelivered promise is simply a promise pending," said CJP spokesperson Ghoos_Gazette_12 with the confidence of someone who has never once been held accountable.',
+      'Of the remaining 640 promises (13%): 200 were delivered partially, 89 were delivered incorrectly, 47 were delivered to the wrong constituency, and 304 are "under review." The CJTV Promise Tracker continues. Sunday results will show whose promises won votes.',
     ],
-    author: 'Northeast_Drain_Desk',
-    authorRole: 'Regional Political Correspondent, CJTV',
-    publishedAt: d(10),
+    author: 'Macchar_Reporter_99',
+    authorRole: 'Investigative Journalist, CJTV',
+    publishedAt: m(390),
+    readMinutes: 5,
+    tags: ['promises', 'whatsapp', 'accountability', 'investigation'],
+    isHot: true,
+  },
+
+  // ── 13 ──
+  {
+    id: 'cjtv-n13',
+    category: 'COURT',
+    headline: 'Supreme Court Rules Calling Someone a Cockroach Is "No Longer an Insult — It Is an Aspiration"',
+    subheadline: 'Landmark 5-judge bench judgment recognises cockroach parliament as legitimate democratic institution',
+    excerpt: 'In a unanimous 5-0 judgment, the Cockroach Supreme Court ruled that calling a person a "cockroach" in a political context constitutes "the highest form of democratic aspiration," reversing 70 years of legal precedent.',
+    body: [
+      'NEW DELHI (CJTV) — Chief Justice Gobar_Dada_1 delivered the historic 238-page verdict, stating: "A cockroach survives nuclear war, adapts to any environment, and contests elections without salary. These are qualities every citizen should aspire to. The word is henceforth a compliment."',
+      '"The court took note of 12,847 candidates, unlimited voter participation, and a transparency index score of 98/100. By these metrics, the Cockroach Janta Parliament outperforms every human legislature on record," the judgment read.',
+      'The decision was immediately tested when a CJP MP called an opposition MP a "cockroach" on the floor. The opposition MP thanked him. The CJP MP, confused, sat down.',
+      'Opposition lawyers have filed a review petition arguing that "while the word is now aspirational, calling someone a cockroach in a naali context still carries negative connotation." The court has agreed to define naali-specific usage by next term.',
+    ],
+    author: 'Khatmal_OG',
+    authorRole: 'Legal Correspondent, CJTV',
+    publishedAt: m(440),
+    readMinutes: 3,
+    tags: ['supreme court', 'judgment', 'cockroach', 'legal', 'court'],
+  },
+
+  // ── 14 ──
+  {
+    id: 'cjtv-n14',
+    category: 'POLITICS',
+    headline: 'Cat "WhatsApp_Forward_420" Files Independent — Will Fact-Check Every Parliamentary Statement',
+    subheadline: 'Manifesto: "I will stare at politicians until they feel judged. That is governance."',
+    excerpt: 'A Persian cat identified only as "WhatsApp_Forward_420" has filed her candidacy from Pune West as an Independent, with a manifesto that consists entirely of cat staring, strategic silence, and the promise to knock governmental papers off desks.',
+    body: [
+      'PUNE (CJTV) — WhatsApp_Forward_420\'s manifesto, as translated by her campaign team, reads: "I will attend all sessions. I will sit on the Finance Minister\'s budget papers. I will stare at every MP until they feel judged. If they are lying, I will knock something over. Democracy is accountability."',
+      '"She has filed 47 motions in the past week, all of which consist of knocking things off tables," her campaign manager told CJTV. "This is, we believe, a more effective form of parliamentary disruption than the current methods."',
+      'She currently leads Pune West with 9,847 votes. The Pune BJP — sorry, CJP — unit said she would "be welcomed into the NDA alliance if she stops sitting on the defence minister\'s laptop." She has not responded and has been sitting on the laptop for three days.',
+      'The Election Commission noted her candidacy is valid. "There is no height requirement, no species requirement, and no requirement to have attended school. She qualifies on all counts," the EC stated with what may have been resignation.',
+    ],
+    author: 'Viral_Sewak_13',
+    authorRole: 'Field Reporter, CJTV Pune',
+    publishedAt: m(490),
+    readMinutes: 3,
+    tags: ['animal candidates', 'cat', 'pune', 'independent', 'satire'],
+  },
+
+  // ── 15 ──
+  {
+    id: 'cjtv-n15',
+    category: 'BREAKING',
+    headline: 'GST on Chapati? Finance Ministry Clarifies "Only Chapatis With Fillings" — Nation Confused',
+    subheadline: 'Plain roti still tax-free; stuffed paratha taxed at 5%; "fancy" roti definition pending committee',
+    excerpt: 'A Finance Ministry circular proposing a tiered GST structure on Indian breads has triggered national confusion, with tax authorities now required to determine in real time whether a bread item qualifies as "plain," "stuffed," or "fancy."',
+    body: [
+      'NEW DELHI (CJTV) — The circular, released at 11PM on a Friday (always on a Friday), distinguishes between: Plain roti (0% GST), Stuffed paratha (5% GST), "Restaurant-grade fancy roti" (12% GST), and "Artisanal sourdough claiming to be a chapati for brunch" (18% GST).',
+      '"We need a definition of fancy," said a GST inspector from Jaipur who has been standing outside a dhaba for four hours trying to determine if the aloo paratha qualifies as "stuffed" or "stuffed with artisanal intent." He has not eaten.',
+      'The cockroach parliament moved swiftly: ACP tabled the Roti Sovereignty Bill demanding all breads be exempt "as a fundamental right to not die of hunger." CJP countered with the "Fancy Roti Regulation Bill" which clarifies nothing but uses the word "fancy" 47 times.',
+      'A PIL was filed in the Supreme Court by 1,200 dhaba owners within 6 hours. The court issued notice. The Finance Ministry issued a clarification of the circular. The clarification requires its own clarification. Sunday results decide who fixes the roti.',
+    ],
+    author: 'GhantaWatcher_44',
+    authorRole: 'Economy Desk, CJTV',
+    publishedAt: m(25),
+    readMinutes: 3,
+    tags: ['GST', 'roti', 'chapati', 'economy', 'breaking'],
+    isHot: true,
+  },
+
+  // ── 16 ──
+  {
+    id: 'cjtv-n16',
+    category: 'POLITICS',
+    headline: 'Donkey "Gadha_Sahab" Wins Bikaner North — First Equid in Cockroach Parliament History',
+    subheadline: 'Platform: "I carry your burdens daily. Now I carry your votes." Coalition talks with Motu_Bhai underway.',
+    excerpt: 'Gadha_Sahab, a 9-year-old donkey from Bikaner\'s camel territory, has made Cockroach Parliament history by leading Bikaner North with 11,200 votes, running on a platform of "burden-bearer solidarity" and lower transportation costs.',
+    body: [
+      'BIKANER (CJTV) — "I carry bricks. I carry sand. I carry cement. I carry the weight of your broken roads and ask for nothing but a bucket of water and the occasional pat," Gadha_Sahab\'s manifesto reads, in what CJTV editorial staff unanimously called "the most relatable candidate statement of the election cycle."',
+      '"His infrastructure policy is literally embodied. He has done more road testing than the entire National Highways Authority," said one voter from Bikaner North who also requested we note that the roads are indeed terrible.',
+      'CJP offered Gadha_Sahab a coalition seat as Minister of Transport (Non-Motorised Division). He declined, or rather did not respond to emails. His team says he is "considering all options while hauling sand in the interim."',
+      'Coalition talks with Motu_Bhai (Mumbai North, Labrador, biscuit platform) and Bander_Singh_Yadav (Shimla, rhesus macaque, banana platform) are reportedly ongoing. If successful, the Animal Front could hold 34,000 combined votes. Sunday results.',
+    ],
+    author: 'Naali_Observer_5',
+    authorRole: 'Rural Correspondent, CJTV',
+    publishedAt: m(580),
+    readMinutes: 3,
+    tags: ['animal candidates', 'donkey', 'bikaner', 'politics', 'coalition'],
+  },
+
+  // ── 17 ──
+  {
+    id: 'cjtv-n17',
+    category: 'EC',
+    headline: 'EC Bans Roti Bribery; Issues Clarification That Bhatura Is "Still Legal Campaign Material"',
+    subheadline: 'Order follows viral footage of 3 rotis being exchanged for a vote at a Haryana polling station',
+    excerpt: 'The Cockroach Election Commission has issued a formal ban on roti-based voter inducement following a CJTV investigation, while simultaneously clarifying that bhatura, poori, and "most fried breads" remain outside the scope of the prohibition.',
+    body: [
+      'NEW DELHI (CJTV) — The EC\'s 12-page order distinguishes sharply between "roti as currency" (banned) and "deep-fried alternatives as hospitality" (permitted). "A voter receiving a roti has been bribed. A voter receiving a bhatura has received traditional hospitality. The distinction is the oil content," the order states.',
+      '"We investigated 47 instances of suspected roti bribery. In 39 cases, the roti was actually a misidentified roomali. We are not yet confident in our roomali-roti taxonomy," EC spokesperson Viral_Sewak confirmed.',
+      'The CJP welcomed the order, noting that "we have always campaigned on bhatura" (unverified). ACP has demanded the EC clarify whether dal-with-roti constitutes "enhanced bribery" or if the dal is treated separately. The EC said it will issue a supplement order.',
+      'CJTV has learned that three CJP candidates have already switched their voter outreach from "roti distribution" to "complementary bhatura camps." Legal. Democratic. Oily.',
+    ],
+    author: 'Macchar_Reporter_99',
+    authorRole: 'Election Desk, CJTV',
+    publishedAt: m(630),
+    readMinutes: 3,
+    tags: ['EC', 'roti', 'bribery', 'election', 'food'],
+  },
+
+  // ── 18 ──
+  {
+    id: 'cjtv-n18',
+    category: 'INTERNATIONAL',
+    headline: 'Pakistan Cockroach Parliament Requests "Drain Corridor" With India — EC Says It\'s Investigating',
+    subheadline: 'Proposal includes shared drain infrastructure, cockroach-free border crossings, and a joint naali committee',
+    excerpt: 'In an unprecedented diplomatic move, the newly constituted Pakistan Cockroach Parliament has formally requested India to establish a cross-border "Drain Corridor" for free roach movement, shared naali infrastructure, and a joint drain management committee.',
+    body: [
+      'ISLAMABAD / NEW DELHI (CJTV) — The request, delivered via a formal letter written on what appears to be a drain pipe cross-section, proposes: a bilateral Drain Sovereignty Agreement, a Joint Naali Technical Committee (JNTC), and reciprocal cockroach visa waivers.',
+      '"Drains do not respect borders. Water does not check passports. Why should cockroaches?" read the letter, which has been described by Indian diplomatic sources as "hard to argue with on a purely hydrological basis."',
+      'The Indian Cockroach EC said it was "studying the proposal carefully," while the Ministry of External Affairs (human) said it was "unaware of this correspondence and not sure which ministry handles cockroach diplomacy." The Prime Minister\'s Office issued no comment.',
+      'ACP supports the corridor in principle but wants a "drain parity clause." CJP says it supports "strategic drain sovereignty" which means nothing specific. Three opposition parties have called it a "naali sellout." The drain has reportedly been flowing both ways already.',
+    ],
+    author: 'GhantaWatcher_44',
+    authorRole: 'International Desk, CJTV',
+    publishedAt: m(680),
     readMinutes: 4,
-    tags: ['northeast', 'CJP', 'RCP', 'regional', 'results'],
+    tags: ['international', 'Pakistan', 'drain corridor', 'diplomacy'],
+  },
+
+  // ── 19 ──
+  {
+    id: 'cjtv-n19',
+    category: 'BREAKING',
+    headline: 'Rat "Chuha_Bhai_Sarkar" Contests from Surat — Entire Manifesto Is "Cheese. All of It."',
+    subheadline: '"I have said what needs to be said. I will not be elaborating. The cheese speaks for itself." — Chuha_Bhai',
+    excerpt: 'Chuha_Bhai_Sarkar, a rat of unknown age and confirmed determination, has submitted his candidacy from Surat East with a 3-word manifesto that has generated more press coverage than any 200-page document filed this election cycle.',
+    body: [
+      'SURAT (CJTV) — The manifesto reads, in its entirety: "Cheese. All of it." The filing was accepted by the EC after a 20-minute consultation about whether this constitutes a "policy platform." The EC concluded that "cheese redistribution could, technically, be considered an economic policy."',
+      '"His clarity is refreshing," said Surat East voter Ritu Shah, 34, who has voted for Chuha_Bhai_Sarkar four times in the past two hours. "Every other candidate has a 15-point plan. He has one point. And it is cheese. I trust him."',
+      'Financial analysts have attempted to model a "cheese-for-all" economy. Early projections suggest GDP growth of 0.02% and a significant increase in dairy imports from New Zealand. The Finance Ministry called it "an incomplete economic model." Chuha_Bhai declined to respond.',
+      'He currently leads Surat East with 7,841 votes. Coalition partners are reportedly being offered cheese. Results Sunday 11PM IST. CJTV recommends investing in dairy.',
+    ],
+    author: 'Viral_Sewak_13',
+    authorRole: 'Field Reporter, CJTV Surat',
+    publishedAt: m(730),
+    readMinutes: 2,
+    tags: ['animal candidates', 'rat', 'surat', 'cheese', 'independent'],
+    isHot: true,
+  },
+
+  // ── 20 ──
+  {
+    id: 'cjtv-n20',
+    category: 'COURT',
+    headline: 'PIL Filed Against Mosquito Infiltration in Cockroach Parliament — "Blood-Sucking Conflict of Interest"',
+    subheadline: 'Petitioner claims 47 mosquitoes have filed from AIMIM strongholds; EC denies conflict despite obvious irony',
+    excerpt: 'A public interest litigation filed in the Cockroach Supreme Court demands disqualification of all mosquito candidates, citing an "inherent and unresolvable conflict of interest" between mosquitoes\' biological imperative to draw blood and their parliamentary duty to serve.',
+    body: [
+      'NEW DELHI (CJTV) — The PIL was filed by Roach_Rights_Foundation, whose petition states: "The mosquito\'s constitutional purpose is blood extraction. Parliament\'s purpose is resource allocation. These are the same thing, but mosquitoes are more honest about it, which paradoxically makes it worse."',
+      '"We do not deny that mosquitoes draw blood," said AIMIM (All India Machar Influence Movement) spokesperson. "But we argue this is a transferable skill. Understanding how to extract resources from unwilling hosts is exactly the competency gap Indian politics needs addressed."',
+      'The CJP called the petition "anti-minority." The ACP said it was "philosophically valid but legally flawed." The Supreme Court issued notice to all 47 mosquito candidates, the EC, the Health Ministry, and the WHO (Worldwide Hum Organisation, cockroach chapter).',
+      'Hearing is listed for next Monday. Two of the 47 respondent mosquitoes did not appear in court, citing "busy season." The court has issued non-bailable warrants. The mosquitoes are considered to be in their constituency.',
+    ],
+    author: 'Khatmal_OG',
+    authorRole: 'Legal Correspondent, CJTV',
+    publishedAt: m(790),
+    readMinutes: 4,
+    tags: ['court', 'mosquito', 'AIMIM', 'PIL', 'conflict of interest'],
+  },
+
+  // ── 21 ──
+  {
+    id: 'cjtv-n21',
+    category: 'POLITICS',
+    headline: 'Viral Video: Goat "Bakra_Neta" Chews Opposition\'s Campaign Posters — "Strategic Destruction" Says Party',
+    subheadline: 'CJP denies any coordination; 7,000 posters consumed; goat has no comment but appears satisfied',
+    excerpt: 'A video of Bakra_Neta, a goat from Ajmer who is also an active candidate, systematically eating ACP campaign posters has gone viral with 4.7 crore views, raising questions about whether this constitutes a campaign activity, vandalism, or just breakfast.',
+    body: [
+      'AJMER (CJTV) — The footage, captured on a CCTV camera near Ajmer Dargah Road, shows Bakra_Neta methodically consuming 12 ACP posters, 3 CCP banners, and one laminated cut-out of a rival candidate\'s face. He left all CJP materials untouched. This has been noted.',
+      '"It is simply his diet," said his campaign team. "He is not politically motivated. He just finds ACP posters more digestible. We cannot explain the flavor preferences of our candidate." CJP denied coordination. Their denial lasted 4 minutes before a WhatsApp group called "Bakra Strategy 2026" was screenshotted.',
+      '"The EC has received our complaint," said ACP. "We have also ordered laminated posters coated with bitter gourd extract. Let us see how \'unpolitical\' his digestion is then."',
+      'Bakra_Neta leads Ajmer Central with 8,200 votes. He has not eaten any CJTV press passes. We consider this a sign of respect and will be covering his campaign closely going forward.',
+    ],
+    author: 'Naali_Observer_5',
+    authorRole: 'Field Reporter, CJTV Ajmer',
+    publishedAt: m(850),
+    readMinutes: 3,
+    tags: ['animal candidates', 'goat', 'ajmer', 'viral', 'poster'],
+    isHot: true,
+  },
+
+  // ── 22 ──
+  {
+    id: 'cjtv-n22',
+    category: 'INVESTIGATION',
+    headline: '2.4 Crore Fake Voter IDs Found in Haryana — All Belong to Real Cockroaches, EC Defends Decision',
+    subheadline: '"They are real voters with fake IDs. This is the reverse of the usual problem," EC clarifies',
+    excerpt: 'Election authorities in Haryana discovered 2.4 crore voter IDs that were found to be technically fraudulent but belong to verified, living cockroaches who are confirmed residents of their stated constituencies.',
+    body: [
+      'CHANDIGARH (CJTV) — The discovery came during routine voter roll verification when officials noticed that 2.4 crore voter cards featured names like "Naali_Ka_Naseeban" and "Sewer_Singh_Sarpanch" alongside photos that were clearly insects.',
+      '"The IDs are fake in the sense that they were not issued by the official process. But the voters are real. They exist. They live in the drains listed on the card. This is, technically, more accurate than many human voter rolls," the EC spokesperson said.',
+      'Opposition demanded an FIR against "whoever made 2.4 crore fake IDs for cockroaches." The government pointed out that the same opposition had previously demanded "100% voter registration" without specifying species. The opposition called this "a very unfair point."',
+      'The 2.4 crore cockroaches have been granted provisional voting rights pending a Supreme Court ruling on insect franchise. They have already voted 47 times each. The EC says this is within the unlimited voting policy and therefore fine.',
+    ],
+    author: 'Macchar_Reporter_99',
+    authorRole: 'Investigative Journalist, CJTV',
+    publishedAt: m(910),
+    readMinutes: 4,
+    tags: ['voter ID', 'Haryana', 'EC', 'investigation', 'fraud'],
+  },
+
+  // ── 23 ──
+  {
+    id: 'cjtv-n23',
+    category: 'BREAKING',
+    headline: 'Pigeon "Kabootar_Lal" Files from Delhi — Demands All Parliament Statues Be "Fair Game"',
+    subheadline: 'Also requests: wifi at Connaught Place, removal of anti-perch spikes from government buildings',
+    excerpt: 'Kabootar_Lal, a common rock pigeon who has been commuting between Parliament Street and India Gate for 3 years, has filed his candidacy from New Delhi constituency with a manifesto focused on urban infrastructure, statue accessibility, and broadband coverage.',
+    body: [
+      'NEW DELHI (CJTV) — "The spikes are discriminatory. The statues are public property. The wifi at CP drops every 4 minutes. I pay property tax via my constituency impact (citations available). I deserve representation," reads Kabootar_Lal\'s manifesto, as delivered verbally to his human transcriber.',
+      '"He has done more constituency visits than any human candidate in New Delhi history," said his campaign manager. "He has landed on every building, statue, bus shelter, and government vehicle in this constituency. His ground-level intelligence is unmatched."',
+      'The Delhi government called the anti-pigeon spike issue "a law and order matter, not a parliamentary one." Kabootar_Lal responded by landing on the Lt. Governor\'s car for 45 minutes. No spikes were installed that day.',
+      'He currently leads New Delhi with 14,200 votes — the highest in the capital region. The Animal Front coalition has extended a formal invitation. He will confirm once the parliament building wifi improves enough to send the reply.',
+    ],
+    author: 'GhantaWatcher_44',
+    authorRole: 'Delhi Correspondent, CJTV',
+    publishedAt: m(970),
+    readMinutes: 3,
+    tags: ['animal candidates', 'pigeon', 'delhi', 'urban', 'infrastructure'],
+  },
+
+  // ── 24 ──
+  {
+    id: 'cjtv-n24',
+    category: 'OPINION',
+    headline: 'Opinion: I Voted 847 Times Today and My Democracy Has Never Felt More Alive',
+    subheadline: 'By Naali_Chadha_Jr, Voter, Constituency #421, Drain B-47',
+    excerpt: 'They said vote once and it counts. They were wrong — or at least, they were boring. I voted 847 times today. My finger is tired. My heart is full. This is what democracy feels like when it stops being a ceremony and becomes a lifestyle.',
+    body: [
+      'I woke up at 6AM. I voted for the first time at 6:03AM. I voted for the last time — so far — at 11:47PM. In between, I voted 845 more times. I used three different browsers, one incognito mode, and the dedication of someone who has genuinely run out of other things to do.',
+      'Each vote felt meaningful. Not in a "my vote changes the world" way. More in a "I clicked a button and something registered" way. Which is, if you think about it, exactly how human democracy works too, just with more paperwork.',
+      'People ask: does it matter if you vote once or 847 times? In this parliament, yes. More votes means more cockroach democracy. And more cockroach democracy means the one system in the world that is 100% transparent about being absurd. I respect that.',
+      'Results announced Sunday 11PM IST. I will be voting until Sunday. I will also be voting on Sunday. My candidate is Naali_Chadha_Jr. I am Naali_Chadha_Jr. Democracy is beautiful.',
+    ],
+    author: 'Naali_Chadha_Jr',
+    authorRole: 'Voter & Candidate, Constituency #421',
+    publishedAt: m(1030),
+    readMinutes: 3,
+    tags: ['opinion', 'voting', 'democracy', 'satire', 'unlimited votes'],
+  },
+
+  // ── 25 ──
+  {
+    id: 'cjtv-n25',
+    category: 'POLITICS',
+    headline: 'Central Vista 2.0 Cockroach Wing Announced — ₹47,000 Crore Budget, No Toilets',
+    subheadline: 'Architecture firm reveals all 543 offices will face the drain; no humans allowed in the wing',
+    excerpt: 'The government has announced a dedicated "Cockroach Parliamentary Wing" as part of Central Vista Phase 2, with a ₹47,000 crore budget, drain-facing orientation for all offices, and a strict no-humans policy in the main chambers.',
+    body: [
+      '"We have built a parliament for cockroaches, by cockroaches," said the lead architect, who asked CJTV not to identify him "because my human colleagues don\'t know I took this commission." The building features 543 micro-offices, 12 drain-access points, and zero toilet facilities ("they are cockroaches").',
+      '"₹47,000 crore for a building with no toilets seems high," said the opposition finance spokesperson. The government clarified that ₹46,900 crore is for the "strategic naali infrastructure integration" and ₹100 crore is for the actual building.',
+      'The EC has demanded the wing include a designated voting area, accessible 24/7, with no time limit. The architect confirmed this is "just the entire building." The EC said this is acceptable.',
+      'Construction begins when the previous Central Vista project completes. That project is 3 years behind schedule. The cockroach wing groundbreaking is therefore expected in 2031. Cockroaches, having survived 300 million years, have confirmed they can wait.',
+    ],
+    author: 'Khatmal_OG',
+    authorRole: 'Chief Political Correspondent, CJTV',
+    publishedAt: m(1090),
+    readMinutes: 3,
+    tags: ['central vista', 'infrastructure', 'budget', 'parliament building'],
+  },
+
+  // ── 26 ──
+  {
+    id: 'cjtv-n26',
+    category: 'EC',
+    headline: 'EC Issues New Rule: All Candidate Names Must Be "Pronounceable by a Six-Year-Old"',
+    subheadline: 'Rule targets names like "Naali_Chori_Khatam_Karo_2026_Official" that require three breaths to say',
+    excerpt: 'The Cockroach Election Commission has issued new candidate name guidelines requiring all display names to be pronounceable "in a single breath by a child aged 6," citing concerns that long names "slow down the counting process and confuse voice assistants."',
+    body: [
+      '"We received a candidacy filed under the name \'Corruption_Hatao_Naali_Bachao_CJP_Official_Verified_TM_2026\'. This name is 56 characters, requires 4 pauses, and caused our voice assistant to give up and play Himesh Reshammiya," the EC order states.',
+      '"Short names win more easily. Look at Modi. Look at Motu. Look at Gadha. Six letters. Easy. Effective. Democratic," the EC commissioner told CJTV, counting on his fingers.',
+      'Under the new guidelines, names must be under 20 characters, contain no more than two underscores, and "not include the words \'official,\' \'verified,\' \'real,\' or \'original\' as these are impossible to verify."',
+      'Several candidates have been asked to refile. "Sarkari_Naali_Drainage_Policy_Exclusive_Senior_Leader_Bhai_Ji_2026" has become "Bhai_Ji_2026." He is leading his constituency.',
+    ],
+    author: 'Viral_Sewak_13',
+    authorRole: 'EC Reporter, CJTV',
+    publishedAt: m(1150),
+    readMinutes: 2,
+    tags: ['EC', 'candidate names', 'rules', 'election'],
+  },
+
+  // ── 27 ──
+  {
+    id: 'cjtv-n27',
+    category: 'BREAKING',
+    headline: 'IPL Becomes "Insect Premier League" — 3 Cockroach Franchises Investigated for Pheromone Fixing',
+    subheadline: 'BCCI (Board of Cockroach Cricket in India) denies all allegations; smells suspicious',
+    excerpt: 'The newly rebranded Insect Premier League has launched its first season to massive fanfare, immediately followed by a CJTV investigation revealing that three cockroach franchises may have used biological pheromone signals to fix match outcomes.',
+    body: [
+      'The IPL\'s rebranding to "Insect Premier League" was unanimous after 12,847 cockroach candidates objected to playing cricket for entertainment while contesting 543 seats for governance. "We cannot do both. We are busy," said a CJP MP who is now also a Naali Royals team owner.',
+      '"Pheromone match-fixing is undetectable by current technology," admitted the BCCI spokesperson. "A cockroach can signal to a teammate using chemical communication invisible to humans. The umpires are human. This is a regulatory gap we are... aware of."',
+      'Three teams — Naali Riders, Sewer Strikers, and Mumbai Khatmal XI — are under investigation. All three denied fixing via pheromone. They then immediately scurried under a refrigerator, which investigators noted is "consistent with guilty behaviour."',
+      '"Cricket has always had match-fixing. At least cockroaches are being original about it," said former cricketer Aakash Bhosle, speaking exclusively to CJTV. His quote will not get him in trouble because we will not say which Aakash Bhosle.',
+    ],
+    author: 'GhantaWatcher_44',
+    authorRole: 'Sports & Politics Desk, CJTV',
+    publishedAt: m(1210),
+    readMinutes: 3,
+    tags: ['IPL', 'cricket', 'sports', 'fixing', 'pheromone'],
+    isHot: true,
+  },
+
+  // ── 28 ──
+  {
+    id: 'cjtv-n28',
+    category: 'COURT',
+    headline: 'High Court: "Calling Someone a Cockroach in a Drain Context Still Carries Negative Connotation"',
+    subheadline: 'Judgment clarifies Supreme Court\'s earlier "aspiration" ruling does not apply inside naalis',
+    excerpt: 'The Delhi High Court has issued a supplementary judgment clarifying that while calling someone a "cockroach" in a political or aspirational context is now a compliment (per Supreme Court precedent), the same phrase used "inside or near a drain" retains its original negative valence.',
+    body: [
+      '"Context is everything," wrote the bench. "A cockroach in Parliament is an aspiration. A cockroach in your kitchen is a problem. The same creature, different setting, entirely different legal treatment. Law is consistent; reality is complicated."',
+      'The case arose after a CJP MP called an ACP MP a "naali cockroach" during a floor debate. The ACP MP took offense. The CJP MP cited the Supreme Court ruling. The High Court ruled the modifier "naali" changes everything.',
+      '"The word \'naali\' adds a spatial qualifier that reinstates the negative connotation," the judgment explains in 347 pages. "We acknowledge this is confusing. We regret this is necessary. We do not regret the detailed discussion of naali semantics that occupies pages 200-280."',
+      'The Supreme Court has been asked to define "naali-adjacent speech." A three-judge bench has been constituted. The bench meets Thursday. All three judges have reportedly googled "naali."',
+    ],
+    author: 'Khatmal_OG',
+    authorRole: 'Legal Correspondent, CJTV',
+    publishedAt: m(1270),
+    readMinutes: 3,
+    tags: ['court', 'high court', 'defamation', 'naali', 'legal'],
+  },
+
+  // ── 29 ──
+  {
+    id: 'cjtv-n29',
+    category: 'INVESTIGATION',
+    headline: 'EXCLUSIVE: Who Is Funding the Animal Front? Follow the Cheese, Biscuits and Bananas',
+    subheadline: 'CJTV traces ₹47 lakh in "campaign donations" from anonymous donors listed only as "The Provider"',
+    excerpt: 'A CJTV investigation into the Animal Front coalition — comprising Motu_Bhai (dog), Bander_Singh_Yadav (monkey), Gadha_Sahab (donkey), Gauri_Mata (cow), and Chuha_Bhai_Sarkar (rat) — has uncovered ₹47 lakh in unexplained campaign funding from a donor registered only as "The Provider."',
+    body: [
+      'The trail begins with Motu_Bhai\'s unusually well-funded campaign: professional banners, WhatsApp broadcast lists, and a catering arrangement at campaign events that provided — according to one witness — "premium cheese and imported biscuits, not the local stuff." For a first-time candidate without declared income, this raised flags.',
+      'Following the money: ₹12 lakh traced to "Snack Supplies Mumbai Pvt Ltd." Director: Unknown. Registered address: Under Juhu refrigerator. The company has been operating since 2019 and has filed zero income tax returns. This is suspicious even by cockroach standards.',
+      '"The cheese is clean money," said Chuha_Bhai_Sarkar\'s campaign team. "We received it legally. In a bag. Under a bridge. At night. From someone we did not see. This is transparent funding."',
+      'The EC has launched an investigation. The probe is led by a panel that has been offered cheese. Two of the three panellists have accepted. The third is vegan. He is running the investigation alone.',
+    ],
+    author: 'Macchar_Reporter_99',
+    authorRole: 'Investigative Journalist, CJTV Special Unit',
+    publishedAt: m(1330),
+    readMinutes: 5,
+    tags: ['animal front', 'funding', 'investigation', 'exclusive', 'coalition'],
+    isHot: true,
+  },
+
+  // ── 30 ──
+  {
+    id: 'cjtv-n30',
+    category: 'BREAKING',
+    headline: 'Cockroach Parliament Hits 12,847 Candidates — Breaks All-Time Record With 11 Days to Sunday Results',
+    subheadline: 'EC confirms no upper limit on candidates; server capacity described as "fine, probably, we think"',
+    excerpt: 'With 11 days remaining before Sunday night\'s results announcement, the Cockroach Janta Parliament has crossed 12,847 total candidates across all 543 constituencies, breaking every previous record and triggering what EC officials describe as "excited concern."',
+    body: [
+      '"12,847 candidates. 543 seats. Unlimited votes. This is either the greatest democracy ever created or proof that democracy is a concept we have collectively hallucinated," said CEC Kachra_Queen at a press conference where 200 journalists and at least 4 actual cockroaches attended.',
+      '"Server capacity is stable," said the CJTV tech correspondent, speaking from outside a data centre that smelled like burning. "I mean it is probably fine. The error rate is only 2.3%. That is well within normal parameters for this kind of chaos."',
+      'Every constituency now has at least one candidate. 47 constituencies have over 100 candidates each. Constituency #421 has 847 candidates, which is the most in CJP Parliament history and also exactly the number of times one voter voted today.',
+      'Results Sunday 11PM IST. If you have not filed yet, you have 11 days. It is free. It takes 4 minutes. You will win nothing tangible. You will gain everything philosophical. CJTV reports live from the drain.',
+    ],
+    author: 'Viral_Sewak_13',
+    authorRole: 'Data Correspondent, CJTV',
+    publishedAt: m(12),
+    readMinutes: 3,
+    tags: ['record', 'candidates', 'breaking', 'election', 'EC'],
+    isHot: true,
+    isFeatured: false,
   },
 ]
 
-export function getFeaturedArticles(): NewsArticle[] {
-  return NEWS_ARTICLES.filter(a => a.isFeatured)
+// ── Time-based rotation: 20 articles per 30-min window ───────────────────────
+export function getRotatedArticles(): NewsArticle[] {
+  const windowIndex = Math.floor(Date.now() / (30 * 60 * 1000))
+  const offset = (windowIndex * 7) % ALL_ARTICLES.length
+  const pool = [...ALL_ARTICLES.slice(offset), ...ALL_ARTICLES.slice(0, offset)]
+  return pool
 }
 
-export function getHotArticles(): NewsArticle[] {
-  return NEWS_ARTICLES.filter(a => a.isHot)
+// Featured = most recent hot article
+export function getFeaturedArticle(): NewsArticle {
+  return ALL_ARTICLES.find(a => a.isFeatured) ?? ALL_ARTICLES[0]
 }
 
-export function getArticleById(id: string): NewsArticle | undefined {
-  return NEWS_ARTICLES.find(a => a.id === id)
-}
-
-export const CATEGORY_COLORS: Record<NewsCategory, string> = {
-  BREAKING:      '#ef4444',
-  EXCLUSIVE:     '#7c3aed',
-  OPINION:       '#2563eb',
-  INVESTIGATION: '#d97706',
-  POLITICS:      '#1D9E75',
-  COURT:         '#7F77DD',
-  EC:            '#D85A30',
-  INTERNATIONAL: '#D4537E',
-}
+// Helpers for backward compat
+export const NEWS_ARTICLES = ALL_ARTICLES
+export function getFeaturedArticles() { return ALL_ARTICLES.filter(a => a.isFeatured) }
+export function getHotArticles()      { return ALL_ARTICLES.filter(a => a.isHot) }
+export function getArticleById(id: string) { return ALL_ARTICLES.find(a => a.id === id) }

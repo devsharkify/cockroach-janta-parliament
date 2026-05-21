@@ -201,7 +201,7 @@ export default function HomePage() {
           {[
             { step: '1', emoji: '🪳', title: 'PICK A SEAT',   desc: 'Choose any of 543 Lok Sabha constituencies. Find yours by city, PIN code, or name.' },
             { step: '2', emoji: '📋', title: 'CONTEST', desc: 'Get an auto-generated cockroach identity and a Hinglish manifesto. Party optional.' },
-            { step: '3', emoji: '🏆', title: 'WIN ON SATURDAY', desc: 'Votes count every Saturday 11PM IST. Most votes wins. Results are forever (ish).' },
+            { step: '3', emoji: '🏆', title: 'WIN ON SUNDAY', desc: 'Votes count every Sunday 11PM IST. Most votes wins. Results are forever (ish).' },
           ].map((s) => (
             <div
               key={s.step}
@@ -279,7 +279,7 @@ export default function HomePage() {
 
           {/* Supporting nudge */}
           <p className="text-center text-black/50 font-mono text-xs mt-4">
-            🪳 543 seats available · all free · no ID required · results every Saturday
+            🪳 543 seats available · all free · no ID required · results every Sunday
           </p>
         </div>
       </section>

@@ -61,7 +61,7 @@ export default function ResultsContent({ data }: { data: LeaderboardData }) {
                 UPDATED {timeAgo(updatedAt).toUpperCase()}
               </span>
               <span className="bg-[#7F77DD]/20 text-[#7F77DD] font-black text-xs px-3 py-1 rounded-full border-2 border-[#7F77DD]">
-                ⏰ Next snapshot: Saturday 11PM IST
+                ⏰ Next snapshot: Sunday 11PM IST
               </span>
             </div>
           </div>

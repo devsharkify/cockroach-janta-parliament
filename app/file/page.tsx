@@ -126,7 +126,7 @@ export default function FilePickerPage() {
               <span className="text-yellow-300">YOU CONTEST?</span>
             </h1>
             <p className="text-white/40 font-mono text-sm">
-              543 seats · all free · results every Saturday 11PM IST
+              543 seats · all free · results every Sunday 11PM IST
             </p>
           </div>
 

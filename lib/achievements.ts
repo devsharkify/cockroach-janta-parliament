@@ -18,7 +18,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'level_3',           emoji: '🪳', name: 'Adult Roach',         description: 'Reached level 3 — full cockroach mode',  rarity: 'rare'      },
   { id: 'level_5',           emoji: '⚡', name: 'Samrat',              description: 'Reached level 5 — supreme power',        rarity: 'epic'      },
   { id: 'level_6',           emoji: '👑', name: 'Supreme Commander',   description: 'Maxed out — you ARE the parliament',     rarity: 'legendary' },
-  { id: 'saturday_voter',    emoji: '🌙', name: 'Saturday Night Fever','description': 'Voted on a Saturday results night',     rarity: 'rare'      },
+  { id: 'sunday_voter',    emoji: '🌙', name: 'Sunday Night Fever','description': 'Voted on a Sunday results night',     rarity: 'rare'      },
   { id: 'multi_seat',        emoji: '🗺️', name: 'Pan-India Roach',    description: 'Voted in 5 different seats',             rarity: 'epic'      },
   { id: 'winner',            emoji: '🏆', name: 'Winning Candidate',   description: 'Your candidate won a seat',              rarity: 'legendary' },
   { id: 'nominated',         emoji: '⭐', name: 'People\'s Choice',    description: 'Someone else voted for your candidate',  rarity: 'rare'      },

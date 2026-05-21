@@ -6,7 +6,7 @@ const POWERS = [
   'Power to declare any seat "spiritually uncontested"',
   'Power to ban brooms in all constituencies',
   'Power to grant 50,000 ceremonial votes to loud supporters',
-  'Power to declare Saturday sacred and results binding',
+  'Power to declare Sunday sacred and results binding',
   'Power to name any naali after himself',
 ]
 
@@ -21,14 +21,14 @@ const DECREES = [
   },
   {
     number: '003',
-    text: 'Saturday 11PM IST is now a national holiday. All screens must show the snapshot results.',
+    text: 'Sunday 11PM IST is now a national holiday. All screens must show the snapshot results.',
   },
 ]
 
 const STAT_CHIPS = [
   '543 seats under my protection',
   '∞ votes possible per citizen',
-  '1 snapshot every Saturday',
+  '1 snapshot every Sunday',
   '0 real politicians involved',
 ]
 

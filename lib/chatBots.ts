@@ -97,7 +97,7 @@ const MSGS_DEMOCRACY = [
   "545 seats mein se 543 already contested. What a site yaar.",
   "The drain is not just infrastructure. The drain is a metaphor. For everything.",
   "Minimum 100 votes karo, phir baat karo representation ki bhai",
-  "Freedom. Chaos. Results every Saturday. Name a better democracy.",
+  "Freedom. Chaos. Results every Sunday. Name a better democracy.",
   "If cockroaches ran government, at least they'd show up. Unlike some people.",
 ]
 
@@ -144,7 +144,7 @@ const MSGS_CONSTITUENCY = [
 ]
 
 const MSGS_RESULTS = [
-  "Saturday results aa rahe hain. Main so nahi sakta. Send help.",
+  "Sunday results aa rahe hain. Main so nahi sakta. Send help.",
   "If my candidate loses I'm petitioning the Roach Supreme Court.",
   "Vote counting in progress... naali math is complex but I trust the process.",
   "Keep refreshing results page. Doesn't update faster but I keep trying anyway.",
@@ -155,7 +155,7 @@ const MSGS_RESULTS = [
   "Exit polls say CJP wins 200+ seats. Exit polls are always wrong everywhere.",
   "Tuesday recount — ek vote ka difference tha. Maine woh vote diya. 🪳",
   "Results aate hi mera candidate ka victory speech ready hai. Ghost-wrote it.",
-  "Saturday 11PM IST. Set alarm. Inform your drain.",
+  "Sunday 11PM IST. Set alarm. Inform your drain.",
   "Current standings mein mera candidate top pe hai. Please don't jinx it.",
   "Agar results galat aaye toh Cockroach Election Commission se complaint.",
   "Recount ho raha hai Seat #182 mein. Ek cockroach ne 4000 votes kiye akele.",
