@@ -37,16 +37,21 @@ export default function Navbar() {
           {/* LOGO */}
           <Link
             href="/"
-            className="flex items-center gap-1.5 shrink-0"
+            className="flex items-center gap-2 shrink-0"
             onClick={closeMenu}
           >
-            <span className="text-xl leading-none">🪳</span>
-            <span
-              className="font-black text-yellow-300 text-lg leading-none tracking-tight"
-              style={{ letterSpacing: '-0.5px' }}
-            >
-              CJP
-            </span>
+            <span className="text-2xl leading-none">🪳</span>
+            <div className="flex flex-col leading-none">
+              <span
+                className="font-black text-yellow-300 text-sm leading-none tracking-tight uppercase"
+                style={{ letterSpacing: '-0.3px' }}
+              >
+                SAMRAT MACCHAR
+              </span>
+              <span className="text-white/40 font-mono text-[9px] leading-tight tracking-wider">
+                Prime Cockroach Sevarkar
+              </span>
+            </div>
           </Link>
 
           {/* DESKTOP NAV LINKS */}
