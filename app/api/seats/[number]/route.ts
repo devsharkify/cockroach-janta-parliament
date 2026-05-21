@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server'
 import { seats, candidates, votes, cycles, parties } from '@/lib/mongodb/collections'
+import { getMockCandidates } from '@/lib/mockCandidates'
+import { CONSTITUENCIES } from '@/lib/constituencies'
 
 type SeatResponse = {
   seat: { number: number; name: string; state: string; stateCode: string; slug: string }
@@ -32,50 +34,37 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ number: str
 
   // Return mock data when MongoDB is not configured
   if (!process.env.MONGODB_URI) {
+    // Resolve real seat name from constituencies list
+    let seatName = `Constituency ${num}`
+    let stateName = 'India'
+    let stateCode = 'IN'
+    for (const stateObj of CONSTITUENCIES) {
+      const found = stateObj.seats.find(s => s.number === num)
+      if (found) {
+        seatName = found.name
+        stateName = stateObj.state
+        stateCode = stateObj.state.slice(0, 2).toUpperCase()
+        break
+      }
+    }
+
+    const mockCands = getMockCandidates(num)
+    const totalVotes = mockCands.reduce((s, c) => s + c.voteCount, 0)
+
     const mock: SeatResponse = {
-      seat: {
-        number: num,
-        name: `Constituency ${num}`,
-        state: 'Demo State',
-        stateCode: 'DS',
-        slug: `constituency-${num}`,
-      },
-      candidates: [
-        {
-          id: 'mock-1',
-          displayName: 'Naali_Naresh_42',
-          partyCode: 'CJP',
-          partyColor: '#7F77DD',
-          partyName: 'Cockroach Janta Party',
-          isIndependent: false,
-          manifesto: "Free naali for all. Brooms banned. Vote or don't, I survive either way.",
-          voteCount: 342,
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: 'mock-2',
-          displayName: 'Kachra_Queen',
-          partyCode: 'ACP',
-          partyColor: '#1D9E75',
-          partyName: 'Aam Cockroach Party',
-          isIndependent: false,
-          manifesto: 'Naali sabki iss baar cockroach ki. Your garbage is my palace.',
-          voteCount: 289,
-          createdAt: new Date(Date.now() - 72000000).toISOString(),
-        },
-        {
-          id: 'mock-3',
-          displayName: 'Gobar_Sarkar',
-          partyCode: null,
-          partyColor: null,
-          partyName: null,
-          isIndependent: true,
-          manifesto: 'No party. No agenda. Just vibes and survival instinct.',
-          voteCount: 156,
-          createdAt: new Date(Date.now() - 43200000).toISOString(),
-        },
-      ],
-      totalVotes: 787,
+      seat: { number: num, name: seatName, state: stateName, stateCode, slug: seatName.toLowerCase().replace(/\s+/g, '-') },
+      candidates: mockCands.map(c => ({
+        id: c.id,
+        displayName: c.displayName,
+        partyCode: c.partyCode,
+        partyColor: c.partyColor,
+        partyName: c.partyName,
+        isIndependent: c.isIndependent,
+        manifesto: c.manifesto,
+        voteCount: c.voteCount,
+        createdAt: c.createdAt,
+      })),
+      totalVotes,
       cycleId: null,
     }
     return Response.json(mock, { headers })

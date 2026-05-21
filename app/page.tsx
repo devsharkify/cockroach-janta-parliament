@@ -93,7 +93,7 @@ export default function HomePage() {
                 📋 CONTEST (free)
               </Link>
             </div>
-            <p className="text-black/50 text-xs font-mono mt-3">— Samrat Macchar, Supreme Cockroach Commander 👑</p>
+            <p className="text-black/50 text-xs font-mono mt-3">— Pradhan Cockroach Minister 👑</p>
           </div>
         </section>
       </div>
@@ -165,7 +165,7 @@ export default function HomePage() {
             </div>
 
             <p className="text-black/50 text-xs font-mono mt-4">
-              — Samrat Macchar, Supreme Cockroach Commander 👑
+              — Pradhan Cockroach Minister 👑
             </p>
           </div>
         </div>

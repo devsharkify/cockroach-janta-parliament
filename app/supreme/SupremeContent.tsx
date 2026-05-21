@@ -92,7 +92,7 @@ export default function SupremeContent() {
           className="text-base sm:text-xl font-bold uppercase tracking-widest text-center mb-8"
           style={{ color: 'rgba(212,160,23,0.6)' }}
         >
-          Supreme Cockroach Commander — All 543 Constituencies
+          Pradhan Cockroach Minister — All 543 Constituencies
         </p>
 
         {/* Gold separator */}
@@ -237,7 +237,7 @@ export default function SupremeContent() {
                   className="relative mt-4 pt-3 border-t font-mono text-xs text-right"
                   style={{ borderColor: 'rgba(139,105,20,0.3)', color: '#8B6914' }}
                 >
-                  — Samrat Macchar, Supreme Cockroach Commander
+                  — Pradhan Cockroach Minister
                 </div>
               </div>
             ))}
