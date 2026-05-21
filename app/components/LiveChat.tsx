@@ -24,7 +24,7 @@ export default function LiveChat() {
   const [isOpen, setIsOpen]     = useState(false)
   const [msgs, setMsgs]         = useState<ChatMessage[]>([])
   const [input, setInput]       = useState('')
-  const [online, setOnline]     = useState(1247)
+  const [online, setOnline]     = useState(14200)
   const [typing, setTyping]     = useState<{ name: string; color: string }[]>([])
   const [unread, setUnread]     = useState(0)
 
@@ -48,7 +48,7 @@ export default function LiveChat() {
       bots[Math.floor((i / AGENT_COUNT) * bots.length)]
     )
 
-    setOnline(rand(1200, 1500))
+    setOnline(rand(12000, 24000))
 
     // Seed 10 initial messages from agents
     const init: ChatMessage[] = Array.from({ length: 10 }, (_, i) => {
@@ -133,7 +133,7 @@ export default function LiveChat() {
   /* ── Online count fluctuation ── */
   useEffect(() => {
     const i = setInterval(() => {
-      setOnline(n => Math.max(900, Math.min(2200, n + rand(-45, 65))))
+      setOnline(n => Math.max(10000, Math.min(50000, n + rand(-300, 500))))
     }, 11000)
     return () => clearInterval(i)
   }, [])
@@ -254,7 +254,7 @@ export default function LiveChat() {
             {/* Welcome pill */}
             <div className="flex justify-center mb-1">
               <span className="text-[9px] font-mono text-white/20 px-3 py-1 rounded-full border border-white/10">
-                🪳 {AGENT_COUNT} active agents · 1,000 roaches lurking
+                🪳 {AGENT_COUNT} active agents · 10,000+ roaches lurking
               </span>
             </div>
 
