@@ -1,4 +1,4 @@
-import { votes } from '@/lib/mongodb/collections'
+import { votes, candidates } from '@/lib/mongodb/collections'
 
 export type TopCandidate = {
   candidateId: string
@@ -33,8 +33,11 @@ export type LeaderboardData = {
   topCandidates: TopCandidate[]
   partyStandings: PartyStanding[]
   trendingSeats: TrendingSeat[]
+  nalalaCount: number
   updatedAt: string
 }
+
+const NALALA_THRESHOLD = 10
 
 const MOCK_DATA: LeaderboardData = {
   topCandidates: [
@@ -62,6 +65,7 @@ const MOCK_DATA: LeaderboardData = {
     { seatNumber: 173, seatName: 'Bengaluru Central', state: 'Karnataka', recentVotes: 2103 },
     { seatNumber: 393, seatName: 'Hyderabad', state: 'Telangana', recentVotes: 1876 },
   ],
+  nalalaCount: 127,
   updatedAt: new Date().toISOString(),
 }
 
@@ -137,10 +141,20 @@ export async function GET() {
     },
   ]).toArray()
 
+  // Nalala count: candidates whose party has fewer than NALALA_THRESHOLD total candidacies
+  const nalalaAgg = await (await candidates()).aggregate<{ count: number }>([
+    { $match: { withdrawn: false, party_id: { $ne: null } } },
+    { $group: { _id: '$party_id', candidateCount: { $sum: 1 } } },
+    { $match: { candidateCount: { $lt: NALALA_THRESHOLD } } },
+    { $group: { _id: null, count: { $sum: '$candidateCount' } } },
+  ]).toArray()
+  const nalalaCount = nalalaAgg[0]?.count ?? 0
+
   const data: LeaderboardData = {
     topCandidates,
     partyStandings,
     trendingSeats,
+    nalalaCount,
     updatedAt: new Date().toISOString(),
   }
 

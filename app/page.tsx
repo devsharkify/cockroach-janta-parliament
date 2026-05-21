@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import IndiaMap from './components/IndiaMap'
+import IndiaMapInteractive from './components/IndiaMapInteractive'
 import SeatFinder from './components/SeatFinder'
 import SoulPanel from './components/SoulPanel'
 import FilingFrenzy from './components/FilingFrenzy'
@@ -171,7 +171,7 @@ export default function HomePage() {
             click any city to jump to its seat
           </p>
 
-          <IndiaMap className="rounded-2xl overflow-hidden border-4 border-[#4a3fa0] shadow-[0_0_40px_rgba(127,119,221,0.3)]" />
+          <IndiaMapInteractive />
 
           <div className="text-center mt-5">
             <a

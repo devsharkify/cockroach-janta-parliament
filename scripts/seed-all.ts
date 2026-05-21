@@ -1,7 +1,7 @@
 /**
  * Seeds all collections in order:
  *   1. seats (from CSV)
- *   2. founding parties
+ *   2. all parties (founding + established)
  *   3. cycle 1
  *
  * Run: npx tsx scripts/seed-all.ts
@@ -12,6 +12,7 @@ import { MongoClient } from 'mongodb'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { config } from 'dotenv'
+import { ALL_PARTIES } from '../lib/types'
 
 config({ path: resolve(process.cwd(), '.env.local') })
 
@@ -45,22 +46,30 @@ async function main() {
     await seatsCol.bulkWrite(seatOps, { ordered: false })
     console.log(`✓ ${seatDocs.length} seats seeded`)
 
-    // ── 2. Founding parties ───────────────────────────────────────────────
+    // ── 2. Parties (founding + established) ──────────────────────────────
     const partiesCol = db.collection('parties')
+    // Unique on code only — id is generated per-run for $setOnInsert
     await partiesCol.createIndex({ code: 1 }, { unique: true })
-    await partiesCol.createIndex({ id: 1 }, { unique: true })
 
-    const partyDocs = [
-      { id: crypto.randomUUID(), code: 'CJP', name: 'Cockroach Janta Party',    color: '#7F77DD', tagline: 'Lazy, Loud, Lawful',                 logo_url: null, founder_fingerprint: null, is_founding: true, created_at: new Date() },
-      { id: crypto.randomUUID(), code: 'CCP', name: 'Cockroach Congress Party',  color: '#D85A30', tagline: 'Old Roach Magic',                    logo_url: null, founder_fingerprint: null, is_founding: true, created_at: new Date() },
-      { id: crypto.randomUUID(), code: 'ACP', name: 'Aam Cockroach Party',       color: '#1D9E75', tagline: 'Naali Sabki, Iss Baar Cockroach Ki', logo_url: null, founder_fingerprint: null, is_founding: true, created_at: new Date() },
-      { id: crypto.randomUUID(), code: 'RCP', name: 'Regional Cockroach Party',  color: '#D4537E', tagline: 'Apni Galli Apna Kachra',              logo_url: null, founder_fingerprint: null, is_founding: true, created_at: new Date() },
-    ]
+    // Seed all parties except IND (virtual — independent candidates, not a real party)
+    const seedableParties = ALL_PARTIES.filter(p => p.code !== 'IND')
+    const partyDocs = seedableParties.map(p => ({
+      id: crypto.randomUUID(),
+      code: p.code,
+      name: p.name,
+      color: p.color,
+      tagline: p.tagline,
+      logo_url: null,
+      founder_fingerprint: null,
+      is_founding: p.is_founding,
+      created_at: new Date(),
+    }))
     const partyOps = partyDocs.map(p => ({
       updateOne: { filter: { code: p.code }, update: { $setOnInsert: p }, upsert: true },
     }))
     await partiesCol.bulkWrite(partyOps, { ordered: false })
-    console.log(`✓ ${partyDocs.length} founding parties seeded`)
+    const foundingCount = partyDocs.filter(p => p.is_founding).length
+    console.log(`✓ ${partyDocs.length} parties seeded (${foundingCount} founding + ${partyDocs.length - foundingCount} established)`)
 
     // ── 3. Cycle 1 ────────────────────────────────────────────────────────
     const cyclesCol = db.collection('cycles')
@@ -106,9 +115,9 @@ async function main() {
     ])
     console.log('\n--- Smoke Test ---')
     console.log(`seats:   ${sc} ${sc >= 543 ? '✓' : '✗ (expected 543)'}`)
-    console.log(`parties: ${pc} ${pc >= 4 ? '✓' : '✗ (expected 4)'}`)
+    console.log(`parties: ${pc} ${pc >= 23 ? '✓' : '✗ (expected 23)'}`)
     console.log(`cycles:  ${cc} ${cc >= 1 ? '✓' : '✗ (expected 1)'}`)
-    if (sc < 543 || pc < 4 || cc < 1) process.exit(1)
+    if (sc < 543 || pc < 23 || cc < 1) process.exit(1)
     console.log('\n✓ All checks passed. MongoDB Atlas is ready.')
   } finally {
     await client.close()

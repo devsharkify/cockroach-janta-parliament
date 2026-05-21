@@ -74,7 +74,16 @@ async function getLeaderboardData(): Promise<LeaderboardData> {
       },
     ]).toArray()
 
-    return { topCandidates, partyStandings, trendingSeats, updatedAt: new Date().toISOString() }
+    const { candidates } = await import('@/lib/mongodb/collections')
+    const nalalaAgg = await (await candidates()).aggregate<{ count: number }>([
+      { $match: { withdrawn: false, party_id: { $ne: null } } },
+      { $group: { _id: '$party_id', candidateCount: { $sum: 1 } } },
+      { $match: { candidateCount: { $lt: 10 } } },
+      { $group: { _id: null, count: { $sum: '$candidateCount' } } },
+    ]).toArray()
+    const nalalaCount = nalalaAgg[0]?.count ?? 0
+
+    return { topCandidates, partyStandings, trendingSeats, nalalaCount, updatedAt: new Date().toISOString() }
   }
 
   // No MongoDB — call the route handler via HTTP (works in dev and production)

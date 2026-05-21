@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/', label: 'Home', emoji: '🏠' },
   { href: '/results', label: 'Results', emoji: '🏆' },
   { href: '/parties', label: 'Parties', emoji: '🪳' },
+  { href: '/create-party', label: 'Start Party', emoji: '🏴' },
   { href: '/supreme', label: 'Supreme', emoji: '👑' },
 ]
 
