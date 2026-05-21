@@ -92,7 +92,7 @@ function PinGate({ onSuccess }: { onSuccess: (pin: string) => void }) {
     setLoading(true)
     setError(false)
     try {
-      const res = await fetch(`/api/admin/dashboard?pin=${pin}`)
+      const res = await fetch(`/api/admin/stats?pin=${pin}`)
       if (res.status === 401) {
         setError(true)
         setShake(true)
@@ -269,7 +269,7 @@ function Dashboard({ pin }: { pin: string }) {
     setError('')
     const isMock = forceMock !== undefined ? forceMock : useMock
     try {
-      const res = await fetch(`/api/admin/dashboard?pin=${pin}${isMock ? '&mock=1' : ''}`)
+      const res = await fetch(`/api/admin/stats?pin=${pin}${isMock ? '&mock=1' : ''}`)
       if (!res.ok) throw new Error('Stats fetch failed')
       setStats(await res.json())
       setLastRefresh(new Date())
@@ -295,7 +295,7 @@ function Dashboard({ pin }: { pin: string }) {
     setSnapshotLoading(true)
     setSnapshotResult(null)
     try {
-      const res = await fetch(`/api/admin/dashboard?pin=${pin}`, { method: 'POST' })
+      const res = await fetch(`/api/admin/stats?pin=${pin}`, { method: 'POST' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
       setSnapshotResult(`✅ Cycle #${data.cycleNumber} closed · ${data.winnersComputed} winners computed`)
