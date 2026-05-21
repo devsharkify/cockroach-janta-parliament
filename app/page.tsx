@@ -48,110 +48,149 @@ export default function HomePage() {
       </div>
 
       {/* ═══════════════════════════════════════
-          1B. PARLIAMENT HERO IMAGE
+          2. COLLAGE HERO (image + content merged)
       ═══════════════════════════════════════ */}
-      <section className="relative w-full border-b-8 border-black overflow-hidden" style={{ maxHeight: '92vh' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/parliament-hero.png"
-          alt="Cockroach Janta Parliament Elections — Unity Survival Progress"
-          className="w-full object-cover object-top"
-          style={{ maxHeight: '92vh', display: 'block' }}
-        />
-        {/* Gradient overlay at bottom so ticker/hero blend */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, transparent, #000)' }}
-        />
-        {/* Bottom badge */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <a
-            href="#seat-finder"
-            className="px-8 py-4 bg-yellow-300 text-black font-black text-lg border-4 border-black rounded-2xl shadow-[5px_5px_0_black] hover:bg-white transition-colors"
-          >
-            🪳 CONTEST NOW — FREE →
-          </a>
-          <p className="text-white/70 font-mono text-xs">543 seats · results every Saturday</p>
-        </div>
-      </section>
 
-      {/* ═══════════════════════════════════════
-          2. HERO
-      ═══════════════════════════════════════ */}
-      <section className="relative bg-yellow-300 border-b-8 border-black overflow-hidden">
-        {/* chaotic bg roaches */}
-        <div
-          className="absolute inset-0 flex flex-wrap gap-4 p-4 pointer-events-none select-none overflow-hidden rotate-12 scale-125"
-          style={{ opacity: 0.07 }}
-          aria-hidden
-        >
-          {Array.from({ length: 60 }).map((_, i) => (
-            <span key={i} className="text-5xl">🪳</span>
-          ))}
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center pt-10 pb-10 px-4 text-center">
-          {/* meme caption */}
-          <p className="text-black font-black text-xs uppercase tracking-widest mb-4 bg-white px-4 py-1.5 rounded border-4 border-black inline-block shadow-[3px_3px_0_black] rotate-[-1deg]">
+      {/* MOBILE: stacked image banner on top, content below */}
+      <div className="lg:hidden">
+        <div className="relative w-full overflow-hidden border-b-4 border-black" style={{ height: '56vw', maxHeight: 320 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/parliament-hero.png"
+            alt="Cockroach Janta Parliament Elections"
+            className="absolute inset-0 w-full h-full object-cover object-top"
+          />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, #FBBF24 100%)' }} />
+          {/* floating stamp */}
+          <div className="absolute top-3 left-3 bg-black text-yellow-300 font-black text-[9px] uppercase tracking-widest px-2 py-1 rounded border-2 border-yellow-300 rotate-[-2deg]">
             POV: democracy but make it chaos 🪳
-          </p>
-
-          {/* giant cockroach */}
-          <div
-            className="text-[8rem] leading-none mb-2"
-            style={{ filter: 'drop-shadow(4px 4px 0 rgba(0,0,0,0.25))' }}
-          >
-            🪳
           </div>
-
-          {/* impact title */}
-          <h1
-            className="text-5xl sm:text-8xl font-black leading-none text-black uppercase mb-0"
-            style={{ textShadow: '4px 4px 0 #7F77DD, 7px 7px 0 rgba(0,0,0,0.12)', letterSpacing: '-2px' }}
-          >
-            COCKROACH
-          </h1>
-          <h2
-            className="text-5xl sm:text-8xl font-black leading-none uppercase mb-0"
-            style={{ color: '#7F77DD', textShadow: '4px 4px 0 black', letterSpacing: '-2px' }}
-          >
-            JANTA
-          </h2>
-          <h3
-            className="text-4xl sm:text-7xl font-black leading-none text-black uppercase mb-6"
-            style={{ textShadow: '4px 4px 0 #D85A30', letterSpacing: '-2px' }}
-          >
-            PARLIAMENT 🏛️
-          </h3>
-
-          {/* meme subtitle band */}
-          <div className="bg-black text-yellow-300 font-black text-base sm:text-xl px-6 py-3 mb-5 rotate-[-1deg] inline-block border-4 border-yellow-300 shadow-[5px_5px_0_rgba(0,0,0,0.3)]">
-            543 SEATS. UNLIMITED VOTES. ZERO CHILL.
-          </div>
-
-          {/* live stat counters */}
-          <LiveStats initialCandidates={12847} initialVotes={394201} />
-
-          {/* Primary CTA */}
-          <div className="flex flex-col sm:flex-row gap-3 items-center">
-            <a
-              href="#seat-finder"
-              className="inline-block px-8 py-4 bg-black text-yellow-300 font-black text-lg border-4 border-black rounded-2xl shadow-[5px_5px_0_rgba(0,0,0,0.3)] hover:bg-[#7F77DD] hover:border-[#7F77DD] transition-colors"
-            >
-              🪳 FIND YOUR SEAT →
-            </a>
-            <Link
-              href="/file"
-              className="inline-block px-8 py-4 bg-white text-black font-black text-lg border-4 border-black rounded-2xl shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:bg-black hover:text-yellow-300 transition-colors"
-            >
-              📋 FILE CANDIDACY (free)
-            </Link>
-          </div>
-
-          <p className="text-black/60 text-xs font-mono mt-4">
-            — Samrat Macchar, Supreme Cockroach Commander 👑
-          </p>
         </div>
+        <section className="relative bg-yellow-300 border-b-8 border-black overflow-hidden">
+          <div
+            className="absolute inset-0 flex flex-wrap gap-3 p-4 pointer-events-none select-none overflow-hidden rotate-12 scale-125"
+            style={{ opacity: 0.06 }}
+            aria-hidden
+          >
+            {Array.from({ length: 40 }).map((_, i) => (
+              <span key={i} className="text-4xl">🪳</span>
+            ))}
+          </div>
+          <div className="relative z-10 flex flex-col items-center pt-6 pb-8 px-4 text-center">
+            <h1 className="text-6xl font-black leading-none text-black uppercase mb-0" style={{ textShadow: '3px 3px 0 #7F77DD', letterSpacing: '-2px' }}>COCKROACH</h1>
+            <h2 className="text-6xl font-black leading-none uppercase mb-0" style={{ color: '#7F77DD', textShadow: '3px 3px 0 black', letterSpacing: '-2px' }}>JANTA</h2>
+            <h3 className="text-5xl font-black leading-none text-black uppercase mb-4" style={{ textShadow: '3px 3px 0 #D85A30', letterSpacing: '-2px' }}>PARLIAMENT 🏛️</h3>
+            <div className="bg-black text-yellow-300 font-black text-sm px-5 py-2 mb-4 rotate-[-1deg] inline-block border-4 border-yellow-300 shadow-[4px_4px_0_rgba(0,0,0,0.3)]">
+              543 SEATS. UNLIMITED VOTES. ZERO CHILL.
+            </div>
+            <LiveStats initialCandidates={12847} initialVotes={394201} />
+            <div className="flex flex-col gap-3 w-full max-w-xs mt-2">
+              <a href="#seat-finder" className="w-full py-4 bg-black text-yellow-300 font-black text-base border-4 border-black rounded-2xl shadow-[4px_4px_0_rgba(0,0,0,0.3)] hover:bg-[#7F77DD] hover:border-[#7F77DD] transition-colors text-center">
+                🪳 FIND YOUR SEAT →
+              </a>
+              <Link href="/file" className="w-full py-4 bg-white text-black font-black text-base border-4 border-black rounded-2xl shadow-[4px_4px_0_rgba(0,0,0,0.25)] hover:bg-black hover:text-yellow-300 transition-colors text-center">
+                📋 FILE CANDIDACY (free)
+              </Link>
+            </div>
+            <p className="text-black/50 text-xs font-mono mt-3">— Samrat Macchar, Supreme Cockroach Commander 👑</p>
+          </div>
+        </section>
+      </div>
+
+      {/* DESKTOP: side-by-side collage */}
+      <section className="hidden lg:flex border-b-8 border-black overflow-hidden" style={{ minHeight: '91vh' }}>
+
+        {/* LEFT — yellow content panel */}
+        <div className="relative flex-1 bg-yellow-300 flex flex-col justify-center px-10 xl:px-16 py-10 overflow-hidden" style={{ maxWidth: '52%' }}>
+          {/* chaotic bg roaches */}
+          <div
+            className="absolute inset-0 flex flex-wrap gap-4 p-4 pointer-events-none select-none overflow-hidden rotate-12 scale-125"
+            style={{ opacity: 0.07 }}
+            aria-hidden
+          >
+            {Array.from({ length: 50 }).map((_, i) => (
+              <span key={i} className="text-5xl">🪳</span>
+            ))}
+          </div>
+
+          <div className="relative z-10">
+            {/* stamp badge */}
+            <p className="text-black font-black text-xs uppercase tracking-widest mb-5 bg-white px-4 py-1.5 rounded border-4 border-black inline-block shadow-[3px_3px_0_black] rotate-[-1.5deg]">
+              POV: democracy but make it chaos 🪳
+            </p>
+
+            {/* title stack */}
+            <h1
+              className="text-[4.5rem] xl:text-[6rem] font-black leading-none text-black uppercase"
+              style={{ textShadow: '5px 5px 0 #7F77DD', letterSpacing: '-3px' }}
+            >
+              COCKROACH
+            </h1>
+            <h2
+              className="text-[4.5rem] xl:text-[6rem] font-black leading-none uppercase"
+              style={{ color: '#7F77DD', textShadow: '5px 5px 0 black', letterSpacing: '-3px' }}
+            >
+              JANTA
+            </h2>
+            <h3
+              className="text-[3.5rem] xl:text-[5rem] font-black leading-none text-black uppercase mb-6"
+              style={{ textShadow: '4px 4px 0 #D85A30', letterSpacing: '-3px' }}
+            >
+              PARLIAMENT 🏛️
+            </h3>
+
+            {/* subtitle band */}
+            <div className="bg-black text-yellow-300 font-black text-lg px-6 py-3 mb-6 rotate-[-1deg] inline-block border-4 border-yellow-300 shadow-[5px_5px_0_rgba(0,0,0,0.3)]">
+              543 SEATS. UNLIMITED VOTES. ZERO CHILL.
+            </div>
+
+            {/* live stats */}
+            <LiveStats initialCandidates={12847} initialVotes={394201} />
+
+            {/* CTAs */}
+            <div className="flex flex-row gap-3 items-center mt-2">
+              <a
+                href="#seat-finder"
+                className="px-7 py-4 bg-black text-yellow-300 font-black text-base border-4 border-black rounded-2xl shadow-[5px_5px_0_rgba(0,0,0,0.3)] hover:bg-[#7F77DD] hover:border-[#7F77DD] transition-colors"
+              >
+                🪳 FIND YOUR SEAT →
+              </a>
+              <Link
+                href="/file"
+                className="px-7 py-4 bg-white text-black font-black text-base border-4 border-black rounded-2xl shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:bg-black hover:text-yellow-300 transition-colors"
+              >
+                📋 FILE CANDIDACY (free)
+              </Link>
+            </div>
+
+            <p className="text-black/50 text-xs font-mono mt-4">
+              — Samrat Macchar, Supreme Cockroach Commander 👑
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT — parliament image panel */}
+        <div className="relative flex-1 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/parliament-hero.png"
+            alt="Cockroach Janta Parliament Elections — Unity Survival Progress"
+            className="absolute inset-0 w-full h-full object-cover object-top"
+          />
+          {/* left-edge blend into yellow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, #FBBF24 0%, transparent 18%)' }}
+          />
+          {/* bottom badge */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none">
+            <span className="bg-black/75 backdrop-blur text-yellow-300 font-black text-xs px-4 py-2 rounded-full border border-yellow-300/40 tracking-widest uppercase">
+              🏛️ Cockroach Janta Parliament Elections
+            </span>
+            <span className="text-white/50 font-mono text-[10px]">Unity · Survival · Progress</span>
+          </div>
+        </div>
+
       </section>
 
       {/* ═══════════════════════════════════════
