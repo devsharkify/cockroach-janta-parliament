@@ -51,11 +51,12 @@ export async function POST(req: NextRequest) {
     // Close current cycle
     await cyclesCol.updateOne({ id: liveCycle.id }, { $set: { status: 'closed' } })
 
-    // Create next cycle (next Saturday 11PM IST = 17:30 UTC)
-    const nextSat = new Date()
-    const daysUntilSat = (6 - nextSat.getDay() + 7) % 7 || 7
-    nextSat.setDate(nextSat.getDate() + daysUntilSat)
-    nextSat.setUTCHours(17, 30, 0, 0)
+    // Create next cycle (next Sunday 11PM IST = 17:30 UTC)
+    const nextSun = new Date()
+    const daysUntilSun = (7 - nextSun.getDay()) % 7 || 7
+    nextSun.setDate(nextSun.getDate() + daysUntilSun)
+    nextSun.setUTCHours(17, 30, 0, 0)
+    const nextSat = nextSun
 
     const nextCycle = {
       id: crypto.randomUUID(),
