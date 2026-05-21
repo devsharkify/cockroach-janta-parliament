@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import LiveChat from './components/LiveChat'
 import InstagramPopup from './components/InstagramPopup'
+import { Analytics } from '@vercel/analytics/react'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <span className="roach-sprite" style={{ animationDuration: '21s', animationDelay: '-6s',  bottom: '48px' }}>🪳</span>
         <span className="roach-sprite" style={{ animationDuration: '32s', animationDelay: '-15s', bottom: '64px' }}>🪳</span>
         <span className="roach-sprite" style={{ animationDuration: '15s', animationDelay: '-3s',  bottom: '4px'  }}>🪳</span>
+        <Analytics />
       </body>
     </html>
   )

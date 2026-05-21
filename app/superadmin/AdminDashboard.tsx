@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 
 /* ── Types ───────────────────────────────────────────────────────────────── */
 interface DashStats {
+  isMock: boolean
   totalCandidates: number
   activeCandidates: number
   withdrawnCandidates: number
@@ -25,6 +26,7 @@ interface DashStats {
   candidatesByState: { state: string; count: number }[]
   xpDistribution: { level: number; souls: number }[]
   topSeats: { seatNumber: number; totalVotes: number }[]
+  dailyStats: { date: string; label: string; candidates: number; votes: number; pageViews: number }[]
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -260,12 +262,14 @@ function Dashboard({ pin }: { pin: string }) {
   const [snapshotResult, setSnapshotResult] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const [useMock, setUseMock] = useState(false)
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = useCallback(async (mock?: boolean) => {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/admin/dashboard?pin=${pin}`)
+      const isMock = mock ?? useMock
+      const res = await fetch(`/api/admin/dashboard?pin=${pin}${isMock ? '&mock=1' : ''}`)
       if (!res.ok) throw new Error('Stats fetch failed')
       setStats(await res.json())
       setLastRefresh(new Date())
@@ -274,7 +278,13 @@ function Dashboard({ pin }: { pin: string }) {
     } finally {
       setLoading(false)
     }
-  }, [pin])
+  }, [pin, useMock])
+
+  const toggleMock = () => {
+    const next = !useMock
+    setUseMock(next)
+    fetchStats(next)
+  }
 
   useEffect(() => { fetchStats() }, [fetchStats])
 
@@ -312,7 +322,7 @@ function Dashboard({ pin }: { pin: string }) {
         <div className="border-4 border-red-500 rounded-2xl p-6 bg-white text-center max-w-sm">
           <div className="text-4xl mb-2">⚠️</div>
           <p className="font-black text-red-600 mb-3">{error}</p>
-          <button onClick={fetchStats} className="px-6 py-2 bg-black text-yellow-300 font-black text-sm rounded-xl border-4 border-black">
+          <button onClick={() => fetchStats()} className="px-6 py-2 bg-black text-yellow-300 font-black text-sm rounded-xl border-4 border-black">
             Retry
           </button>
         </div>
@@ -339,24 +349,46 @@ function Dashboard({ pin }: { pin: string }) {
               <div className="font-mono text-[9px] text-white/30 tracking-widest">cockroachparliament.online/superadmin</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {lastRefresh && (
               <span className="font-mono text-[10px] text-white/30 hidden sm:block">
                 {lastRefresh.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
+            {/* Mock / Live toggle */}
             <button
-              onClick={fetchStats}
+              onClick={toggleMock}
+              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider border-2 transition-all ${
+                useMock
+                  ? 'border-yellow-300 text-yellow-300 bg-yellow-300/10'
+                  : 'border-green-400 text-green-400 bg-green-400/10'
+              }`}
+            >
+              {useMock ? '🧪 MOCK' : '🟢 LIVE'}
+            </button>
+            <button
+              onClick={() => fetchStats()}
               disabled={loading}
               className="px-4 py-1.5 border-2 border-white/20 rounded-lg text-white/60 font-black text-xs uppercase hover:border-white/50 hover:text-white transition-colors disabled:opacity-40"
             >
-              {loading ? '⟳' : '⟳ Refresh'}
+              {loading ? '⟳' : '⟳'}
             </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        {/* MOCK BANNER */}
+        {stats?.isMock && (
+          <div className="flex items-center gap-3 bg-yellow-300 border-4 border-black rounded-2xl px-5 py-3 shadow-[4px_4px_0_black]">
+            <span className="text-2xl">🧪</span>
+            <div>
+              <div className="font-black text-sm text-black uppercase tracking-wide">Mock Data Mode</div>
+              <div className="font-mono text-xs text-black/60">Showing sample/demo data — not from live database. Toggle to 🟢 LIVE to see real stats.</div>
+            </div>
+          </div>
+        )}
 
         {/* STAT CARDS */}
         <div>
@@ -386,6 +418,75 @@ function Dashboard({ pin }: { pin: string }) {
             <StatCard emoji="👁️" label="Views" value={fmt(stats.todayViews)} color="#8e44ad" />
           </div>
         </div>
+
+        {/* 7-DAY ANALYTICS */}
+        {stats.dailyStats && stats.dailyStats.length > 0 && (() => {
+          const maxVotes = Math.max(...stats.dailyStats.map(d => d.votes), 1)
+          const maxCands = Math.max(...stats.dailyStats.map(d => d.candidates), 1)
+          return (
+            <div className="border-4 border-black rounded-2xl bg-white shadow-[4px_4px_0_black] p-5">
+              <SectionHeader title="Last 7 Days — Analytics" emoji="📈" />
+
+              {/* Dual bar chart */}
+              <div className="flex gap-3 h-40 items-end mb-3">
+                {stats.dailyStats.map((day) => (
+                  <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+                    {/* Votes bar */}
+                    <div className="w-full flex flex-col justify-end gap-0.5" style={{ height: '100%' }}>
+                      <div className="w-full flex flex-col gap-0.5 justify-end" style={{ height: '100%' }}>
+                        {/* Votes */}
+                        <div
+                          className="w-full rounded-t-md bg-[#7F77DD] transition-all"
+                          style={{ height: `${(day.votes / maxVotes) * 65}%` }}
+                          title={`${day.votes.toLocaleString()} votes`}
+                        />
+                        {/* Candidates */}
+                        <div
+                          className="w-full rounded-t-md bg-yellow-400 transition-all"
+                          style={{ height: `${(day.candidates / maxCands) * 35}%` }}
+                          title={`${day.candidates} candidates`}
+                        />
+                      </div>
+                    </div>
+                    <div className="font-black text-[9px] text-black/40 uppercase">{day.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Legend + numbers table */}
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-[#7F77DD]" /><span className="font-mono text-[10px] text-black/50">Votes</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-yellow-400" /><span className="font-mono text-[10px] text-black/50">Candidates Filed</span></div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-black">
+                      {['Day', ...stats.dailyStats.map(d => d.label)].map((h, i) => (
+                        <th key={i} className="text-left font-black uppercase tracking-widest pb-1.5 text-black/40 pr-3">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-black/5">
+                      <td className="py-1.5 pr-3 font-black text-[#7F77DD]">Votes</td>
+                      {stats.dailyStats.map(d => (
+                        <td key={d.date} className="py-1.5 pr-3 font-mono">{d.votes.toLocaleString('en-IN')}</td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-black/5">
+                      <td className="py-1.5 pr-3 font-black text-yellow-500">Candidates</td>
+                      {stats.dailyStats.map(d => (
+                        <td key={d.date} className="py-1.5 pr-3 font-mono">{d.candidates.toLocaleString('en-IN')}</td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* CYCLE + DANGER ZONE */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
