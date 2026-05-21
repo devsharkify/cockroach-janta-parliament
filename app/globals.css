@@ -64,6 +64,6 @@ body {
 .ticker-track {
   display: inline-flex;
   white-space: nowrap;
-  animation: ticker 35s linear infinite;
+  animation: ticker 90s linear infinite;
   will-change: transform;
 }
