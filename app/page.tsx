@@ -6,7 +6,9 @@ import FilingFrenzy from './components/FilingFrenzy'
 import LiveStats from './components/LiveStats'
 import TrendingSeats from './components/TrendingSeats'
 import HotSeats from './components/HotSeats'
-import { FOUNDING_PARTIES } from '@/lib/types'
+import { ALL_PARTIES } from '@/lib/types'
+
+const DISPLAY_PARTIES = ALL_PARTIES.filter(p => p.code !== 'IND')
 
 const MOCK_STATS = {
   seats: 543,
@@ -311,41 +313,29 @@ export default function HomePage() {
           choose your cockroach gang 🪳
         </p>
         <p className="text-center font-mono text-xs text-black/30 mb-6">
-          click a party to start filing
+          {DISPLAY_PARTIES.length} parties · click to start filing
         </p>
-        <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto">
-          {FOUNDING_PARTIES.map((p) => {
-            const bgMap: Record<string, string> = {
-              CJP: '#F0EEFF',
-              CCP: '#FFF0EB',
-              ACP: '#EDFAF4',
-              RCP: '#FFF0F5',
-            }
-            const memeMap: Record<string, string> = {
-              CJP: '"just vibes, bro"',
-              CCP: '"old money roach"',
-              ACP: '"naali is life"',
-              RCP: '"my galli my rules"',
-            }
-            return (
-              <Link
-                key={p.code}
-                href={`/parties/${p.code}`}
-                className="rounded-2xl border-4 p-4 text-left hover:scale-105 transition-transform active:scale-95 shadow-[4px_4px_0px_rgba(0,0,0,0.15)] block"
-                style={{ borderColor: p.color, backgroundColor: bgMap[p.code] ?? '#fff' }}
-              >
-                <div className="text-3xl mb-2">🪳</div>
-                <div className="font-black text-xl" style={{ color: p.color }}>
-                  {p.code}
-                </div>
-                <div className="text-xs font-bold text-black/60 leading-tight">{p.name}</div>
-                <div className="mt-1 text-xs text-black/40 font-mono">{p.tagline}</div>
-                <div className="mt-2 text-xs italic text-black/30 font-mono">
-                  {memeMap[p.code] ?? '"chaos gang"'}
-                </div>
-              </Link>
-            )
-          })}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-4xl mx-auto">
+          {DISPLAY_PARTIES.map((p) => (
+            <Link
+              key={p.code}
+              href={`/file?party=${p.code}`}
+              className="rounded-2xl border-4 p-3 text-left hover:scale-[1.03] transition-transform active:scale-95 shadow-[3px_3px_0px_rgba(0,0,0,0.12)] block"
+              style={{ borderColor: p.color, backgroundColor: p.color + '18' }}
+            >
+              <div className="text-2xl mb-1.5">{p.symbol}</div>
+              <div className="font-black text-base leading-none" style={{ color: p.color }}>
+                {p.code}
+              </div>
+              <div className="text-[11px] font-bold text-black/60 leading-tight mt-0.5 truncate">{p.name}</div>
+              <div className="mt-1 text-[10px] text-black/35 font-mono leading-tight line-clamp-2">{p.tagline}</div>
+              {p.is_founding && (
+                <span className="mt-1.5 inline-block text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full border-2" style={{ borderColor: p.color, color: p.color }}>
+                  Founding
+                </span>
+              )}
+            </Link>
+          ))}
         </div>
       </section>
 
