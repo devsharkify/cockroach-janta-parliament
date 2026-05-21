@@ -28,8 +28,23 @@ export default function FilePickerPage() {
     if (p && PARTIES.find(x => x.code === p)) setSelectedParty(p)
   }, [searchParams])
 
-  // reset constituency when state changes
-  useEffect(() => { setSelectedSeatNum('') }, [selectedState])
+  // pre-select state + constituency from ?seat= param (from HotSeats)
+  useEffect(() => {
+    const seatParam = searchParams.get('seat')
+    if (!seatParam) return
+    const seatNum = parseInt(seatParam, 10)
+    for (const stateObj of CONSTITUENCIES) {
+      const found = stateObj.seats.find(s => s.number === seatNum)
+      if (found) {
+        setSelectedState(stateObj.state)
+        setSelectedSeatNum(String(seatNum))
+        break
+      }
+    }
+  }, [searchParams])
+
+  // reset constituency when state changes (only via user interaction, not from ?seat= param)
+  // handled in the select onChange below
 
   const stateSeats = CONSTITUENCIES.find(c => c.state === selectedState)?.seats ?? []
   const selectedSeat = stateSeats.find(s => String(s.number) === selectedSeatNum)
@@ -79,7 +94,7 @@ export default function FilePickerPage() {
               <div className="relative">
                 <select
                   value={selectedState}
-                  onChange={e => setSelectedState(e.target.value)}
+                  onChange={e => { setSelectedState(e.target.value); setSelectedSeatNum('') }}
                   className={selectClass}
                 >
                   <option value="">— Select State / UT —</option>

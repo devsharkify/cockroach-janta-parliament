@@ -56,6 +56,7 @@ export interface CandidateDoc {
   seat_number: number
   display_name: string
   manifesto: string
+  claim_code_hash: string | null
   party_id: string | null
   is_independent: boolean
   filer_fingerprint: string | null

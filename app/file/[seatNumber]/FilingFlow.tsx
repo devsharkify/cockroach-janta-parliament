@@ -11,10 +11,10 @@ const PARTIES = [
   { id: 'IND', code: 'IND', name: 'Independent',              color: '#888888', tagline: 'No faction. Pure chaos.',        desc: 'No allegiance. Just vibes.' },
 ]
 
-const STEP_ORDER: Step[] = ['name', 'manifesto', 'party', 'submit']
-const STEP_LABELS = ['Identity', 'Manifesto', 'Party', 'Review']
+const STEP_ORDER: Step[] = ['name', 'code', 'manifesto', 'party', 'submit']
+const STEP_LABELS = ['Identity', 'Claim Code', 'Manifesto', 'Party', 'Review']
 
-type Step = 'name' | 'manifesto' | 'party' | 'submit' | 'share'
+type Step = 'name' | 'code' | 'manifesto' | 'party' | 'submit' | 'share'
 
 interface FilingFlowProps { seatNumber: number }
 
@@ -23,6 +23,9 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   const [step, setStep] = useState<Step>('name')
   const [candidateName, setCandidateName] = useState('')
   const [namePattern, setNamePattern] = useState('')
+  const [claimCode, setClaimCode] = useState('')
+  const [confirmCode, setConfirmCode] = useState('')
+  const [codeError, setCodeError] = useState('')
   const [manifesto, setManifesto] = useState('')
   const [selectedParty, setSelectedParty] = useState(PARTIES[0])
   const [isSpinning, setIsSpinning] = useState(false)
@@ -98,6 +101,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
           partyId: selectedParty.id === 'IND' ? null : selectedParty.id,
           isIndependent: selectedParty.id === 'IND',
           fingerprint,
+          claimCode: claimCode || undefined,
         }),
       })
       const data = await res.json()
@@ -113,6 +117,33 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
     }
     setIsSubmitting(false)
   }
+
+  function handleCodeContinue() {
+    setCodeError('')
+    if (claimCode === '' && confirmCode === '') {
+      // Both empty — treat as skip
+      setStep('manifesto')
+      return
+    }
+    if (!/^\d{4}$/.test(claimCode)) {
+      setCodeError('Code must be exactly 4 digits.')
+      return
+    }
+    if (claimCode !== confirmCode) {
+      setCodeError('Codes do not match. Try again.')
+      return
+    }
+    setStep('manifesto')
+  }
+
+  function handleCodeSkip() {
+    setClaimCode('')
+    setConfirmCode('')
+    setCodeError('')
+    setStep('manifesto')
+  }
+
+  const codeValid = /^\d{4}$/.test(claimCode) && claimCode === confirmCode
 
   const ogUrl = candidateId
     ? `/api/og/candidate?name=${encodeURIComponent(candidateName)}&seat=Seat%20${seatNumber}&party=${encodeURIComponent(selectedParty.code)}&color=${encodeURIComponent(selectedParty.color)}&manifesto=${encodeURIComponent(manifesto)}`
@@ -130,7 +161,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   }
 
   // Step bar helpers
-  const currentStepIndex = step === 'share' ? 4 : STEP_ORDER.indexOf(step)
+  const currentStepIndex = step === 'share' ? 5 : STEP_ORDER.indexOf(step)
 
   // Manifesto counter color
   const charCount = manifesto.length
@@ -153,7 +184,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
 
       <div className="max-w-lg mx-auto px-4 py-8">
 
-        {/* Step bar — shown for steps 1–4, not on share */}
+        {/* Step bar — shown for steps 1–5, not on share */}
         {step !== 'share' && (
           <div className="flex items-center gap-0 mb-8">
             {STEP_LABELS.map((label, i) => {
@@ -168,7 +199,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                     </div>
                     <div className="text-[10px] font-black mt-1 text-center hidden sm:block text-white/60">{label}</div>
                   </div>
-                  {i < 3 && (
+                  {i < 4 && (
                     <div className={`flex-1 h-1 mx-1 rounded ${isDone ? 'bg-green-400' : 'bg-white/20'}`} />
                   )}
                 </div>
@@ -181,7 +212,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
         {step === 'name' && (
           <div className="space-y-6">
             <div className="text-center">
-              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 1 of 4</p>
+              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 1 of 5</p>
               <h1 className="text-3xl font-black text-white mb-1">Your Cockroach Identity</h1>
               <p className="text-white/50 text-sm">Auto-generated. Real names not allowed. Pure chaos.</p>
             </div>
@@ -218,7 +249,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                 {isSpinning ? '⚡ Spinning...' : '🔄 Spin Again'}
               </button>
               <button
-                onClick={() => { if (candidateName) setStep('manifesto') }}
+                onClick={() => { if (candidateName) setStep('code') }}
                 disabled={!candidateName}
                 className="flex-1 min-h-[48px] py-3 rounded-xl font-black text-sm transition-colors disabled:opacity-30"
                 style={{ backgroundColor: candidateName ? '#D4A017' : '#888', color: '#000' }}
@@ -240,11 +271,124 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
           </div>
         )}
 
-        {/* ── STEP 2: Manifesto ── */}
+        {/* ── STEP 2: Claim Code ── */}
+        {step === 'code' && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 2 of 5</p>
+              <div className="text-6xl mb-3">🔐</div>
+              <h1 className="text-3xl font-black text-white mb-1">Your Secret Claim Code</h1>
+            </div>
+
+            {/* Info card */}
+            <div className="rounded-2xl p-5 space-y-3" style={{ backgroundColor: '#1a0a2e', border: '2px solid #D4A017' }}>
+              <p className="text-white/80 text-sm leading-relaxed">
+                If you <span className="text-[#D4A017] font-black">WIN</span> this election, you&apos;ll need this code to claim your seat and receive the winner badge.
+              </p>
+              <p className="text-white/60 text-sm leading-relaxed">
+                We store only the hash. The raw code is never saved. <span className="font-black text-white">NEVER share it.</span>
+              </p>
+            </div>
+
+            {/* Warning box */}
+            <div className="rounded-xl p-4 border-2 border-red-500/60 bg-red-500/10">
+              <p className="text-red-400 text-sm font-black">
+                ⚠️ If you lose this code, you lose your seat even if you win.
+              </p>
+              <p className="text-red-300/70 text-xs mt-1">
+                The seat will show as "SEAT VACANT — CODE LOST" and cannot be recovered.
+              </p>
+            </div>
+
+            {/* Code input */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
+                  Enter 4-digit PIN
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  pattern="[0-9]*"
+                  value={claimCode}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4)
+                    setClaimCode(val)
+                    setCodeError('')
+                  }}
+                  placeholder="••••"
+                  className="w-full font-black text-3xl tracking-[1rem] text-center bg-[#1a0a2e] border-2 border-[#D4A017]/40 focus:border-[#D4A017] rounded-xl px-4 py-4 text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                  style={{ letterSpacing: '1rem' }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
+                  Confirm PIN
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  pattern="[0-9]*"
+                  value={confirmCode}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4)
+                    setConfirmCode(val)
+                    setCodeError('')
+                  }}
+                  placeholder="••••"
+                  className="w-full font-black text-3xl tracking-[1rem] text-center bg-[#1a0a2e] border-2 border-[#D4A017]/40 focus:border-[#D4A017] rounded-xl px-4 py-4 text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                  style={{ letterSpacing: '1rem' }}
+                />
+              </div>
+
+              {/* Confirmation indicator */}
+              {codeValid && (
+                <p className="text-green-400 text-sm font-black text-center">CLAIM CODE ENTERED ✓</p>
+              )}
+
+              {codeError && (
+                <p className="text-red-400 text-sm text-center">{codeError}</p>
+              )}
+
+              {/* Screenshot reminder */}
+              <p className="text-[#D4A017]/70 text-xs text-center">
+                ⚠️ Screenshot this or memorize it — we cannot recover it for you.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setStep('name')}
+                className="min-h-[48px] px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors"
+              >
+                ← Back
+              </button>
+              <button
+                onClick={handleCodeContinue}
+                className="flex-1 min-h-[48px] py-3 rounded-xl font-black text-sm transition-colors"
+                style={{ backgroundColor: '#D4A017', color: '#000' }}
+              >
+                CONTINUE →
+              </button>
+            </div>
+
+            <button
+              onClick={handleCodeSkip}
+              className="w-full min-h-[44px] py-3 rounded-xl border-2 border-red-500/30 text-red-400/70 font-black text-sm hover:border-red-500/60 hover:text-red-400 transition-colors"
+            >
+              SKIP (risky) — no code, seat may go vacant
+            </button>
+          </div>
+        )}
+
+        {/* ── STEP 3: Manifesto ── */}
         {step === 'manifesto' && (
           <div className="space-y-6">
             <div className="text-center">
-              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 2 of 4</p>
+              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 3 of 5</p>
               <h1 className="text-3xl font-black text-white mb-1">Your Manifesto</h1>
               <p className="text-white/50 text-sm">4 lines. 280 chars. What do you stand for?</p>
             </div>
@@ -296,7 +440,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
 
             <div className="flex gap-3">
               <button
-                onClick={() => setStep('name')}
+                onClick={() => setStep('code')}
                 className="min-h-[48px] px-5 py-3 rounded-xl border-2 border-white/20 text-white/60 font-black text-sm hover:border-white/40 transition-colors"
               >
                 ← Back
@@ -313,11 +457,11 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
           </div>
         )}
 
-        {/* ── STEP 3: Party ── */}
+        {/* ── STEP 4: Party ── */}
         {step === 'party' && (
           <div className="space-y-6">
             <div className="text-center">
-              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 3 of 4</p>
+              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 4 of 5</p>
               <h1 className="text-3xl font-black text-white mb-1">Pick Your Faction</h1>
               <p className="text-white/50 text-sm">Choose wisely. Or don't. It's all chaos.</p>
             </div>
@@ -369,11 +513,11 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
           </div>
         )}
 
-        {/* ── STEP 4: Review & Submit ── */}
+        {/* ── STEP 5: Review & Submit ── */}
         {step === 'submit' && (
           <div className="space-y-6">
             <div className="text-center">
-              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 4 of 4</p>
+              <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 5 of 5</p>
               <h1 className="text-3xl font-black text-white mb-1">Review & File</h1>
               <p className="text-white/50 text-sm">This is your moment. No turning back.</p>
             </div>
@@ -394,6 +538,12 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                 <div className="border-t border-white/10 pt-3">
                   <p className="text-[#D4A017] text-xs font-mono mb-1 uppercase tracking-wider">Manifesto</p>
                   <p className="text-white/80 text-sm font-mono whitespace-pre-line">{manifesto}</p>
+                </div>
+                <div className="border-t border-white/10 pt-3 flex items-center gap-2">
+                  <span className="text-sm">🔐</span>
+                  <p className="text-white/50 text-xs font-mono">
+                    {claimCode ? 'Claim code set ✓' : 'No claim code (seat may go vacant if you win)'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -423,12 +573,12 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
           </div>
         )}
 
-        {/* ── STEP 5: Share ── */}
+        {/* ── STEP 6: Share ── */}
         {step === 'share' && candidateId && (
           <div className="space-y-6 text-center">
             <div>
               <div className="text-7xl mb-4">🎉</div>
-              <h1 className="text-3xl font-black text-white mb-1">You're In!</h1>
+              <h1 className="text-3xl font-black text-white mb-1">You&apos;re In!</h1>
               <p className="text-[#D4A017] font-mono text-sm mb-1">{candidateName}</p>
               <p className="text-white/50 text-sm">
                 is now contesting {seatName ? `${seatName} (Seat #${seatNumber})` : `Seat #${seatNumber}`} under {selectedParty.name}

@@ -1,20 +1,31 @@
 import { NextRequest } from 'next/server'
 import { candidates, souls, seats } from '@/lib/mongodb/collections'
 
+async function hashCode(code: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(code)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
 // POST /api/candidates
-// Body: { seatNumber, displayName, manifesto, partyId, isIndependent, fingerprint }
+// Body: { seatNumber, displayName, manifesto, partyId, isIndependent, fingerprint, claimCode? }
 // Returns: { id, displayName, seatNumber } | { error }
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body) return Response.json({ error: 'Invalid body' }, { status: 400 })
 
-  const { seatNumber, displayName, manifesto, partyId, isIndependent, fingerprint } = body
+  const { seatNumber, displayName, manifesto, partyId, isIndependent, fingerprint, claimCode } = body
 
   if (!seatNumber || !displayName || !manifesto || !fingerprint) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 })
   }
   if (manifesto.length > 280) {
     return Response.json({ error: 'Manifesto too long (280 char max)' }, { status: 400 })
+  }
+  if (claimCode !== undefined && claimCode !== '' && !/^\d{4}$/.test(String(claimCode))) {
+    return Response.json({ error: 'Claim code must be exactly 4 digits' }, { status: 400 })
   }
 
   // Without MongoDB env vars, return a mock success for local development
@@ -43,11 +54,15 @@ export async function POST(req: NextRequest) {
   // Insert candidate
   const now = new Date()
   const id = crypto.randomUUID()
+  const claimCodeHash = (claimCode && /^\d{4}$/.test(String(claimCode)))
+    ? await hashCode(String(claimCode))
+    : null
   await col.insertOne({
     id,
     seat_number: Number(seatNumber),
     display_name: String(displayName),
     manifesto: String(manifesto).slice(0, 280),
+    claim_code_hash: claimCodeHash,
     party_id: isIndependent ? null : (partyId ?? null),
     is_independent: Boolean(isIndependent ?? !partyId),
     filer_fingerprint: String(fingerprint),

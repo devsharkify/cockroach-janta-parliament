@@ -5,6 +5,7 @@ import SoulPanel from './components/SoulPanel'
 import FilingFrenzy from './components/FilingFrenzy'
 import LiveStats from './components/LiveStats'
 import TrendingSeats from './components/TrendingSeats'
+import HotSeats from './components/HotSeats'
 import { FOUNDING_PARTIES } from '@/lib/types'
 
 const MOCK_STATS = {
@@ -276,6 +277,11 @@ export default function HomePage() {
           <TrendingSeats />
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════
+          HOT SEATS
+      ═══════════════════════════════════════ */}
+      <HotSeats />
 
       {/* ═══════════════════════════════════════
           PARTY CARDS
