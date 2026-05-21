@@ -308,7 +308,7 @@ export default function SupremeContent() {
             className="font-mono text-sm mb-10"
             style={{ color: 'rgba(212,160,23,0.45)' }}
           >
-            serve the Supreme Commander. contest. vote. pledge.
+            serve the PM. contest. vote. pledge.
           </p>
 
           {/* Gold separator */}

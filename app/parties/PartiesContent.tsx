@@ -196,15 +196,6 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
             )}
           </div>
 
-          {/* CREATE YOUR PARTY CTA */}
-          <div className="mt-5">
-            <button
-              onClick={() => router.push('/parties/create')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-4 bg-yellow-300 text-black border-4 border-black font-black text-base rounded-xl hover:bg-yellow-400 transition-colors shadow-[4px_4px_0_black]"
-            >
-              🪳 CREATE YOUR PARTY →
-            </button>
-          </div>
         </div>
       </div>
 
