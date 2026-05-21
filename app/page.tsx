@@ -60,7 +60,6 @@ export default function HomePage() {
             alt="Cockroach Janta Parliament Elections"
             className="absolute inset-0 w-full h-full object-cover object-top"
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, #FBBF24 100%)' }} />
           {/* floating stamp */}
           <div className="absolute top-3 left-3 bg-black text-yellow-300 font-black text-[9px] uppercase tracking-widest px-2 py-1 rounded border-2 border-yellow-300 rotate-[-2deg]">
             POV: democracy but make it chaos 🪳
@@ -170,17 +169,12 @@ export default function HomePage() {
         </div>
 
         {/* RIGHT — parliament image panel */}
-        <div className="relative flex-1 overflow-hidden">
+        <div className="relative flex-1 overflow-hidden border-l-8 border-black">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/parliament-hero.png"
             alt="Cockroach Janta Parliament Elections — Unity Survival Progress"
             className="absolute inset-0 w-full h-full object-cover object-top"
-          />
-          {/* left-edge blend into yellow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(to right, #FBBF24 0%, transparent 18%)' }}
           />
           {/* bottom badge */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none">
