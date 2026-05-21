@@ -41,17 +41,6 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             <span className="text-2xl leading-none">🪳</span>
-            <div className="flex flex-col leading-none">
-              <span
-                className="font-black text-yellow-300 text-sm leading-none tracking-tight uppercase"
-                style={{ letterSpacing: '-0.3px' }}
-              >
-                SAMRAT MACCHAR
-              </span>
-              <span className="text-white/40 font-mono text-[9px] leading-tight tracking-wider">
-                Prime Cockroach Sevarkar
-              </span>
-            </div>
           </Link>
 
           {/* DESKTOP NAV LINKS */}
