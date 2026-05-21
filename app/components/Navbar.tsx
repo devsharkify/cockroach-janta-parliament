@@ -8,7 +8,7 @@ const LINKS = [
   { href: '/', label: 'Home', emoji: '🏠' },
   { href: '/results', label: 'Results', emoji: '🏆' },
   { href: '/parties', label: 'Parties', emoji: '🪳' },
-  { href: '/create-party', label: 'Start Party', emoji: '🏴' },
+  { href: '/parties/create', label: 'Start Party', emoji: '🏴' },
   { href: '/supreme', label: 'Supreme', emoji: '👑' },
   { href: '/court', label: 'Court', emoji: '🏛️' },
   { href: '/ec', label: 'EC', emoji: '🗳️' },

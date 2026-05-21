@@ -84,7 +84,7 @@ export default function SupremeContent() {
             letterSpacing: '-1px',
           }}
         >
-          SAMRAT MACCHAR
+          PRADHAN COCKROACH MINISTER
         </h1>
 
         {/* Subtitle */}

@@ -214,9 +214,7 @@ export function generateHyperLocalName(
 ): { name: string; pattern: string } {
   const vibe = getConstituencyVibe(constituencyName, state)
   const viralWord = PARTY_VIRAL_WORDS[partyCode] ?? extractViralWordFromName(partyName)
-  const nicknames = vibe.nicknames.length > 0 ? vibe.nicknames : [constituencyName.split(' ')[0]]
-  const constituencyNick = pickRandom(nicknames)
   const roachWord = pickRandom(vibe.roachWords)
-  const name = `${viralWord}_${constituencyNick}_${roachWord}`
-  return { name, pattern: 'hyper-local: party+constituency+issue' }
+  const name = `${viralWord}_${roachWord}`
+  return { name, pattern: 'hyper-local: party+issue' }
 }

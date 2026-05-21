@@ -207,7 +207,7 @@ const MSGS_BREAKING = [
   "🔴 BREAKING: Viral_Neta_420 files in 3 seats simultaneously. EC investigating.",
   "🔴 BREAKING: Supreme Court gets first 1000 nominations. Judge elections begin.",
   "🔴 BREAKING: Constituency #1 still has 0 candidates. Emergency filing needed.",
-  "🔴 BREAKING: Samrat Macchar issues decree: all drains now sacred.",
+  "🔴 BREAKING: Pradhan Cockroach Minister issues decree: all drains now sacred.",
   "🔴 BREAKING: 12,847 candidates filed. All-time Roach Parliament record.",
   "🔴 BREAKING: CJP leads with 200+ seats in latest unofficial count.",
   "🔴 BREAKING: EC reports unusual voting from Malkajgiri. 4,000 votes in 1 hour.",
