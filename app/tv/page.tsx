@@ -7,6 +7,26 @@ export const metadata: Metadata = {
   description: 'India\'s only cockroach-run news channel. All the corruption, drama, and drain politics you didn\'t know you needed.',
 }
 
+// ── Set your YouTube live stream / video ID here ─────────────────────────────
+// e.g. 'dQw4w9WgXcQ'  (the part after youtube.com/watch?v=)
+const CJTV_YOUTUBE_ID = ''
+
+// ── Cockroach cover images (public domain, Wikimedia Commons) ─────────────────
+const COVER_IMAGES = [
+  'https://upload.wikimedia.org/wikipedia/commons/4/4c/American_cockroach.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Periplaneta_americana_Male.jpg/800px-Periplaneta_americana_Male.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Blatta_orientalis_couple.jpg/800px-Blatta_orientalis_couple.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Blattodea_bg.jpg/800px-Blattodea_bg.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Madagascar_cockroach.jpg/800px-Madagascar_cockroach.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Periplaneta_americana2.jpg/800px-Periplaneta_americana2.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Blaberus_discoidalis_female.jpg/800px-Blaberus_discoidalis_female.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Cockroach_closeup.jpg/800px-Cockroach_closeup.jpg',
+]
+
+function getCover(index: number) {
+  return COVER_IMAGES[index % COVER_IMAGES.length]
+}
+
 function timeAgo(iso: string) {
   const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3600000)
   if (hours < 1) return 'Just now'
@@ -26,17 +46,37 @@ function CategoryBadge({ category }: { category: NewsArticle['category'] }) {
   )
 }
 
-function ArticleCard({ article, size = 'sm' }: { article: NewsArticle; size?: 'sm' | 'md' | 'lg' }) {
+function ArticleCard({
+  article,
+  size = 'sm',
+  imgSrc,
+}: {
+  article: NewsArticle
+  size?: 'sm' | 'md' | 'lg'
+  imgSrc?: string
+}) {
   if (size === 'lg') {
     return (
       <div className="border-4 border-black rounded-2xl overflow-hidden shadow-[5px_5px_0_black] bg-white group cursor-pointer hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[7px_7px_0_black] transition-all">
-        {/* Hero placeholder */}
+        {/* Hero image */}
         <div
-          className="w-full h-52 flex items-end px-5 pb-5 relative overflow-hidden"
+          className="w-full h-56 relative overflow-hidden"
           style={{ background: `${CATEGORY_COLORS[article.category]}15`, borderBottom: `4px solid ${CATEGORY_COLORS[article.category]}` }}
         >
-          <div className="absolute inset-0 flex items-center justify-center text-[120px] opacity-10 select-none pointer-events-none">🪳</div>
-          <div className="relative z-10 flex flex-col gap-2">
+          {imgSrc && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imgSrc}
+              alt={article.headline}
+              className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          )}
+          {/* Cockroach watermark overlay */}
+          <div className="absolute inset-0 flex items-center justify-center text-[100px] opacity-[0.08] select-none pointer-events-none z-10">🪳</div>
+          {/* Dark gradient for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+          <div className="absolute bottom-4 left-5 z-20 flex flex-col gap-2">
             <CategoryBadge category={article.category} />
             {article.isHot && (
               <span className="text-[9px] font-black uppercase tracking-widest bg-black text-yellow-300 px-2 py-0.5 rounded-sm w-fit">
@@ -64,11 +104,23 @@ function ArticleCard({ article, size = 'sm' }: { article: NewsArticle; size?: 's
     return (
       <div className="border-4 border-black rounded-xl overflow-hidden shadow-[3px_3px_0_black] bg-white group cursor-pointer hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_black] transition-all flex flex-col">
         <div
-          className="h-28 flex items-end px-4 pb-3 relative overflow-hidden"
+          className="h-32 relative overflow-hidden"
           style={{ background: `${CATEGORY_COLORS[article.category]}18`, borderBottom: `3px solid ${CATEGORY_COLORS[article.category]}` }}
         >
-          <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-10 select-none">🪳</div>
-          <CategoryBadge category={article.category} />
+          {imgSrc && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imgSrc}
+              alt={article.headline}
+              className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          )}
+          <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-[0.12] select-none z-10">🪳</div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10" />
+          <div className="absolute bottom-3 left-4 z-20">
+            <CategoryBadge category={article.category} />
+          </div>
         </div>
         <div className="p-4 flex-1 flex flex-col">
           <h3 className="font-black text-sm text-black leading-tight mb-1.5 group-hover:text-[#7F77DD] transition-colors flex-1">
@@ -85,11 +137,17 @@ function ArticleCard({ article, size = 'sm' }: { article: NewsArticle; size?: 's
   // sm
   return (
     <div className="flex gap-3 items-start py-3 border-b border-black/10 group cursor-pointer">
-      <div
-        className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-        style={{ background: `${CATEGORY_COLORS[article.category]}20` }}
-      >
-        🪳
+      <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden relative" style={{ background: `${CATEGORY_COLORS[article.category]}20` }}>
+        {imgSrc && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imgSrc}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-80"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+        )}
+        <div className="absolute inset-0 flex items-center justify-center text-xl z-10">🪳</div>
       </div>
       <div className="flex-1 min-w-0">
         <CategoryBadge category={article.category} />
@@ -102,19 +160,40 @@ function ArticleCard({ article, size = 'sm' }: { article: NewsArticle; size?: 's
   )
 }
 
-function FullArticle({ article }: { article: NewsArticle }) {
+function FullArticle({ article, imgSrc }: { article: NewsArticle; imgSrc?: string }) {
   return (
     <article className="border-4 border-black rounded-2xl bg-white shadow-[5px_5px_0_black] overflow-hidden mb-6">
-      {/* Article header */}
-      <div
-        className="px-6 pt-6 pb-5 border-b-4 border-black"
-        style={{ background: `${CATEGORY_COLORS[article.category]}12` }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <CategoryBadge category={article.category} />
-          {article.isHot && <span className="text-[9px] font-black bg-black text-yellow-300 px-2 py-0.5 rounded-sm">🔥 HOT</span>}
-          {article.isFeatured && <span className="text-[9px] font-black bg-yellow-300 text-black px-2 py-0.5 rounded-sm border-2 border-black">⭐ FEATURED</span>}
+      {/* Full-width article image */}
+      {imgSrc && (
+        <div className="w-full h-48 relative overflow-hidden" style={{ borderBottom: `4px solid ${CATEGORY_COLORS[article.category]}` }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imgSrc}
+            alt={article.headline}
+            className="w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+          <div className="absolute bottom-3 left-5 flex items-center gap-2">
+            <CategoryBadge category={article.category} />
+            {article.isHot && <span className="text-[9px] font-black bg-black text-yellow-300 px-2 py-0.5 rounded-sm">🔥 HOT</span>}
+          </div>
         </div>
+      )}
+      {/* Article header */}
+      <div className="px-6 pt-6 pb-5 border-b-4 border-black" style={{ background: `${CATEGORY_COLORS[article.category]}12` }}>
+        {!imgSrc && (
+          <div className="flex items-center gap-2 mb-3">
+            <CategoryBadge category={article.category} />
+            {article.isHot && <span className="text-[9px] font-black bg-black text-yellow-300 px-2 py-0.5 rounded-sm">🔥 HOT</span>}
+            {article.isFeatured && <span className="text-[9px] font-black bg-yellow-300 text-black px-2 py-0.5 rounded-sm border-2 border-black">⭐ FEATURED</span>}
+          </div>
+        )}
+        {imgSrc && (
+          <div className="flex items-center gap-2 mb-3">
+            {article.isFeatured && <span className="text-[9px] font-black bg-yellow-300 text-black px-2 py-0.5 rounded-sm border-2 border-black">⭐ FEATURED</span>}
+          </div>
+        )}
         <h2 className="font-black text-2xl text-black leading-tight mb-2">{article.headline}</h2>
         <p className="text-sm text-black/50 font-mono italic mb-3">{article.subheadline}</p>
         <div className="flex items-center gap-3 text-[10px] text-black/40 font-mono">
@@ -183,7 +262,7 @@ export default function TVPage() {
                 Cockroach Janta TV
               </div>
               <div className="text-white/30 font-mono text-[9px] tracking-widest uppercase">
-                India's Only Cockroach-Run News Channel · Est. 2026
+                India&apos;s Only Cockroach-Run News Channel · Est. 2026
               </div>
             </div>
             <span className="ml-3 flex items-center gap-1 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-wider">
@@ -226,7 +305,7 @@ export default function TVPage() {
 
           {/* Main featured */}
           <div className="lg:col-span-2">
-            <ArticleCard article={featured} size="lg" />
+            <ArticleCard article={featured} size="lg" imgSrc={getCover(0)} />
           </div>
 
           {/* Side top-3 */}
@@ -234,9 +313,90 @@ export default function TVPage() {
             <div className="text-[10px] font-black uppercase tracking-widest text-black/30 border-b-2 border-black pb-1">
               Top Stories
             </div>
-            {top3.map(a => (
-              <ArticleCard key={a.id} article={a} size="md" />
+            {top3.map((a, i) => (
+              <ArticleCard key={a.id} article={a} size="md" imgSrc={getCover(i + 1)} />
             ))}
+          </div>
+        </div>
+
+        {/* ── LIVE TV SECTION ── */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="flex items-center gap-1.5 bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-sm uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
+              LIVE TV
+            </span>
+            <div className="flex-1 h-[3px] bg-black" />
+            <span className="font-black text-xs uppercase tracking-widest px-3">CJTV Live Stream</span>
+            <div className="flex-1 h-[3px] bg-black" />
+          </div>
+
+          <div className="border-4 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0_black] bg-black">
+            {/* Video area - 16:9 */}
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              {CJTV_YOUTUBE_ID ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${CJTV_YOUTUBE_ID}?autoplay=1&mute=0&rel=0&modestbranding=1`}
+                  className="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="CJTV Live"
+                />
+              ) : (
+                /* ── PLACEHOLDER — replace CJTV_YOUTUBE_ID at the top of this file ── */
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#0f0f0f]">
+                  <div className="relative">
+                    <span className="text-7xl block mb-2">📺</span>
+                    <span className="absolute -top-2 -right-4 flex items-center gap-1 bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded-sm">
+                      <span className="w-1 h-1 rounded-full bg-white animate-pulse inline-block" />
+                      LIVE
+                    </span>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-black text-xl uppercase tracking-widest mb-1">
+                      CJTV Live
+                    </p>
+                    <p className="text-white/30 font-mono text-xs mb-3">
+                      India&apos;s Only Cockroach-Run News Channel
+                    </p>
+                    <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2">
+                      <span className="text-yellow-300 font-mono text-[10px]">Set CJTV_YOUTUBE_ID in /app/tv/page.tsx</span>
+                    </div>
+                  </div>
+                  {/* Fake progress / loading bars for aesthetic */}
+                  <div className="flex gap-1 mt-2">
+                    {[...Array(12)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1.5 rounded-full bg-yellow-300/20 animate-pulse"
+                        style={{ height: `${8 + Math.sin(i * 0.8) * 6}px`, animationDelay: `${i * 0.1}s` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Video footer */}
+            <div className="px-5 py-3 flex items-center justify-between bg-[#111] border-t border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-[9px] font-black text-red-400 uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
+                  {CJTV_YOUTUBE_ID ? 'LIVE NOW' : 'STREAM OFFLINE'}
+                </span>
+                <span className="text-white/30 font-mono text-[9px]">📺 Cockroach Janta TV · Est. 2026</span>
+              </div>
+              <a
+                href={CJTV_YOUTUBE_ID
+                  ? `https://www.youtube.com/watch?v=${CJTV_YOUTUBE_ID}`
+                  : 'https://www.youtube.com/@cockroachparliament'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-wider transition-colors"
+              >
+                ▶ Watch on YouTube →
+              </a>
+            </div>
           </div>
         </div>
 
@@ -252,10 +412,10 @@ export default function TVPage() {
 
           {/* Articles grid */}
           <div className="lg:col-span-2 space-y-6">
-            {/* 3-col card grid */}
+            {/* 2-col card grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {grid6.map(a => (
-                <ArticleCard key={a.id} article={a} size="md" />
+              {grid6.map((a, i) => (
+                <ArticleCard key={a.id} article={a} size="md" imgSrc={getCover(i + 4)} />
               ))}
             </div>
 
@@ -263,8 +423,8 @@ export default function TVPage() {
             <div className="text-[10px] font-black uppercase tracking-widest text-black/30 border-b-2 border-black pb-1 mb-4">
               Full Reports
             </div>
-            {remaining.map(a => (
-              <FullArticle key={a.id} article={a} />
+            {remaining.map((a, i) => (
+              <FullArticle key={a.id} article={a} imgSrc={getCover(i + 10)} />
             ))}
           </div>
 
@@ -276,8 +436,8 @@ export default function TVPage() {
               <div className="font-black text-xs uppercase tracking-widest border-b-2 border-black pb-2 mb-3 flex items-center gap-2">
                 🔥 Hot Right Now
               </div>
-              {sidebar.map(a => (
-                <ArticleCard key={a.id} article={a} size="sm" />
+              {sidebar.map((a, i) => (
+                <ArticleCard key={a.id} article={a} size="sm" imgSrc={getCover(i + 5)} />
               ))}
             </div>
 
@@ -332,6 +492,19 @@ export default function TVPage() {
                 </div>
               ))}
             </div>
+
+            {/* Instagram CTA */}
+            <a
+              href="https://www.instagram.com/cockroachparliament_official"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-4 border-black rounded-xl overflow-hidden shadow-[4px_4px_0_black] flex flex-col items-center gap-2 p-4 text-center hover:scale-[1.02] transition-transform block"
+              style={{ background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)' }}
+            >
+              <span className="text-3xl">📸</span>
+              <p className="font-black text-white text-sm uppercase">Follow CJTV on Instagram</p>
+              <p className="text-white/70 font-mono text-[9px]">@cockroachparliament_official</p>
+            </a>
           </aside>
         </div>
       </div>
