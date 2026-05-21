@@ -18,6 +18,8 @@ function timeStr(d: Date) {
   return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 
+const AGENT_COUNT = 30
+
 export default function LiveChat() {
   const [isOpen, setIsOpen]     = useState(false)
   const [msgs, setMsgs]         = useState<ChatMessage[]>([])
@@ -26,23 +28,31 @@ export default function LiveChat() {
   const [typing, setTyping]     = useState<{ name: string; color: string }[]>([])
   const [unread, setUnread]     = useState(0)
 
-  const scrollRef   = useRef<HTMLDivElement>(null)
-  const endRef      = useRef<HTMLDivElement>(null)
-  const botsRef     = useRef<BotIdentity[]>([])
-  const lastBotRef  = useRef('')
-  const isOpenRef   = useRef(false)
-  const inputRef    = useRef<HTMLInputElement>(null)
+  const scrollRef    = useRef<HTMLDivElement>(null)
+  const endRef       = useRef<HTMLDivElement>(null)
+  const botsRef      = useRef<BotIdentity[]>([])
+  const agentsRef    = useRef<BotIdentity[]>([])   // 30 always-active agents
+  const lastBotRef   = useRef('')
+  const isOpenRef    = useRef(false)
+  const inputRef     = useRef<HTMLInputElement>(null)
 
   useEffect(() => { isOpenRef.current = isOpen }, [isOpen])
 
-  /* ── Init bots + seed messages ── */
+  /* ── Init 1000 bots → pick 30 active agents + seed messages ── */
   useEffect(() => {
     const bots = generateBots(1000)
     botsRef.current = bots
+
+    // 30 active agents: spread evenly across the 1000 pool
+    agentsRef.current = Array.from({ length: AGENT_COUNT }, (_, i) =>
+      bots[Math.floor((i / AGENT_COUNT) * bots.length)]
+    )
+
     setOnline(rand(1200, 1500))
 
-    const init: ChatMessage[] = Array.from({ length: 7 }, (_, i) => {
-      const bot = bots[rand(0, 999)]
+    // Seed 10 initial messages from agents
+    const init: ChatMessage[] = Array.from({ length: 10 }, (_, i) => {
+      const bot = agentsRef.current[i % AGENT_COUNT]
       return {
         id: uid(),
         botId: bot.id,
@@ -51,41 +61,49 @@ export default function LiveChat() {
         partyColor: bot.partyColor,
         symbol: bot.symbol,
         text: getRandomMsg(bot),
-        timestamp: new Date(Date.now() - (7 - i) * 22000),
+        timestamp: new Date(Date.now() - (10 - i) * 8000),
       }
     })
     setMsgs(init)
     lastBotRef.current = init[init.length - 1].botName
   }, [])
 
-  /* ── Push one bot message ── */
-  const pushBot = useCallback(() => {
-    const bots = botsRef.current
-    if (!bots.length) return
-    const bot = bots[rand(0, bots.length - 1)]
-    const text = getRandomMsg(bot, lastBotRef.current)
+  /* ── Push a single agent message ── */
+  const pushAgent = useCallback((agent: BotIdentity) => {
+    const text = getRandomMsg(agent, lastBotRef.current)
     const msg: ChatMessage = {
       id: uid(),
-      botId: bot.id,
-      botName: bot.name,
-      partyCode: bot.partyCode,
-      partyColor: bot.partyColor,
-      symbol: bot.symbol,
+      botId: agent.id,
+      botName: agent.name,
+      partyCode: agent.partyCode,
+      partyColor: agent.partyColor,
+      symbol: agent.symbol,
       text,
       timestamp: new Date(),
     }
-    lastBotRef.current = bot.name
-    setMsgs(prev => [...prev.slice(-90), msg])
+    lastBotRef.current = agent.name
+    setMsgs(prev => [...prev.slice(-120), msg])
     if (!isOpenRef.current) setUnread(u => u + 1)
   }, [])
 
-  /* ── Ambient messages every 2-5s ── */
+  /* ── Every 10s: 2-4 random agents fire in staggered bursts ── */
   useEffect(() => {
-    let t: ReturnType<typeof setTimeout>
-    const schedule = () => { t = setTimeout(() => { pushBot(); schedule() }, rand(2200, 5000)) }
-    schedule()
-    return () => clearTimeout(t)
-  }, [pushBot])
+    const interval = setInterval(() => {
+      const agents = agentsRef.current
+      if (!agents.length) return
+
+      // Pick 2-4 distinct agents for this burst
+      const count = rand(2, 4)
+      const picks = new Set<number>()
+      while (picks.size < count) picks.add(rand(0, agents.length - 1))
+
+      Array.from(picks).forEach((idx, i) => {
+        // Stagger each agent within the 10s window
+        setTimeout(() => pushAgent(agents[idx]), i * rand(1200, 2800))
+      })
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [pushAgent])
 
   /* ── Breaking news every 65-100s ── */
   useEffect(() => {
@@ -236,7 +254,7 @@ export default function LiveChat() {
             {/* Welcome pill */}
             <div className="flex justify-center mb-1">
               <span className="text-[9px] font-mono text-white/20 px-3 py-1 rounded-full border border-white/10">
-                🪳 {msgs.length > 0 ? `${(1000 + msgs.length).toLocaleString()}+ messages today` : 'Welcome to the drain'}
+                🪳 {AGENT_COUNT} active agents · 1,000 roaches lurking
               </span>
             </div>
 
