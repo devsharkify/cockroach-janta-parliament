@@ -34,12 +34,17 @@ export default function TrendingSeats() {
       if (!res.ok) throw new Error('failed')
       const data = await res.json()
       if (Array.isArray(data.trendingSeats) && data.trendingSeats.length > 0) {
-        setSeats(data.trendingSeats.slice(0, 5).map((s: { seat_number: number; seat_name?: string; state?: string; votes24h?: number }) => ({
-          seat_number: s.seat_number,
-          seat_name:   s.seat_name  ?? `Seat ${s.seat_number}`,
-          state:       s.state      ?? '—',
-          votes24h:    s.votes24h   ?? 0,
-        })))
+        // API may return camelCase (seatName/seatNumber/recentVotes) — normalise both shapes
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setSeats(data.trendingSeats.slice(0, 5).map((s: any) => {
+          const num = s.seatNumber ?? s.seat_number
+          return {
+            seat_number: num,
+            seat_name:   s.seatName   ?? s.seat_name   ?? `Seat ${num}`,
+            state:       s.state      ?? '—',
+            votes24h:    s.recentVotes ?? s.votes24h    ?? 0,
+          }
+        }))
       }
     } catch {
       // keep mock data

@@ -221,47 +221,6 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════
-          6. DRAKE MEME / COMPARISON
-      ═══════════════════════════════════════ */}
-      <section className="bg-black text-white py-10 px-4 border-b-8 border-yellow-300">
-        <p className="text-center text-yellow-300 font-black text-xs uppercase tracking-widest mb-6">
-          the cockroach difference 🪳
-        </p>
-        <div className="max-w-lg mx-auto space-y-3">
-          {[
-            {
-              nah: true,
-              emoji: '😒',
-              text: 'Normal elections. Voter ID. Vote once. Results in 6 months. Full boring.',
-            },
-            {
-              nah: false,
-              emoji: '😍',
-              text: 'Cockroach Parliament. Anonymous. Vote 1000 times. Winner every Saturday. Full chaos. 🪳',
-            },
-          ].map((row, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-4 rounded-2xl p-4 border-4"
-              style={{
-                borderColor: row.nah ? '#333' : '#7F77DD',
-                background: row.nah ? 'rgba(255,255,255,0.03)' : 'rgba(127,119,221,0.12)',
-              }}
-            >
-              <div className="text-4xl shrink-0">{row.emoji}</div>
-              <p
-                className={`font-bold text-sm leading-snug ${
-                  row.nah ? 'text-white/35 line-through' : 'text-yellow-300'
-                }`}
-              >
-                {row.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════
           TRENDING SEATS
       ═══════════════════════════════════════ */}
       <section className="py-10 px-4 border-b-8 border-black" style={{ background: '#0f0b30' }}>
