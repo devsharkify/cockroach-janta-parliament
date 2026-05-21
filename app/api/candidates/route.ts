@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
   if (manifesto.length > 280) {
     return Response.json({ error: 'Manifesto too long (280 char max)' }, { status: 400 })
   }
-  if (claimCode !== undefined && claimCode !== '' && !/^\d{4}$/.test(String(claimCode))) {
-    return Response.json({ error: 'Claim code must be exactly 4 digits' }, { status: 400 })
+  if (claimCode !== undefined && claimCode !== '' && !/^[A-Z]{3}[0-9]{3}$/.test(String(claimCode))) {
+    return Response.json({ error: 'Claim code must be 3 uppercase letters followed by 3 digits (e.g. RKJ419)' }, { status: 400 })
   }
 
   // Without MongoDB env vars, return a mock success for local development
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   // Insert candidate
   const now = new Date()
   const id = crypto.randomUUID()
-  const claimCodeHash = (claimCode && /^\d{4}$/.test(String(claimCode)))
+  const claimCodeHash = (claimCode && /^[A-Z]{3}[0-9]{3}$/.test(String(claimCode)))
     ? await hashCode(String(claimCode))
     : null
   await col.insertOne({

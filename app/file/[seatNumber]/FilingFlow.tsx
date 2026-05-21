@@ -140,14 +140,22 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
     setIsSubmitting(false)
   }
 
+  function generateClaimCode(): string {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const digits = '0123456789'
+    const randomLetters = Array.from({ length: 3 }, () => letters[Math.floor(Math.random() * letters.length)]).join('')
+    const randomDigits = Array.from({ length: 3 }, () => digits[Math.floor(Math.random() * digits.length)]).join('')
+    return randomLetters + randomDigits
+  }
+
   function handleCodeContinue() {
     setCodeError('')
     if (claimCode === '' && confirmCode === '') {
       setStep('manifesto')
       return
     }
-    if (!/^\d{4}$/.test(claimCode)) {
-      setCodeError('Code must be exactly 4 digits.')
+    if (!/^[A-Z]{3}[0-9]{3}$/.test(claimCode)) {
+      setCodeError('Code must be 3 uppercase letters followed by 3 digits (e.g. RKJ419).')
       return
     }
     if (claimCode !== confirmCode) {
@@ -164,7 +172,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
     setStep('manifesto')
   }
 
-  const codeValid = /^\d{4}$/.test(claimCode) && claimCode === confirmCode
+  const codeValid = /^[A-Z]{3}[0-9]{3}$/.test(claimCode) && claimCode === confirmCode
 
   const ogUrl = candidateId
     ? `/api/og/candidate?name=${encodeURIComponent(candidateName)}&seat=${encodeURIComponent(seatName ?? `Seat ${seatNumber}`)}&party=${encodeURIComponent(selectedParty.code)}&color=${encodeURIComponent(selectedParty.color)}&manifesto=${encodeURIComponent(manifesto)}`
@@ -335,44 +343,53 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             {/* Code input */}
             <div className="space-y-4">
               <div>
-                <label className="block text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
-                  Enter 4-digit PIN
+                <label className="block text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-1">
+                  Enter 6-character Claim Code (3 letters + 3 digits)
                 </label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  pattern="[0-9]*"
-                  value={claimCode}
-                  onChange={e => {
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 4)
-                    setClaimCode(val)
-                    setCodeError('')
-                  }}
-                  placeholder="••••"
-                  className="w-full font-black text-3xl tracking-[1rem] text-center bg-[#1a0a2e] border-2 border-[#D4A017]/40 focus:border-[#D4A017] rounded-xl px-4 py-4 text-white placeholder:text-white/20 focus:outline-none transition-colors"
-                  style={{ letterSpacing: '1rem' }}
-                />
+                <p className="text-white/40 text-xs font-mono mb-2">e.g. RKJ419</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={claimCode}
+                    onChange={e => {
+                      const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
+                      setClaimCode(val)
+                      setCodeError('')
+                    }}
+                    placeholder="RKJ419"
+                    className="flex-1 font-black text-2xl tracking-widest text-center bg-[#1a0a2e] border-2 border-[#D4A017]/40 focus:border-[#D4A017] rounded-xl px-4 py-4 text-white placeholder:text-white/20 focus:outline-none transition-colors uppercase"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const code = generateClaimCode()
+                      setClaimCode(code)
+                      setConfirmCode(code)
+                      setCodeError('')
+                    }}
+                    className="shrink-0 px-4 py-3 rounded-xl bg-[#D4A017]/20 border-2 border-[#D4A017]/40 text-[#D4A017] font-black text-xs hover:bg-[#D4A017]/30 transition-colors whitespace-nowrap"
+                  >
+                    GENERATE CODE →
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
-                  Confirm PIN
+                  Confirm Claim Code
                 </label>
                 <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  pattern="[0-9]*"
+                  type="text"
+                  maxLength={6}
                   value={confirmCode}
                   onChange={e => {
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 4)
+                    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
                     setConfirmCode(val)
                     setCodeError('')
                   }}
-                  placeholder="••••"
-                  className="w-full font-black text-3xl tracking-[1rem] text-center bg-[#1a0a2e] border-2 border-[#D4A017]/40 focus:border-[#D4A017] rounded-xl px-4 py-4 text-white placeholder:text-white/20 focus:outline-none transition-colors"
-                  style={{ letterSpacing: '1rem' }}
+                  placeholder="RKJ419"
+                  className="w-full font-black text-2xl tracking-widest text-center bg-[#1a0a2e] border-2 border-[#D4A017]/40 focus:border-[#D4A017] rounded-xl px-4 py-4 text-white placeholder:text-white/20 focus:outline-none transition-colors uppercase"
                 />
               </div>
 

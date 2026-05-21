@@ -32,6 +32,117 @@ function formatNumber(n: number): string {
   return String(n)
 }
 
+function PartyCard({ party, router }: { party: PartyData; router: ReturnType<typeof useRouter> }) {
+  const copy = PARTY_COPY[party.code] ?? { description: '', funnyStat: '#1 in something' }
+  const meta = ALL_PARTIES.find(p => p.code === party.code)
+  const symbol = meta?.symbol ?? '🪳'
+  const persona = meta?.persona ?? ''
+  const isNalala = party.candidateCount < NALALA_THRESHOLD
+
+  return (
+    <div
+      className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
+      style={{ borderLeft: `8px solid ${party.color}` }}
+    >
+      {/* Color band header */}
+      <div
+        className="px-5 py-4 flex items-center gap-3"
+        style={{ background: party.color }}
+      >
+        <span className="text-5xl font-black text-white tracking-tight leading-none">
+          {party.code}
+        </span>
+        <span className="text-3xl leading-none">{symbol}</span>
+      </div>
+
+      {/* Card body */}
+      <div className="p-5 flex flex-col gap-3">
+        <div>
+          <h2 className="text-xl font-black text-[#1a1a2e]">{party.name}</h2>
+          <p className="text-sm italic text-gray-500 mt-0.5">&ldquo;{party.tagline}&rdquo;</p>
+          {persona && (
+            <span
+              className="inline-flex items-center mt-1.5 text-xs font-black px-2.5 py-1 rounded-full text-white"
+              style={{ background: party.color }}
+            >
+              {persona}
+            </span>
+          )}
+        </div>
+
+        <p className="text-sm text-gray-600 leading-relaxed">{copy.description}</p>
+
+        {/* Stats row */}
+        <div className="flex items-center gap-2 text-sm font-bold text-gray-500 flex-wrap">
+          <span>{party.candidateCount} candidates</span>
+          <span className="text-gray-300">·</span>
+          <span>{formatNumber(party.totalVotes)} votes</span>
+        </div>
+
+        {/* Nalala progress bar */}
+        {isNalala ? (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between text-xs font-black">
+              <span className="text-red-600">{party.candidateCount}/{NALALA_THRESHOLD} seats — NALALA RISK ⚠️</span>
+            </div>
+            <div className="w-full h-2 bg-red-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-red-500 rounded-full transition-all"
+                style={{ width: `${(party.candidateCount / NALALA_THRESHOLD) * 100}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-xs font-black text-green-700">
+            <div className="w-full h-2 bg-green-100 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 rounded-full w-full" />
+            </div>
+            <span className="shrink-0">✓ Nalala-safe</span>
+          </div>
+        )}
+
+        {/* Funny stat badge */}
+        <div
+          className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full text-white w-fit"
+          style={{ background: party.color }}
+        >
+          ⚡ {copy.funnyStat}
+        </div>
+
+        {/* CTA buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-1">
+          <button
+            onClick={() => router.push(`/file?party=${party.code}`)}
+            className="flex-1 bg-yellow-300 text-black border-4 border-black font-black text-sm py-2.5 px-4 rounded-xl hover:bg-black hover:text-yellow-300 transition-colors text-center"
+          >
+            JOIN THIS PARTY →
+          </button>
+          <button
+            onClick={() => router.push(`/parties/${party.code}`)}
+            className="flex-1 border-4 font-black text-sm py-2.5 px-4 rounded-xl transition-colors text-center"
+            style={{
+              borderColor: party.color,
+              color: party.color,
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget
+              el.style.background = party.color
+              el.style.color = 'white'
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget
+              el.style.background = 'transparent'
+              el.style.color = party.color
+            }}
+          >
+            VIEW CANDIDATES →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function PartiesContent({ parties }: { parties: PartyData[] }) {
   const router = useRouter()
 
@@ -55,7 +166,7 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
             {parties.length} parties. One parliament. Infinite naali drama.
           </p>
 
-          {/* Parliament Strength summary — Feature 3 */}
+          {/* Parliament Strength summary */}
           <div className="mt-4 bg-white/10 rounded-xl px-4 py-3 flex flex-col gap-2">
             <p className="text-xs font-black uppercase tracking-wider text-white/70">
               Parliament Strength — {TOTAL_SEATS} total seats
@@ -84,123 +195,54 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
               </p>
             )}
           </div>
+
+          {/* CREATE YOUR PARTY CTA */}
+          <div className="mt-5">
+            <button
+              onClick={() => router.push('/parties/create')}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-4 bg-yellow-300 text-black border-4 border-black font-black text-base rounded-xl hover:bg-yellow-400 transition-colors shadow-[4px_4px_0_black]"
+            >
+              🪳 CREATE YOUR PARTY →
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Party grid */}
-      <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {parties.map((party) => {
-          const copy = PARTY_COPY[party.code] ?? { description: '', funnyStat: '#1 in something' }
-          const meta = ALL_PARTIES.find(p => p.code === party.code)
-          const symbol = meta?.symbol ?? '🪳'
-          const persona = meta?.persona ?? ''
-          const isNalala = party.candidateCount < NALALA_THRESHOLD
+      {/* Safe parties grid */}
+      {safeParties.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 pt-8">
+          <h2 className="text-lg font-black text-[#1a1a2e] mb-4 uppercase tracking-wider">
+            ✅ Nalala-Safe Parties ({safeParties.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {safeParties.map(party => (
+              <PartyCard key={party.id} party={party} router={router} />
+            ))}
+          </div>
+        </div>
+      )}
 
-          return (
-            <div
-              key={party.id}
-              className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
-              style={{ borderLeft: `8px solid ${party.color}` }}
-            >
-              {/* Color band header */}
-              <div
-                className="px-5 py-4 flex items-center gap-3"
-                style={{ background: party.color }}
-              >
-                <span className="text-5xl font-black text-white tracking-tight leading-none">
-                  {party.code}
-                </span>
-                <span className="text-3xl leading-none">{symbol}</span>
-              </div>
+      {/* Nalala parties section */}
+      {nalalaParties.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 pt-8 pb-8">
+          <h2 className="text-lg font-black text-red-600 mb-1 uppercase tracking-wider">
+            ⚠️ In the Nalala ({nalalaParties.length})
+          </h2>
+          <p className="text-sm text-gray-500 mb-4">
+            These parties have fewer than {NALALA_THRESHOLD} candidates and are at risk of being flushed. Join them to save their naali rights.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {nalalaParties.map(party => (
+              <PartyCard key={party.id} party={party} router={router} />
+            ))}
+          </div>
+        </div>
+      )}
 
-              {/* Card body */}
-              <div className="p-5 flex flex-col gap-3">
-                <div>
-                  <h2 className="text-xl font-black text-[#1a1a2e]">{party.name}</h2>
-                  <p className="text-sm italic text-gray-500 mt-0.5">&ldquo;{party.tagline}&rdquo;</p>
-                  {persona && (
-                    <span
-                      className="inline-flex items-center mt-1.5 text-xs font-black px-2.5 py-1 rounded-full text-white"
-                      style={{ background: party.color }}
-                    >
-                      {persona}
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-sm text-gray-600 leading-relaxed">{copy.description}</p>
-
-                {/* Stats row */}
-                <div className="flex items-center gap-2 text-sm font-bold text-gray-500 flex-wrap">
-                  <span>{party.candidateCount} candidates</span>
-                  <span className="text-gray-300">·</span>
-                  <span>{formatNumber(party.totalVotes)} votes</span>
-                </div>
-
-                {/* Nalala progress bar */}
-                {isNalala ? (
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between text-xs font-black">
-                      <span className="text-red-600">{party.candidateCount}/{NALALA_THRESHOLD} seats — NALALA RISK ⚠️</span>
-                    </div>
-                    <div className="w-full h-2 bg-red-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-red-500 rounded-full transition-all"
-                        style={{ width: `${(party.candidateCount / NALALA_THRESHOLD) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 text-xs font-black text-green-700">
-                    <div className="w-full h-2 bg-green-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-green-500 rounded-full w-full" />
-                    </div>
-                    <span className="shrink-0">✓ Nalala-safe</span>
-                  </div>
-                )}
-
-                {/* Funny stat badge */}
-                <div
-                  className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full text-white w-fit"
-                  style={{ background: party.color }}
-                >
-                  ⚡ {copy.funnyStat}
-                </div>
-
-                {/* CTA buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 mt-1">
-                  <button
-                    onClick={() => router.push(`/file?party=${party.code}`)}
-                    className="flex-1 bg-yellow-300 text-black border-4 border-black font-black text-sm py-2.5 px-4 rounded-xl hover:bg-black hover:text-yellow-300 transition-colors text-center"
-                  >
-                    JOIN THIS PARTY →
-                  </button>
-                  <button
-                    onClick={() => router.push(`/parties/${party.code}`)}
-                    className="flex-1 border-4 font-black text-sm py-2.5 px-4 rounded-xl transition-colors text-center"
-                    style={{
-                      borderColor: party.color,
-                      color: party.color,
-                    }}
-                    onMouseEnter={(e) => {
-                      const el = e.currentTarget
-                      el.style.background = party.color
-                      el.style.color = 'white'
-                    }}
-                    onMouseLeave={(e) => {
-                      const el = e.currentTarget
-                      el.style.background = 'transparent'
-                      el.style.color = party.color
-                    }}
-                  >
-                    VIEW CANDIDATES →
-                  </button>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      {/* Bottom padding when both sections render */}
+      {safeParties.length > 0 && nalalaParties.length === 0 && (
+        <div className="pb-8" />
+      )}
     </div>
   )
 }
