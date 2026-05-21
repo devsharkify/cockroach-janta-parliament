@@ -1,479 +1,442 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFingerprint } from '@/lib/hooks/useFingerprint'
+import { ALL_PARTIES } from '@/lib/types'
 
-const EMOJI_OPTIONS = [
-  '🪳','🦟','🐛','🐜','🦂','🦎','🐍','🐢','🦀','🦞',
-  '🐸','🐊','🐉','🦁','🐯','🐺','🦊','🐻','🐼','🦝',
-  '🔥','💧','🌊','⚡','🌪️','🏔️','🌋','🌵','🌴','🌿',
-  '⭐','🌟','💥','🎯','🎪','🏴','🚩','⚔️','🛡️','👑',
-  '🪔','🔱','♾️','🌐','🗺️','🧲','⚙️','🔩','🪛','🔮',
+// ── 30 symbol slots — order: available first, taken last ──────────────────────
+const ALL_SYMBOLS_30 = [
+  // ── Available for new parties (not in ALL_PARTIES) ──
+  '🚽🪳', '🎪🪳', '🦠🪳', '☠️🪳', '👑🪳', '🎭🪳', '🔮🪳', '🏹🪳',
+  '⚔️🪳', '🎺🪳', '🌪️🪳', '💣🪳', '🧨🪳', '🕷️🪳', '🦂🪳',
+  // ── Already allocated to existing parties (marked TAKEN) ──
+  '🪳', '✋🪳', '🧹🪳', '🏠🪳', '💧🪳', '🦟🪳', '🪷🪳', '✊🪳',
+  '⭐🪳', '🌊🪳', '🛡️🪳', '🔥🪳', '⚡🪳', '🏛️🪳', '🪔🪳',
 ]
 
-const COLOR_PRESETS = [
-  '#7F77DD','#D85A30','#1D9E75','#D4537E','#00BCD4','#FF6F00',
-  '#F57F17','#5D4037','#1B5E20','#880E4F','#004D40','#6A1B9A',
-  '#0D47A1','#BF360C','#37474F','#4A148C','#B71C1C','#1A237E',
-  '#F9A825','#E91E63','#009688','#78909C','#FF5722','#263238',
+// Build set of taken symbols from ALL_PARTIES
+const TAKEN_SYMBOLS = new Set(ALL_PARTIES.map(p => p.symbol))
+
+// First available symbol (not taken)
+const FIRST_AVAILABLE = ALL_SYMBOLS_30.find(s => !TAKEN_SYMBOLS.has(s)) ?? ALL_SYMBOLS_30[0]
+
+const MAX_NEW_PARTIES = 30
+
+const PRESET_COLORS = [
+  '#7F77DD', '#D85A30', '#1D9E75', '#D4537E',
+  '#00BCD4', '#FF6F00', '#F57F17', '#E91E63',
+  '#C0392B', '#8E44AD', '#16A085', '#2C3E50',
 ]
 
-type Step = 'code' | 'name' | 'look' | 'tagline' | 'review' | 'done'
-const STEPS: Step[] = ['code', 'name', 'look', 'tagline', 'review']
-
-interface PartyDraft {
-  code: string
-  name: string
-  symbol: string
-  color: string
-  tagline: string
+function isValidHex(v: string) {
+  return /^#[0-9A-Fa-f]{6}$/.test(v)
 }
 
 export default function CreatePartyFlow() {
   const router = useRouter()
   const fingerprint = useFingerprint()
 
-  const [step, setStep] = useState<Step>('code')
-  const [draft, setDraft] = useState<PartyDraft>({
-    code: '',
-    name: '',
-    symbol: '🪳',
-    color: '#FF5722',
-    tagline: '',
-  })
+  const [code, setCode] = useState('')
+  const [name, setName] = useState('')
+  const [color, setColor] = useState(PRESET_COLORS[0])
+  const [customHex, setCustomHex] = useState('')
+  const [symbol, setSymbol] = useState(FIRST_AVAILABLE)
+  const [tagline, setTagline] = useState('')
+  const [manifesto, setManifesto] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [createdCode, setCreatedCode] = useState<string | null>(null)
-  const [customColor, setCustomColor] = useState('#FF5722')
 
-  const currentIdx = STEPS.indexOf(step as Step)
+  // Party slot tracking
+  const [slotsUsed, setSlotsUsed]   = useState<number | null>(null)
+  const [loadingSlots, setLoadingSlots] = useState(true)
 
-  function set<K extends keyof PartyDraft>(key: K, val: PartyDraft[K]) {
-    setDraft(d => ({ ...d, [key]: val }))
-    setError(null)
+  useEffect(() => {
+    fetch('/api/parties')
+      .then(r => r.json())
+      .then((data: { is_founding?: boolean }[]) => {
+        if (Array.isArray(data)) {
+          const newPartyCount = data.filter(p => !p.is_founding).length
+          setSlotsUsed(newPartyCount)
+        }
+      })
+      .catch(() => setSlotsUsed(null))
+      .finally(() => setLoadingSlots(false))
+  }, [])
+
+  useEffect(() => {
+    if (isValidHex(customHex)) setColor(customHex)
+  }, [customHex])
+
+  const handleCodeChange = (v: string) => {
+    setCode(v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))
   }
 
-  function validateAndNext() {
-    setError(null)
-    if (step === 'code') {
-      const code = draft.code.trim().toUpperCase()
-      if (!/^[A-Z0-9]{2,6}$/.test(code)) {
-        setError('Code must be 2–6 uppercase letters or numbers. No spaces.')
-        return
-      }
-      set('code', code)
-      setStep('name')
-    } else if (step === 'name') {
-      if (draft.name.trim().length < 5 || draft.name.trim().length > 60) {
-        setError('Party name must be 5–60 characters.')
-        return
-      }
-      setStep('look')
-    } else if (step === 'look') {
-      setStep('tagline')
-    } else if (step === 'tagline') {
-      if (draft.tagline.trim().length > 60) {
-        setError('Tagline must be at most 60 characters.')
-        return
-      }
-      setStep('review')
-    }
-  }
+  const slotsRemaining   = slotsUsed !== null ? MAX_NEW_PARTIES - slotsUsed : null
+  const allSlotsFull     = slotsRemaining !== null && slotsRemaining <= 0
+  const symbolTaken      = TAKEN_SYMBOLS.has(symbol)
 
-  async function submit() {
-    if (!fingerprint) {
-      setError('Loading your identity… please wait a moment.')
-      return
-    }
-    setIsSubmitting(true)
+  const codeValid        = /^[A-Z0-9]{2,6}$/.test(code)
+  const nameValid        = name.trim().length >= 5 && name.trim().length <= 60
+  const colorValid       = isValidHex(color)
+  const taglineValid     = tagline.length <= 60
+  const manifestoValid   = manifesto.length <= 200
+  const canSubmit        = codeValid && nameValid && colorValid && taglineValid &&
+                           manifestoValid && !!fingerprint && !symbolTaken && !allSlotsFull
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!canSubmit) return
+    setSubmitting(true)
     setError(null)
+
     try {
       const res = await fetch('/api/parties', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          code: draft.code,
-          name: draft.name.trim(),
-          color: draft.color,
-          tagline: draft.tagline.trim(),
-          symbol: draft.symbol,
+          code,
+          name: name.trim(),
+          color,
+          symbol,
+          tagline: tagline.trim(),
           fingerprint,
         }),
       })
+
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Something went wrong. Try again.')
         return
       }
-      setCreatedCode(data.party.code)
-      setStep('done')
+
+      router.push(`/parties/${data.party.code}`)
     } catch {
       setError('Network error. Please try again.')
     } finally {
-      setIsSubmitting(false)
+      setSubmitting(false)
     }
   }
 
-  // ── Done screen ────────────────────────────────────────────────────────────
-  if (step === 'done' && createdCode) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 text-center">
-        <div className="max-w-sm w-full">
-          {/* Confetti row */}
-          <div className="text-5xl mb-4 animate-bounce">{draft.symbol}</div>
-          <div
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full font-black text-white text-2xl mb-4"
-            style={{ background: draft.color }}
-          >
-            {draft.code}
-          </div>
-          <h1 className="text-3xl font-black text-white mb-2 uppercase">
-            Party Born! 🪳
-          </h1>
-          <p className="text-white/60 font-mono text-sm mb-8">
-            <span className="text-white font-black">{draft.name}</span> is now a registered cockroach party.
-            Contest seats, get votes, win the naali.
-          </p>
-
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => router.push(`/file?party=${createdCode}`)}
-              className="w-full py-4 rounded-2xl bg-yellow-300 text-black font-black text-base border-4 border-black shadow-[4px_4px_0_black] hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              🪳 CONTEST A SEAT NOW →
-            </button>
-            <button
-              onClick={() => router.push(`/parties/${createdCode}`)}
-              className="w-full py-3 rounded-xl font-black text-white/60 text-sm hover:text-white transition-colors"
-            >
-              View your party →
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Step: Code ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
       {/* Header */}
-      <div className="bg-[#3C3489] text-white px-4 pt-6 pb-8">
-        <div className="max-w-lg mx-auto">
-          <a href="/parties" className="text-sm font-bold text-white/60 hover:text-white transition-colors">
+      <div className="bg-[#3C3489] text-white px-4 pt-6 pb-10">
+        <div className="max-w-4xl mx-auto">
+          <a href="/parties" className="text-sm font-bold text-white/70 hover:text-white transition-colors">
             ← Back to Parties
           </a>
-          <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
-            🪳 Start a Party
-          </h1>
-          <p className="text-white/50 text-sm mt-1 font-mono">
-            4 steps. 30 slots left in parliament.
+          <div className="mt-4 text-5xl">🏴</div>
+          <h1 className="mt-2 text-4xl font-black tracking-tight">START YOUR PARTY</h1>
+          <p className="mt-1 text-white/60 text-sm">
+            Build a movement. Contest seats. Rule the naali.
           </p>
 
-          {/* Progress dots */}
-          <div className="flex gap-2 mt-4">
-            {STEPS.map((s, i) => (
-              <div
-                key={s}
-                className="h-1.5 rounded-full flex-1 transition-all"
-                style={{
-                  background: i <= currentIdx ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
-                }}
-              />
-            ))}
+          {/* Slot counter */}
+          <div className="mt-4 flex items-center gap-3">
+            {loadingSlots ? (
+              <span className="text-white/40 text-sm font-mono">Loading slots...</span>
+            ) : slotsRemaining !== null ? (
+              <>
+                <div className="flex-1 max-w-xs bg-white/10 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, ((slotsUsed ?? 0) / MAX_NEW_PARTIES) * 100)}%`,
+                      background: allSlotsFull ? '#ef4444' : slotsRemaining <= 5 ? '#f59e0b' : '#4ade80',
+                    }}
+                  />
+                </div>
+                <span className={`text-sm font-black ${allSlotsFull ? 'text-red-400' : slotsRemaining <= 5 ? 'text-yellow-300' : 'text-green-300'}`}>
+                  {allSlotsFull
+                    ? '🔒 ALL 30 SLOTS TAKEN'
+                    : `${slotsRemaining} / ${MAX_NEW_PARTIES} party slots remaining`}
+                </span>
+              </>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="max-w-lg mx-auto px-4 py-8">
+      {/* Full slots wall */}
+      {allSlotsFull && (
+        <div className="max-w-4xl mx-auto px-4 py-10 text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-black text-[#3C3489] mb-2">Parliament is Full</h2>
+          <p className="text-gray-500 font-mono text-sm">
+            All 30 new party slots have been claimed. The roaches have spoken.
+          </p>
+          <a
+            href="/parties"
+            className="mt-6 inline-block px-6 py-3 bg-[#3C3489] text-white font-black rounded-xl border-4 border-black hover:bg-black transition-colors"
+          >
+            ← Browse Existing Parties
+          </a>
+        </div>
+      )}
 
-        {/* ── STEP: CODE ── */}
-        {step === 'code' && (
-          <div>
-            <h2 className="text-2xl font-black text-[#1a1a2e] mb-1">Pick your party code</h2>
-            <p className="text-sm text-gray-500 mb-6 font-mono">
-              2–6 characters. All caps. This is your party&apos;s identity in parliament. Choose wisely.
-            </p>
-            <input
-              type="text"
-              maxLength={6}
-              className="w-full px-5 py-4 border-4 border-black rounded-2xl text-3xl font-black tracking-widest uppercase text-center focus:outline-none focus:border-[#3C3489] bg-white"
-              placeholder="e.g. DRCP"
-              value={draft.code}
-              onChange={e => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-              onKeyDown={e => e.key === 'Enter' && validateAndNext()}
-              autoFocus
-            />
-            <p className="text-xs text-gray-400 font-mono text-center mt-2">
-              {draft.code.length}/6 chars · only A–Z and 0–9
-            </p>
-            {/* Examples */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {['DRCP','NPCX','KPP','ROACH','ZBP','KKP'].map(eg => (
-                <button
-                  key={eg}
-                  onClick={() => set('code', eg)}
-                  className="px-3 py-1.5 rounded-xl border-2 border-gray-300 font-black text-sm text-gray-600 hover:border-[#3C3489] hover:text-[#3C3489] transition-colors"
-                >
-                  {eg}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      {!allSlotsFull && (
+        <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* ── FORM ── */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-        {/* ── STEP: NAME ── */}
-        {step === 'name' && (
-          <div>
-            <h2 className="text-2xl font-black text-[#1a1a2e] mb-1">What&apos;s your party called?</h2>
-            <p className="text-sm text-gray-500 mb-6 font-mono">
-              Full official name. 5–60 characters. Make it sound important.
-            </p>
-            <input
-              type="text"
-              maxLength={60}
-              className="w-full px-5 py-4 border-4 border-black rounded-2xl text-xl font-black focus:outline-none focus:border-[#3C3489] bg-white"
-              placeholder="e.g. Drain Rights Cockroach Party"
-              value={draft.name}
-              onChange={e => set('name', e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && validateAndNext()}
-              autoFocus
-            />
-            <p className="text-xs text-gray-400 font-mono text-right mt-2">
-              {draft.name.trim().length}/60
-            </p>
-            {/* Suggestions */}
-            <div className="mt-4">
-              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Need inspiration?</p>
-              <div className="flex flex-col gap-2">
-                {[
-                  'National Drain Rights Congress',
-                  'All India Cockroach Liberation Front',
-                  'Gutter Suraksha Morcha',
-                  'Kachra Mukti Party',
-                ].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => set('name', s)}
-                    className="text-left px-4 py-2 rounded-xl border-2 border-gray-200 font-bold text-sm text-gray-700 hover:border-[#3C3489] hover:text-[#3C3489] transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP: LOOK ── */}
-        {step === 'look' && (
-          <div>
-            <h2 className="text-2xl font-black text-[#1a1a2e] mb-1">Party color &amp; symbol</h2>
-            <p className="text-sm text-gray-500 mb-5 font-mono">
-              Choose your party&apos;s look. This is how you&apos;ll appear in every seat.
-            </p>
-
-            {/* Preview pill */}
-            <div className="flex justify-center mb-6">
-              <div
-                className="flex items-center gap-3 px-6 py-3 rounded-2xl border-4 border-black font-black text-white text-xl shadow-[4px_4px_0_black]"
-                style={{ background: draft.color }}
-              >
-                <span className="text-3xl">{draft.symbol}</span>
-                <span className="tracking-widest">{draft.code || 'XYZ'}</span>
-              </div>
+            {/* Nalala disclaimer */}
+            <div className="flex gap-2 items-start bg-yellow-50 border-2 border-yellow-300 rounded-xl px-4 py-3">
+              <span className="text-lg shrink-0">⚠️</span>
+              <p className="text-sm font-bold text-yellow-800 leading-snug">
+                Your party must contest at least 10 seats — otherwise your candidates go to the{' '}
+                <strong>Nalala</strong> category (the shame zone).
+              </p>
             </div>
 
-            {/* Color grid */}
-            <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Color</p>
-            <div className="grid grid-cols-8 gap-2 mb-3">
-              {COLOR_PRESETS.map(c => (
-                <button
-                  key={c}
-                  onClick={() => { set('color', c); setCustomColor(c) }}
-                  className="w-full aspect-square rounded-xl border-4 transition-all hover:scale-110"
-                  style={{
-                    background: c,
-                    borderColor: draft.color === c ? 'black' : 'transparent',
-                    boxShadow: draft.color === c ? '0 0 0 2px black' : 'none',
-                  }}
-                />
-              ))}
-            </div>
-            {/* Custom color */}
-            <div className="flex items-center gap-3 mb-6">
+            {/* Party Code */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-500">
+                Party Code <span className="text-red-400">*</span>
+              </label>
               <input
-                type="color"
-                value={customColor}
-                onChange={e => { setCustomColor(e.target.value); set('color', e.target.value) }}
-                className="w-10 h-10 rounded-xl border-2 border-gray-300 cursor-pointer"
+                type="text"
+                value={code}
+                onChange={e => handleCodeChange(e.target.value)}
+                placeholder="e.g. SKCP"
+                maxLength={6}
+                className={`w-full border-4 rounded-xl px-4 py-3 font-black text-lg tracking-wider uppercase bg-white focus:outline-none transition-colors ${
+                  code && !codeValid ? 'border-red-400' : 'border-black focus:border-[#3C3489]'
+                }`}
               />
-              <span className="font-mono text-sm text-gray-500">Custom color</span>
-              <span className="font-mono text-xs text-gray-400">{draft.color}</span>
+              <p className="text-xs text-gray-400">2–6 uppercase letters or numbers</p>
             </div>
 
-            {/* Symbol grid */}
-            <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Symbol</p>
-            <div className="grid grid-cols-10 gap-1.5">
-              {EMOJI_OPTIONS.map(em => (
-                <button
-                  key={em}
-                  onClick={() => set('symbol', em)}
-                  className="w-full aspect-square rounded-xl text-2xl flex items-center justify-center border-4 transition-all hover:scale-110"
-                  style={{
-                    borderColor: draft.symbol === em ? 'black' : 'transparent',
-                    background: draft.symbol === em ? 'rgba(0,0,0,0.08)' : 'white',
-                  }}
-                >
-                  {em}
-                </button>
-              ))}
+            {/* Party Name */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-500">
+                Party Name <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value.slice(0, 60))}
+                placeholder="e.g. National Drain Defence Party"
+                className={`w-full border-4 rounded-xl px-4 py-3 font-bold bg-white focus:outline-none transition-colors ${
+                  name && !nameValid ? 'border-red-400' : 'border-black focus:border-[#3C3489]'
+                }`}
+              />
+              <p className="text-xs text-gray-400">{name.length}/60 characters</p>
             </div>
-          </div>
-        )}
 
-        {/* ── STEP: TAGLINE ── */}
-        {step === 'tagline' && (
-          <div>
-            <h2 className="text-2xl font-black text-[#1a1a2e] mb-1">Party tagline</h2>
-            <p className="text-sm text-gray-500 mb-6 font-mono">
-              Your battle cry. Max 60 characters. Optional but powerful.
-            </p>
-            <input
-              type="text"
-              maxLength={60}
-              className="w-full px-5 py-4 border-4 border-black rounded-2xl text-xl font-black italic focus:outline-none focus:border-[#3C3489] bg-white"
-              placeholder="e.g. Naali is our birthright"
-              value={draft.tagline}
-              onChange={e => set('tagline', e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && validateAndNext()}
-              autoFocus
-            />
-            <p className="text-xs text-gray-400 font-mono text-right mt-2">
-              {draft.tagline.length}/60
-            </p>
-            <div className="mt-4">
-              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Slogans from the drain</p>
-              <div className="flex flex-col gap-2">
-                {[
-                  'Naali is our birthright',
-                  'From the gutter, for the gutter',
-                  'One drain, one destiny',
-                  'Kachra se kranthi',
-                ].map(s => (
+            {/* Color */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-500">
+                Party Color <span className="text-red-400">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_COLORS.map(c => (
                   <button
-                    key={s}
-                    onClick={() => set('tagline', s)}
-                    className="text-left px-4 py-2 rounded-xl border-2 border-gray-200 font-bold text-sm italic text-gray-700 hover:border-[#3C3489] hover:text-[#3C3489] transition-colors"
-                  >
-                    &ldquo;{s}&rdquo;
-                  </button>
+                    key={c}
+                    type="button"
+                    onClick={() => { setColor(c); setCustomHex('') }}
+                    className="w-9 h-9 rounded-lg border-4 transition-transform hover:scale-110"
+                    style={{ background: c, borderColor: color === c ? '#000' : 'transparent' }}
+                    aria-label={c}
+                  />
                 ))}
               </div>
-            </div>
-            <button
-              onClick={() => { set('tagline', ''); validateAndNext() }}
-              className="mt-4 text-sm text-gray-400 hover:text-gray-700 font-bold transition-colors w-full text-center"
-            >
-              Skip tagline →
-            </button>
-          </div>
-        )}
-
-        {/* ── STEP: REVIEW ── */}
-        {step === 'review' && (
-          <div>
-            <h2 className="text-2xl font-black text-[#1a1a2e] mb-1">Review your party</h2>
-            <p className="text-sm text-gray-500 mb-6 font-mono">
-              One cockroach parliament. No refunds. No returns. Confirm below.
-            </p>
-
-            {/* Big preview card */}
-            <div
-              className="rounded-3xl border-4 border-black overflow-hidden shadow-[6px_6px_0_black] mb-6"
-            >
-              {/* Colour band */}
-              <div
-                className="px-6 py-5 flex items-center gap-4"
-                style={{ background: draft.color }}
-              >
-                <span className="text-5xl">{draft.symbol}</span>
-                <div>
-                  <div className="text-4xl font-black text-white tracking-widest leading-none">{draft.code}</div>
-                  <div className="text-sm text-white/80 font-mono mt-0.5">{draft.name}</div>
-                </div>
-              </div>
-              {/* Info */}
-              <div className="bg-white px-6 py-4">
-                {draft.tagline && (
-                  <p className="text-base italic text-gray-500 mb-3">&ldquo;{draft.tagline}&rdquo;</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={customHex}
+                  onChange={e => setCustomHex(e.target.value)}
+                  placeholder="#FF5722"
+                  maxLength={7}
+                  className="w-28 border-2 rounded-lg px-2 py-1.5 text-sm font-mono bg-white focus:outline-none border-gray-300 focus:border-[#3C3489]"
+                />
+                {isValidHex(customHex) && (
+                  <div className="w-7 h-7 rounded-md border-2 border-gray-300" style={{ background: customHex }} />
                 )}
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-wider">Code</p>
-                    <p className="font-black text-[#1a1a2e]">{draft.code}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-wider">Symbol</p>
-                    <p className="text-xl">{draft.symbol}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-wider">Color</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-200" style={{ background: draft.color }} />
-                      <span className="font-mono text-sm text-gray-600">{draft.color}</span>
-                    </div>
+                <span className="text-xs text-gray-400">Custom hex</span>
+              </div>
+            </div>
+
+            {/* Symbol picker — 30 slots */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-wider text-gray-500">
+                  Party Symbol <span className="text-red-400">*</span>
+                </label>
+                <span className="text-[10px] font-mono text-gray-400">
+                  {ALL_SYMBOLS_30.filter(s => !TAKEN_SYMBOLS.has(s)).length} available · {TAKEN_SYMBOLS.size} taken
+                </span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-1.5">
+                {ALL_SYMBOLS_30.map(s => {
+                  const taken      = TAKEN_SYMBOLS.has(s)
+                  const isSelected = symbol === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => { if (!taken) setSymbol(s) }}
+                      disabled={taken}
+                      title={taken ? 'Already allocated to an existing party' : s}
+                      className={`relative flex flex-col items-center justify-center py-2 px-1 rounded-xl border-2 transition-all text-xl
+                        ${taken
+                          ? 'opacity-35 cursor-not-allowed border-gray-200 bg-gray-50 grayscale'
+                          : isSelected
+                            ? 'border-black bg-yellow-50 shadow-[2px_2px_0_black] scale-105'
+                            : 'border-gray-200 bg-white hover:border-[#3C3489] hover:scale-105'
+                        }`}
+                    >
+                      {s}
+                      {taken && (
+                        <span className="absolute -top-1.5 -right-1.5 text-[8px] font-black bg-red-500 text-white px-1 rounded leading-tight">
+                          TAKEN
+                        </span>
+                      )}
+                      {isSelected && !taken && (
+                        <span className="absolute -top-1.5 -right-1.5 text-[8px] font-black bg-black text-yellow-300 px-1 rounded leading-tight">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {symbolTaken && (
+                <p className="text-red-500 text-xs font-bold">
+                  ⚠ This symbol is already allocated — pick an available one above.
+                </p>
+              )}
+              {!symbolTaken && (
+                <p className="text-xs text-gray-400">
+                  Selected: <span className="text-lg">{symbol}</span>
+                  <span className="ml-2 text-green-600 font-bold">✓ Available</span>
+                </p>
+              )}
+            </div>
+
+            {/* Tagline */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-500">Tagline</label>
+              <input
+                type="text"
+                value={tagline}
+                onChange={e => setTagline(e.target.value.slice(0, 60))}
+                placeholder="e.g. Drains for the people"
+                className="w-full border-4 border-black rounded-xl px-4 py-3 font-medium bg-white focus:outline-none focus:border-[#3C3489] transition-colors"
+              />
+              <p className="text-xs text-gray-400">{tagline.length}/60 characters</p>
+            </div>
+
+            {/* Manifesto */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-500">Manifesto</label>
+              <textarea
+                value={manifesto}
+                onChange={e => setManifesto(e.target.value.slice(0, 200))}
+                placeholder="What does your party stand for? (max 200 chars)"
+                rows={3}
+                className="w-full border-4 border-black rounded-xl px-4 py-3 font-medium bg-white focus:outline-none focus:border-[#3C3489] transition-colors resize-none"
+              />
+              <p className="text-xs text-gray-400">{manifesto.length}/200 characters</p>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border-2 border-red-400 rounded-xl px-4 py-3 text-sm font-bold text-red-700">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!canSubmit || submitting}
+              className="w-full bg-yellow-300 text-black border-4 border-black font-black text-base py-3.5 rounded-xl hover:bg-black hover:text-yellow-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'LAUNCHING...' : '🏴 LAUNCH PARTY →'}
+            </button>
+
+            {!fingerprint && (
+              <p className="text-xs text-gray-400 text-center">Loading identity... please wait</p>
+            )}
+          </form>
+
+          {/* ── LIVE PREVIEW ── */}
+          <div className="flex flex-col gap-4">
+            <p className="text-xs font-black uppercase tracking-wider text-gray-400">Live Preview</p>
+
+            <div
+              className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
+              style={{ borderLeft: `8px solid ${color}` }}
+            >
+              <div className="px-5 py-4 flex items-center gap-3" style={{ background: color }}>
+                <span className="text-5xl font-black text-white tracking-tight leading-none">
+                  {code || 'CODE'}
+                </span>
+                <span className="text-3xl leading-none">{symbol}</span>
+              </div>
+
+              <div className="p-5 flex flex-col gap-3">
+                <div>
+                  <h2 className="text-xl font-black text-[#1a1a2e]">
+                    {name.trim() || 'Your Party Name'}
+                  </h2>
+                  <p className="text-sm italic text-gray-500 mt-0.5">
+                    &ldquo;{tagline.trim() || 'Your tagline here'}&rdquo;
+                  </p>
+                </div>
+
+                {manifesto && (
+                  <p className="text-sm text-gray-600 leading-relaxed">{manifesto}</p>
+                )}
+
+                <div className="flex items-center gap-4 text-sm font-bold text-gray-500">
+                  <span>0 candidates</span>
+                  <span className="text-gray-300">|</span>
+                  <span>0 votes</span>
+                </div>
+
+                <div
+                  className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full text-white w-fit"
+                  style={{ background: color }}
+                >
+                  ⚡ New party
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-1">
+                  <div
+                    className="flex-1 text-center border-4 font-black text-sm py-2.5 px-4 rounded-xl opacity-50 cursor-not-allowed"
+                    style={{ borderColor: color, color }}
+                  >
+                    JOIN THIS PARTY →
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Edit buttons */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {(['code','name','look','tagline'] as Step[]).map(s => (
-                <button
-                  key={s}
-                  onClick={() => { setError(null); setStep(s) }}
-                  className="px-4 py-2 rounded-xl border-2 border-gray-300 text-sm font-black text-gray-500 hover:border-[#3C3489] hover:text-[#3C3489] transition-colors capitalize"
-                >
-                  Edit {s}
-                </button>
-              ))}
+            {/* Slot info */}
+            {slotsRemaining !== null && (
+              <div className="flex gap-2 items-start bg-[#3C3489]/10 border border-[#3C3489]/20 rounded-xl px-4 py-3">
+                <span className="text-base shrink-0">🏴</span>
+                <p className="text-xs text-[#3C3489] leading-snug font-bold">
+                  <strong>{slotsRemaining}</strong> of {MAX_NEW_PARTIES} new party slots remain.
+                  Once all slots are taken, no new parties can be formed.
+                </p>
+              </div>
+            )}
+
+            {/* Nalala warning */}
+            <div className="flex gap-2 items-start bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+              <span className="text-base shrink-0">🚽</span>
+              <p className="text-xs text-gray-500 leading-snug">
+                Contest fewer than <strong>10 seats</strong> and your candidates will be listed under{' '}
+                <strong className="text-red-500">Nalala</strong> — the parliament&apos;s shame section.
+                Recruit hard.
+              </p>
             </div>
           </div>
-        )}
-
-        {/* Error */}
-        {error && (
-          <div className="mt-4 px-4 py-3 bg-red-50 border-2 border-red-400 rounded-xl text-sm font-bold text-red-700">
-            ⚠️ {error}
-          </div>
-        )}
-
-        {/* CTA button */}
-        {step !== 'done' && (
-          <div className="mt-8">
-            {step === 'review' ? (
-              <button
-                onClick={submit}
-                disabled={isSubmitting || !fingerprint}
-                className="w-full py-4 rounded-2xl bg-yellow-300 text-black font-black text-base border-4 border-black shadow-[4px_4px_0_black] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
-              >
-                {isSubmitting ? '🪳 Registering...' : '🪳 LAUNCH THIS PARTY →'}
-              </button>
-            ) : (
-              <button
-                onClick={validateAndNext}
-                className="w-full py-4 rounded-2xl bg-black text-white font-black text-base border-4 border-black shadow-[4px_4px_0_black] hover:bg-[#3C3489] transition-all"
-              >
-                Continue →
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
