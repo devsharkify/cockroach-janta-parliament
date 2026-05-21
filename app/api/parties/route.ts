@@ -125,6 +125,12 @@ export async function POST(req: Request) {
     return Response.json({ error: `Party code "${normalizedCode}" is already taken` }, { status: 409, headers })
   }
 
+  // Global cap: max 30 user-created (non-founding) parties
+  const totalNewParties = await partiesCol.countDocuments({ is_founding: false })
+  if (totalNewParties >= 30) {
+    return Response.json({ error: 'All 30 new party slots are taken. Parliament is full.' }, { status: 429, headers })
+  }
+
   // Rate limit: max 3 parties per fingerprint
   const createdByUser = await partiesCol.countDocuments({ founder_fingerprint: fingerprint })
   if (createdByUser >= 3) {
