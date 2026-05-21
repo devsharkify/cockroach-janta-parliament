@@ -48,6 +48,34 @@ export default function HomePage() {
       </div>
 
       {/* ═══════════════════════════════════════
+          1B. PARLIAMENT HERO IMAGE
+      ═══════════════════════════════════════ */}
+      <section className="relative w-full border-b-8 border-black overflow-hidden" style={{ maxHeight: '92vh' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/parliament-hero.png"
+          alt="Cockroach Janta Parliament Elections — Unity Survival Progress"
+          className="w-full object-cover object-top"
+          style={{ maxHeight: '92vh', display: 'block' }}
+        />
+        {/* Gradient overlay at bottom so ticker/hero blend */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, transparent, #000)' }}
+        />
+        {/* Bottom badge */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+          <a
+            href="#seat-finder"
+            className="px-8 py-4 bg-yellow-300 text-black font-black text-lg border-4 border-black rounded-2xl shadow-[5px_5px_0_black] hover:bg-white transition-colors"
+          >
+            🪳 CONTEST NOW — FREE →
+          </a>
+          <p className="text-white/70 font-mono text-xs">543 seats · results every Saturday</p>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════
           2. HERO
       ═══════════════════════════════════════ */}
       <section className="relative bg-yellow-300 border-b-8 border-black overflow-hidden">
