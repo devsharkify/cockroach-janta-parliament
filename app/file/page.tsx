@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CONSTITUENCIES } from '@/lib/constituencies'
+import { ALL_PARTIES } from '@/lib/types'
 
 const PARTIES = [
   { code: 'CJP', name: 'Cockroach Janta Party',    color: '#7F77DD', emoji: '🟣', tagline: 'Lazy, Loud, Lawful' },
@@ -13,6 +14,11 @@ const PARTIES = [
   { code: 'IND', name: 'Independent',               color: '#888888', emoji: '⚪', tagline: 'No faction. Pure chaos.' },
 ]
 
+type SeatCandidate = {
+  partyCode: string | null
+  partyName: string | null
+}
+
 export default function FilePickerPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -21,6 +27,10 @@ export default function FilePickerPage() {
   const [selectedSeatNum, setSelectedSeatNum] = useState('')
   const [selectedParty, setSelectedParty] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  const [takenPartyCodes, setTakenPartyCodes] = useState<Set<string>>(new Set())
+  const [seatCandidates, setSeatCandidates] = useState<SeatCandidate[]>([])
+  const [fetchingParties, setFetchingParties] = useState(false)
 
   // pre-select party from URL if navigated from a party page
   useEffect(() => {
@@ -43,12 +53,53 @@ export default function FilePickerPage() {
     }
   }, [searchParams])
 
+  // When seat changes, fetch existing candidates to find taken party codes
+  useEffect(() => {
+    if (!selectedSeatNum) {
+      setTakenPartyCodes(new Set())
+      setSeatCandidates([])
+      return
+    }
+    setFetchingParties(true)
+    fetch(`/api/seats/${selectedSeatNum}`)
+      .then(r => r.json())
+      .then(data => {
+        const taken = new Set<string>()
+        const candidateList: SeatCandidate[] = []
+        if (Array.isArray(data.candidates)) {
+          for (const c of data.candidates) {
+            if (c.partyCode && c.partyCode !== 'IND') {
+              taken.add(c.partyCode)
+            }
+            candidateList.push({ partyCode: c.partyCode, partyName: c.partyName })
+          }
+        }
+        setTakenPartyCodes(taken)
+        setSeatCandidates(candidateList)
+      })
+      .catch(() => {})
+      .finally(() => setFetchingParties(false))
+  }, [selectedSeatNum])
+
   // reset constituency when state changes (only via user interaction, not from ?seat= param)
   // handled in the select onChange below
 
   const stateSeats = CONSTITUENCIES.find(c => c.state === selectedState)?.seats ?? []
   const selectedSeat = stateSeats.find(s => String(s.number) === selectedSeatNum)
   const selectedPartyObj = PARTIES.find(p => p.code === selectedParty)
+
+  // Build party candidate count summary for the seat
+  const partyCandidateCounts: Record<string, { name: string; count: number; color: string }> = {}
+  for (const c of seatCandidates) {
+    if (!c.partyCode || c.partyCode === 'IND') continue
+    const partyInfo = PARTIES.find(p => p.code === c.partyCode) ??
+      { name: c.partyName ?? c.partyCode, color: '#888888' }
+    if (!partyCandidateCounts[c.partyCode]) {
+      partyCandidateCounts[c.partyCode] = { name: partyInfo.name, count: 0, color: partyInfo.color }
+    }
+    partyCandidateCounts[c.partyCode].count++
+  }
+  const contestingParties = Object.entries(partyCandidateCounts)
 
   function handleFile() {
     if (!selectedSeatNum) { setError('Pick a constituency first 🪳'); return }
@@ -140,29 +191,73 @@ export default function FilePickerPage() {
               <label className="block font-black text-xs uppercase tracking-widest text-black/50 mb-2">
                 3. Pick Your Gang
               </label>
+
+              {/* Already contesting from this seat */}
+              {selectedSeatNum && !fetchingParties && contestingParties.length > 0 && (
+                <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
+                  <p className="text-xs font-black uppercase tracking-wider text-yellow-800 mb-2">
+                    Already contesting from this seat:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {contestingParties.map(([code, info]) => {
+                      const meta = ALL_PARTIES.find(p => p.code === code)
+                      return (
+                        <span
+                          key={code}
+                          className="inline-flex items-center gap-1 text-xs font-black px-2 py-1 rounded-full text-white"
+                          style={{ background: info.color }}
+                        >
+                          {meta?.symbol ?? '🪳'} {code} — {info.count} candidate{info.count !== 1 ? 's' : ''}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              {fetchingParties && (
+                <p className="text-xs font-mono text-black/40 mb-2">Loading seat data...</p>
+              )}
+
               <div className="grid grid-cols-1 gap-2">
-                {PARTIES.map(p => (
-                  <button
-                    key={p.code}
-                    onClick={() => { setSelectedParty(p.code); setError('') }}
-                    disabled={!selectedSeatNum}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl border-4 text-left transition-all"
-                    style={{
-                      borderColor: selectedParty === p.code ? p.color : '#e5e7eb',
-                      background: selectedParty === p.code ? p.color + '18' : '#fff',
-                      boxShadow: selectedParty === p.code ? `3px 3px 0 ${p.color}` : 'none',
-                    }}
-                  >
-                    <span className="text-xl shrink-0">{p.emoji}</span>
-                    <span className="flex-1 min-w-0">
-                      <span className="font-black text-sm text-black block">{p.code} — {p.name}</span>
-                      <span className="font-mono text-xs text-black/45 truncate block">{p.tagline}</span>
-                    </span>
-                    {selectedParty === p.code && (
-                      <span className="shrink-0 font-black text-sm" style={{ color: p.color }}>✓</span>
-                    )}
-                  </button>
-                ))}
+                {PARTIES.map(p => {
+                  const isContested = takenPartyCodes.has(p.code)
+                  return (
+                    <button
+                      key={p.code}
+                      onClick={() => { setSelectedParty(p.code); setError('') }}
+                      disabled={!selectedSeatNum}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl border-4 text-left transition-all relative"
+                      style={{
+                        borderColor: selectedParty === p.code ? p.color : isContested ? '#f59e0b' : '#e5e7eb',
+                        background: selectedParty === p.code ? p.color + '18' : isContested ? '#fffbeb' : '#fff',
+                        boxShadow: selectedParty === p.code ? `3px 3px 0 ${p.color}` : 'none',
+                        opacity: isContested ? 0.85 : 1,
+                      }}
+                    >
+                      <span className="text-xl shrink-0">{p.emoji}</span>
+                      <span className="flex-1 min-w-0">
+                        <span className="font-black text-sm text-black block">{p.code} — {p.name}</span>
+                        {isContested ? (
+                          <span className="font-mono text-xs text-amber-700 truncate block font-black">
+                            ⚠️ CONTESTED — JOIN ANYWAY?
+                          </span>
+                        ) : (
+                          <span className="font-mono text-xs text-black/45 truncate block">{p.tagline}</span>
+                        )}
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isContested && (
+                          <span className="text-xs font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-black">
+                            CONTESTED 🪳
+                          </span>
+                        )}
+                        {selectedParty === p.code && (
+                          <span className="font-black text-sm" style={{ color: p.color }}>✓</span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

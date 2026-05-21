@@ -9,6 +9,11 @@ const PRESET_COLORS = [
   '#00BCD4', '#FF6F00', '#F57F17', '#E91E63',
 ]
 
+const PRESET_SYMBOLS = [
+  '🪳', '✋🪳', '🧹🪳', '🦟🪳', '💧🪳', '🏴🪳', '🔥🪳', '⚡🪳',
+  '🚽🪳', '🏛️🪳', '📢🪳', '💬🪳', '📱🪳', '✊🪳', '🪔🪳',
+]
+
 function isValidHex(v: string) {
   return /^#[0-9A-Fa-f]{6}$/.test(v)
 }
@@ -21,6 +26,7 @@ export default function CreatePartyPage() {
   const [name, setName] = useState('')
   const [color, setColor] = useState(PRESET_COLORS[0])
   const [customHex, setCustomHex] = useState('')
+  const [symbol, setSymbol] = useState('🪳')
   const [tagline, setTagline] = useState('')
   const [manifesto, setManifesto] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -56,6 +62,7 @@ export default function CreatePartyPage() {
           code,
           name: name.trim(),
           color,
+          symbol,
           tagline: tagline.trim(),
           fingerprint,
         }),
@@ -175,6 +182,29 @@ export default function CreatePartyPage() {
             </div>
           </div>
 
+          {/* Symbol picker */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-wider text-gray-500">
+              Party Symbol
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_SYMBOLS.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSymbol(s)}
+                  className={`text-xl px-2 py-1.5 rounded-lg border-4 transition-all hover:scale-110 ${
+                    symbol === s ? 'border-black bg-gray-100' : 'border-transparent bg-gray-50 hover:border-gray-300'
+                  }`}
+                  aria-label={s}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400">Selected: <span className="text-lg">{symbol}</span></p>
+          </div>
+
           {/* Tagline */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-black uppercase tracking-wider text-gray-500">Tagline</label>
@@ -229,10 +259,11 @@ export default function CreatePartyPage() {
             style={{ borderLeft: `8px solid ${color}` }}
           >
             {/* Color band */}
-            <div className="px-5 py-4" style={{ background: color }}>
+            <div className="px-5 py-4 flex items-center gap-3" style={{ background: color }}>
               <span className="text-5xl font-black text-white tracking-tight leading-none">
                 {code || 'CODE'}
               </span>
+              <span className="text-3xl leading-none">{symbol}</span>
             </div>
 
             {/* Card body */}

@@ -72,14 +72,14 @@ export async function GET() {
 export async function POST(req: Request) {
   const headers = { 'Cache-Control': 'no-store' }
 
-  let body: { code?: unknown; name?: unknown; color?: unknown; tagline?: unknown; fingerprint?: unknown }
+  let body: { code?: unknown; name?: unknown; color?: unknown; tagline?: unknown; fingerprint?: unknown; symbol?: unknown }
   try {
     body = await req.json()
   } catch {
     return Response.json({ error: 'Invalid JSON' }, { status: 400, headers })
   }
 
-  const { code, name, color, tagline, fingerprint } = body
+  const { code, name, color, tagline, fingerprint, symbol } = body
 
   // Validate
   if (typeof code !== 'string' || !/^[A-Z0-9]{2,6}$/.test(code.toUpperCase())) {
@@ -93,6 +93,9 @@ export async function POST(req: Request) {
   }
   if (tagline !== undefined && (typeof tagline !== 'string' || tagline.length > 60)) {
     return Response.json({ error: 'Tagline must be at most 60 characters' }, { status: 400, headers })
+  }
+  if (symbol !== undefined && (typeof symbol !== 'string' || symbol.length === 0 || symbol.length > 6)) {
+    return Response.json({ error: 'Symbol must be 1–6 characters' }, { status: 400, headers })
   }
   if (typeof fingerprint !== 'string' || fingerprint.trim().length === 0) {
     return Response.json({ error: 'fingerprint is required' }, { status: 400, headers })
@@ -108,6 +111,7 @@ export async function POST(req: Request) {
       name: (name as string).trim(),
       color,
       tagline: typeof tagline === 'string' ? tagline.trim() : '',
+      symbol: typeof symbol === 'string' ? symbol : '🪳',
       is_founding: false,
     }
     return Response.json({ party: mockParty }, { status: 201, headers })
@@ -134,6 +138,7 @@ export async function POST(req: Request) {
     name: (name as string).trim(),
     color,
     tagline: typeof tagline === 'string' ? tagline.trim() : null,
+    symbol: typeof symbol === 'string' ? symbol : '🪳',
     logo_url: null,
     founder_fingerprint: fingerprint,
     is_founding: false,

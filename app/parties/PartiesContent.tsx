@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import type { PartyData } from '@/app/api/parties/route'
+import { ALL_PARTIES } from '@/lib/types'
 
 const PARTY_COPY: Record<string, { description: string; funnyStat: string }> = {
   CJP: {
@@ -22,6 +23,9 @@ const PARTY_COPY: Record<string, { description: string; funnyStat: string }> = {
   },
 }
 
+const TOTAL_SEATS = 543
+const NALALA_THRESHOLD = 10
+
 function formatNumber(n: number): string {
   if (n >= 1_00_000) return `${(n / 1_00_000).toFixed(1)}L`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
@@ -30,6 +34,9 @@ function formatNumber(n: number): string {
 
 export default function PartiesContent({ parties }: { parties: PartyData[] }) {
   const router = useRouter()
+
+  const safeParties = parties.filter(p => p.candidateCount >= NALALA_THRESHOLD)
+  const nalalaParties = parties.filter(p => p.candidateCount < NALALA_THRESHOLD)
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
@@ -45,8 +52,38 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
           <div className="mt-4 text-5xl">🪳</div>
           <h1 className="mt-2 text-4xl font-black tracking-tight">PARTIES</h1>
           <p className="mt-1 text-white/60 text-sm">
-            Four parties. One parliament. Infinite naali drama.
+            {parties.length} parties. One parliament. Infinite naali drama.
           </p>
+
+          {/* Parliament Strength summary — Feature 3 */}
+          <div className="mt-4 bg-white/10 rounded-xl px-4 py-3 flex flex-col gap-2">
+            <p className="text-xs font-black uppercase tracking-wider text-white/70">
+              Parliament Strength — {TOTAL_SEATS} total seats
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {safeParties.map(p => (
+                <span
+                  key={p.code}
+                  className="inline-flex items-center gap-1 text-xs font-black px-2 py-1 rounded-full bg-green-500/20 text-green-300"
+                >
+                  ✓ {p.code}
+                </span>
+              ))}
+              {nalalaParties.map(p => (
+                <span
+                  key={p.code}
+                  className="inline-flex items-center gap-1 text-xs font-black px-2 py-1 rounded-full bg-red-500/20 text-red-300"
+                >
+                  ⚠️ {p.code}
+                </span>
+              ))}
+            </div>
+            {safeParties.length > 0 && (
+              <p className="text-xs text-white/50">
+                {safeParties.length} nalala-safe · {nalalaParties.length} at risk
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -54,6 +91,10 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
       <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         {parties.map((party) => {
           const copy = PARTY_COPY[party.code] ?? { description: '', funnyStat: '#1 in something' }
+          const meta = ALL_PARTIES.find(p => p.code === party.code)
+          const symbol = meta?.symbol ?? '🪳'
+          const persona = meta?.persona ?? ''
+          const isNalala = party.candidateCount < NALALA_THRESHOLD
 
           return (
             <div
@@ -63,12 +104,13 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
             >
               {/* Color band header */}
               <div
-                className="px-5 py-4"
+                className="px-5 py-4 flex items-center gap-3"
                 style={{ background: party.color }}
               >
                 <span className="text-5xl font-black text-white tracking-tight leading-none">
                   {party.code}
                 </span>
+                <span className="text-3xl leading-none">{symbol}</span>
               </div>
 
               {/* Card body */}
@@ -76,16 +118,46 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
                 <div>
                   <h2 className="text-xl font-black text-[#1a1a2e]">{party.name}</h2>
                   <p className="text-sm italic text-gray-500 mt-0.5">&ldquo;{party.tagline}&rdquo;</p>
+                  {persona && (
+                    <span
+                      className="inline-flex items-center mt-1.5 text-xs font-black px-2.5 py-1 rounded-full text-white"
+                      style={{ background: party.color }}
+                    >
+                      {persona}
+                    </span>
+                  )}
                 </div>
 
                 <p className="text-sm text-gray-600 leading-relaxed">{copy.description}</p>
 
                 {/* Stats row */}
-                <div className="flex items-center gap-4 text-sm font-bold text-gray-500">
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-500 flex-wrap">
                   <span>{party.candidateCount} candidates</span>
-                  <span className="text-gray-300">|</span>
+                  <span className="text-gray-300">·</span>
                   <span>{formatNumber(party.totalVotes)} votes</span>
                 </div>
+
+                {/* Nalala progress bar */}
+                {isNalala ? (
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between text-xs font-black">
+                      <span className="text-red-600">{party.candidateCount}/{NALALA_THRESHOLD} seats — NALALA RISK ⚠️</span>
+                    </div>
+                    <div className="w-full h-2 bg-red-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-red-500 rounded-full transition-all"
+                        style={{ width: `${(party.candidateCount / NALALA_THRESHOLD) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-black text-green-700">
+                    <div className="w-full h-2 bg-green-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-green-500 rounded-full w-full" />
+                    </div>
+                    <span className="shrink-0">✓ Nalala-safe</span>
+                  </div>
+                )}
 
                 {/* Funny stat badge */}
                 <div

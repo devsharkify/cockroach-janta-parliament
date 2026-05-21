@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useFingerprint } from '@/lib/hooks/useFingerprint'
+import { ALL_PARTIES, type Party } from '@/lib/types'
 
-const PARTIES = [
-  { id: 'CJP', code: 'CJP', name: 'Cockroach Janta Party',    color: '#7F77DD', tagline: 'Lazy, Loud, Lawful',            desc: 'The original roach establishment' },
-  { id: 'ACP', code: 'ACP', name: 'Aam Cockroach Party',      color: '#1D9E75', tagline: 'Naali Sabki, Iss Baar Cockroach Ki', desc: "The people's pest, fighting for the naali" },
-  { id: 'CCP', code: 'CCP', name: 'Cockroach Congress Party', color: '#D85A30', tagline: 'Old Roach Magic',               desc: 'Old roach, new tricks' },
-  { id: 'RCP', code: 'RCP', name: 'Regional Cockroach Party', color: '#D4537E', tagline: 'Apni Galli Apna Kachra',        desc: 'Your galli, your party' },
-  { id: 'IND', code: 'IND', name: 'Independent',              color: '#888888', tagline: 'No faction. Pure chaos.',        desc: 'No allegiance. Just vibes.' },
-]
+// ── All parties (including IND virtual) with display desc ─────────────────────
+const PARTIES: (Party & { desc: string })[] = ALL_PARTIES.map(p => ({
+  ...p,
+  desc: p.persona,
+}))
 
 const STEP_ORDER: Step[] = ['name', 'code', 'manifesto', 'party', 'submit']
 const STEP_LABELS = ['Identity', 'Claim Code', 'Manifesto', 'Party', 'Review']
@@ -20,6 +20,7 @@ interface FilingFlowProps { seatNumber: number }
 
 export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   const fingerprint = useFingerprint()
+  const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>('name')
   const [candidateName, setCandidateName] = useState('')
   const [namePattern, setNamePattern] = useState('')
@@ -27,21 +28,34 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   const [confirmCode, setConfirmCode] = useState('')
   const [codeError, setCodeError] = useState('')
   const [manifesto, setManifesto] = useState('')
-  const [selectedParty, setSelectedParty] = useState(PARTIES[0])
+  const [selectedParty, setSelectedParty] = useState<Party & { desc: string }>(
+    PARTIES.find(p => p.code === 'CJP') ?? PARTIES[0]
+  )
   const [isSpinning, setIsSpinning] = useState(false)
   const [isGeneratingManifesto, setIsGeneratingManifesto] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [candidateId, setCandidateId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [seatName, setSeatName] = useState<string | null>(null)
+  const [seatState, setSeatState] = useState<string | null>(null)
   const manifestoRef = useRef<HTMLTextAreaElement>(null)
 
-  // Fetch seat name on mount
+  // Pre-select party from ?party= URL param
+  useEffect(() => {
+    const partyParam = searchParams.get('party')
+    if (partyParam) {
+      const match = PARTIES.find(p => p.code === partyParam)
+      if (match) setSelectedParty(match)
+    }
+  }, [searchParams])
+
+  // Fetch seat name + state on mount
   useEffect(() => {
     fetch(`/api/seats/${seatNumber}`)
       .then(r => r.json())
       .then(data => {
-        if (data?.seat?.name) setSeatName(data.seat.name)
+        if (data?.seat?.name)  setSeatName(data.seat.name)
+        if (data?.seat?.state) setSeatState(data.seat.state)
       })
       .catch(() => {/* silently ignore */})
   }, [seatNumber])
@@ -53,7 +67,13 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
       const res = await fetch('/api/names/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seatNumber }),
+        body: JSON.stringify({
+          seatNumber,
+          partyCode: selectedParty.code,
+          partyName: selectedParty.name,
+          constituencyName: seatName ?? undefined,
+          state: seatState ?? undefined,
+        }),
       })
       const data = await res.json()
       setCandidateName(data.name)
@@ -73,8 +93,8 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: candidateName,
-          seat: `Seat ${seatNumber}`,
-          state: 'India',
+          seat: seatName ?? `Seat ${seatNumber}`,
+          state: seatState ?? 'India',
           party: selectedParty.name,
         }),
       })
@@ -98,8 +118,10 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
           seatNumber,
           displayName: candidateName,
           manifesto,
-          partyId: selectedParty.id === 'IND' ? null : selectedParty.id,
-          isIndependent: selectedParty.id === 'IND',
+          partyId: selectedParty.code === 'IND' ? null : selectedParty.code,
+          partyCode: selectedParty.code === 'IND' ? null : selectedParty.code,
+          partyName: selectedParty.code === 'IND' ? null : selectedParty.name,
+          isIndependent: selectedParty.code === 'IND',
           fingerprint,
           claimCode: claimCode || undefined,
         }),
@@ -121,7 +143,6 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   function handleCodeContinue() {
     setCodeError('')
     if (claimCode === '' && confirmCode === '') {
-      // Both empty — treat as skip
       setStep('manifesto')
       return
     }
@@ -146,7 +167,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   const codeValid = /^\d{4}$/.test(claimCode) && claimCode === confirmCode
 
   const ogUrl = candidateId
-    ? `/api/og/candidate?name=${encodeURIComponent(candidateName)}&seat=Seat%20${seatNumber}&party=${encodeURIComponent(selectedParty.code)}&color=${encodeURIComponent(selectedParty.color)}&manifesto=${encodeURIComponent(manifesto)}`
+    ? `/api/og/candidate?name=${encodeURIComponent(candidateName)}&seat=${encodeURIComponent(seatName ?? `Seat ${seatNumber}`)}&party=${encodeURIComponent(selectedParty.code)}&color=${encodeURIComponent(selectedParty.color)}&manifesto=${encodeURIComponent(manifesto)}`
     : null
 
   const shareUrl = candidateId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/candidate/${candidateId}` : ''
@@ -154,7 +175,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
   async function shareToIG() {
     if (!ogUrl) return
     try {
-      await navigator.share({ title: `I'm contesting from Seat ${seatNumber}!`, url: shareUrl })
+      await navigator.share({ title: `I'm contesting from ${seatName ?? `Seat ${seatNumber}`}!`, url: shareUrl })
     } catch {
       window.open(`https://www.instagram.com/`, '_blank')
     }
@@ -214,8 +235,19 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             <div className="text-center">
               <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 1 of 5</p>
               <h1 className="text-3xl font-black text-white mb-1">Your Cockroach Identity</h1>
-              <p className="text-white/50 text-sm">Auto-generated. Real names not allowed. Pure chaos.</p>
+              <p className="text-white/50 text-sm">Auto-generated from your party + constituency. Pure chaos.</p>
             </div>
+
+            {/* Party hint */}
+            {seatName && (
+              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white/50">
+                <span>{selectedParty.symbol}</span>
+                <span>{selectedParty.code}</span>
+                <span className="text-white/30">·</span>
+                <span>{seatName}</span>
+                <span className="ml-auto text-[#D4A017]/60">→ hyper-local name</span>
+              </div>
+            )}
 
             <div
               className="bg-white/5 border-2 border-white/10 rounded-2xl p-6 text-center cursor-pointer hover:border-[#D4A017]/50 transition-colors"
@@ -296,7 +328,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
                 ⚠️ If you lose this code, you lose your seat even if you win.
               </p>
               <p className="text-red-300/70 text-xs mt-1">
-                The seat will show as "SEAT VACANT — CODE LOST" and cannot be recovered.
+                The seat will show as &quot;SEAT VACANT — CODE LOST&quot; and cannot be recovered.
               </p>
             </div>
 
@@ -463,32 +495,27 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
             <div className="text-center">
               <p className="text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">Step 4 of 5</p>
               <h1 className="text-3xl font-black text-white mb-1">Pick Your Faction</h1>
-              <p className="text-white/50 text-sm">Choose wisely. Or don't. It's all chaos.</p>
+              <p className="text-white/50 text-sm">Choose wisely. Or don&apos;t. It&apos;s all chaos.</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
               {PARTIES.map(party => (
                 <button
-                  key={party.id}
+                  key={party.code}
                   onClick={() => setSelectedParty(party)}
-                  className="w-full flex items-center gap-4 px-4 py-5 rounded-xl border-2 transition-all text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all text-left"
                   style={{
-                    borderColor: selectedParty.id === party.id ? party.color : 'rgba(255,255,255,0.1)',
-                    backgroundColor: selectedParty.id === party.id ? `${party.color}25` : 'rgba(255,255,255,0.03)',
-                    boxShadow: selectedParty.id === party.id ? `0 4px 0 ${party.color}60` : 'none',
+                    borderColor: selectedParty.code === party.code ? party.color : 'rgba(255,255,255,0.1)',
+                    backgroundColor: selectedParty.code === party.code ? `${party.color}25` : 'rgba(255,255,255,0.03)',
+                    boxShadow: selectedParty.code === party.code ? `0 4px 0 ${party.color}60` : 'none',
                   }}
                 >
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0 border-2 border-black/20"
-                    style={{ backgroundColor: party.color }}
-                  >
-                    {party.code}
-                  </div>
+                  <span className="text-xl shrink-0">{party.symbol}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-black text-sm">{party.name}</p>
-                    <p className="text-white/50 text-xs italic mt-0.5">{party.desc}</p>
+                    <p className="text-white font-black text-sm">{party.code} — {party.name}</p>
+                    <p className="text-white/45 text-xs italic truncate">{party.desc}</p>
                   </div>
-                  {selectedParty.id === party.id && (
+                  {selectedParty.code === party.code && (
                     <span className="text-[#D4A017] text-xl shrink-0">✓</span>
                   )}
                 </button>
@@ -524,8 +551,9 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
 
             {/* Candidate card preview */}
             <div className="border-2 rounded-2xl overflow-hidden" style={{ borderColor: selectedParty.color }}>
-              <div className="p-3 text-white font-black text-xs text-center" style={{ backgroundColor: selectedParty.color }}>
-                {selectedParty.code} — {selectedParty.name}
+              <div className="p-3 text-white font-black text-xs text-center flex items-center justify-center gap-2" style={{ backgroundColor: selectedParty.color }}>
+                <span>{selectedParty.symbol}</span>
+                <span>{selectedParty.code} — {selectedParty.name}</span>
               </div>
               <div className="bg-white/5 p-5 space-y-3">
                 <div className="flex items-center gap-3">

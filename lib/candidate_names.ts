@@ -9,9 +9,15 @@
  * - Don of Hyderabad Galli
  * - Naali Sardar
  *
+ * Also supports hyper-local viral name generation:
+ *   [VIRAL_WORD]_[CONSTITUENCY_NICK]_[ROACH_WORD]
+ *   e.g.  Trending_Malka_DumpYard  |  Naala_Kashi_GhatRoach
+ *
  * Total unique combinations: ~7 lakh.
  * Server enforces per-seat uniqueness — collision triggers regenerate.
  */
+
+import { getConstituencyVibe, pickRandom } from './constituencyIssues'
 
 export const TITLES = [
   'Raja', 'Rani', 'Bhai', 'Don', 'Anna', 'Sahab', 'Master',
@@ -142,3 +148,75 @@ export const TOTAL_COMBINATIONS =
   CORES.length * SUFFIXES.length +
   TITLES.length * REGIONS.length * CORES.length +
   CORES.length * REGIONS.length * SUFFIXES.length;
+
+// ── Hyper-local name generation ───────────────────────────────────────────────
+// Formula: [VIRAL_WORD]_[CONSTITUENCY_NICK]_[ROACH_WORD]
+// Example: Trending_Malka_DumpYard | Naala_Kashi_GhatRoach | Reel_Gorakh_NaaliRaja
+
+/** First distinctive word per party code — used as the "viral prefix" in names */
+const PARTY_VIRAL_WORDS: Record<string, string> = {
+  CJP:    'Sarkari',
+  CCP:    'Khandaani',
+  ACP:    'Aam',
+  RCP:    'Galli',
+  TDP:    'Drainage',
+  TRS:    'Trending',
+  BRS:    'Bharatiya',
+  JSS:    'Janata',
+  AIMIM:  'Machar',
+  DMK:    'Morcha',
+  AIADMK: 'AntiDrain',
+  TMC:    'Collective',
+  YSRC:   'Youth',
+  NMF:    'National',
+  NDF:    'Federation',
+  BSS:    'Sewer',
+  RSS_R:  'Rashtriya',
+  INC_R:  'Naala',
+  NCSP:   'Comment',
+  RWU:    'Reel',
+  ARP:    'AamRoach',
+  SKCP:   'Shuu',
+  TVKP:   'Trending',
+  IND:    'Aam',
+}
+
+const VIRAL_STOP_WORDS = new Set([
+  'the', 'of', 'and', 'or', 'a', 'an', 'party', 'india', 'indian',
+  'all', 'karo', 'cockroach', 'roach', 'sena', 'sangh', 'congress',
+])
+
+/** Fall back: pull first meaningful word out of a party name */
+function extractViralWordFromName(partyName: string): string {
+  const words = partyName.split(/\s+/)
+  for (const w of words) {
+    if (w.length >= 3 && !VIRAL_STOP_WORDS.has(w.toLowerCase())) {
+      return w.replace(/[^a-zA-Z0-9]/g, '')
+    }
+  }
+  return 'Roach'
+}
+
+/**
+ * Generate a hyper-local candidate name.
+ * Format: [PARTY_VIRAL_WORD]_[CONSTITUENCY_NICK]_[ISSUE_ROACH_WORD]
+ *
+ * @param partyCode       e.g. 'TVKP'
+ * @param partyName       e.g. 'Trending Virak Karo Party'
+ * @param constituencyName e.g. 'Malkajgiri'
+ * @param state           e.g. 'Telangana' (optional, for state-level fallback)
+ */
+export function generateHyperLocalName(
+  partyCode: string,
+  partyName: string,
+  constituencyName: string,
+  state?: string,
+): { name: string; pattern: string } {
+  const vibe = getConstituencyVibe(constituencyName, state)
+  const viralWord = PARTY_VIRAL_WORDS[partyCode] ?? extractViralWordFromName(partyName)
+  const nicknames = vibe.nicknames.length > 0 ? vibe.nicknames : [constituencyName.split(' ')[0]]
+  const constituencyNick = pickRandom(nicknames)
+  const roachWord = pickRandom(vibe.roachWords)
+  const name = `${viralWord}_${constituencyNick}_${roachWord}`
+  return { name, pattern: 'hyper-local: party+constituency+issue' }
+}
