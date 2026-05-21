@@ -264,11 +264,11 @@ function Dashboard({ pin }: { pin: string }) {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [useMock, setUseMock] = useState(false)
 
-  const fetchStats = useCallback(async (mock?: boolean) => {
+  const fetchStats = useCallback(async (forceMock?: boolean) => {
     setLoading(true)
     setError('')
+    const isMock = forceMock !== undefined ? forceMock : useMock
     try {
-      const isMock = mock ?? useMock
       const res = await fetch(`/api/admin/dashboard?pin=${pin}${isMock ? '&mock=1' : ''}`)
       if (!res.ok) throw new Error('Stats fetch failed')
       setStats(await res.json())
@@ -278,7 +278,8 @@ function Dashboard({ pin }: { pin: string }) {
     } finally {
       setLoading(false)
     }
-  }, [pin, useMock])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin])  // intentionally exclude useMock — we pass forceMock explicitly
 
   const toggleMock = () => {
     const next = !useMock
@@ -286,7 +287,8 @@ function Dashboard({ pin }: { pin: string }) {
     fetchStats(next)
   }
 
-  useEffect(() => { fetchStats() }, [fetchStats])
+  // fetch once on mount
+  useEffect(() => { fetchStats(false) }, [])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const triggerSnapshot = async () => {
     if (!confirm('Close current cycle, compute winners, open next cycle. Are you sure?')) return
@@ -340,7 +342,7 @@ function Dashboard({ pin }: { pin: string }) {
     <div className="min-h-screen bg-[#FAFAF7]">
 
       {/* HEADER */}
-      <div className="bg-[#05071a] border-b-4 border-yellow-300 px-4 py-4 sticky top-0 z-50">
+      <div className="bg-[#05071a] px-4 py-4 sticky top-0 z-50" style={{ borderBottom: `4px solid ${useMock ? '#D4A017' : '#22c55e'}` }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🪳</span>
@@ -349,29 +351,31 @@ function Dashboard({ pin }: { pin: string }) {
               <div className="font-mono text-[9px] text-white/30 tracking-widest">cockroachparliament.online/superadmin</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {lastRefresh && (
               <span className="font-mono text-[10px] text-white/30 hidden sm:block">
                 {lastRefresh.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
-            {/* Mock / Live toggle */}
+            {/* DATA MODE TOGGLE — prominent solid pill */}
             <button
               onClick={toggleMock}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider border-2 transition-all ${
-                useMock
-                  ? 'border-yellow-300 text-yellow-300 bg-yellow-300/10'
-                  : 'border-green-400 text-green-400 bg-green-400/10'
-              }`}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl font-black text-sm uppercase tracking-wider shadow-[3px_3px_0_rgba(0,0,0,0.5)] active:translate-y-[1px] transition-all"
+              style={useMock
+                ? { background: '#D4A017', color: '#05071a' }
+                : { background: '#16a34a', color: '#ffffff' }
+              }
+              title="Click to switch between mock sample data and live database data"
             >
-              {useMock ? '🧪 MOCK' : '🟢 LIVE'}
+              <span className="text-base leading-none">{useMock ? '🧪' : '🟢'}</span>
+              <span>{useMock ? 'MOCK DATA' : 'LIVE DATA'}</span>
             </button>
             <button
               onClick={() => fetchStats()}
               disabled={loading}
-              className="px-4 py-1.5 border-2 border-white/20 rounded-lg text-white/60 font-black text-xs uppercase hover:border-white/50 hover:text-white transition-colors disabled:opacity-40"
+              className="px-4 py-2 border-2 border-white/20 rounded-xl text-white font-black text-sm uppercase hover:border-white/60 hover:bg-white/10 transition-colors disabled:opacity-40"
             >
-              {loading ? '⟳' : '⟳'}
+              {loading ? '⟳ ...' : '⟳ REFRESH'}
             </button>
           </div>
         </div>

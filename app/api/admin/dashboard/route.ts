@@ -68,7 +68,14 @@ export async function GET(req: NextRequest) {
       currentCycle: {
         cycleNumber: 3,
         status: 'live',
-        snapshotAt: new Date(Date.now() + 2 * 24 * 3_600_000).toISOString(),
+        snapshotAt: (() => {
+          // Next Sunday 11PM IST (17:30 UTC)
+          const d = new Date()
+          const daysUntilSun = (7 - d.getDay()) % 7 || 7
+          d.setDate(d.getDate() + daysUntilSun)
+          d.setUTCHours(17, 30, 0, 0)
+          return d.toISOString()
+        })(),
         votesThisCycle: 47823,
       },
       votesByParty: [
