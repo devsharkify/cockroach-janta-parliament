@@ -74,7 +74,7 @@ export default function Navbar() {
               className="hidden md:inline-flex items-center gap-1 px-4 py-1.5 bg-yellow-300 text-black font-black text-sm rounded-lg border-2 border-yellow-300 hover:bg-yellow-400 transition-colors"
               style={{ letterSpacing: '-0.2px' }}
             >
-              FILE CANDIDACY →
+              CONTEST →
             </Link>
 
             {/* Mobile hamburger */}
@@ -131,7 +131,7 @@ export default function Navbar() {
               onClick={closeMenu}
               className="mt-4 px-8 py-4 bg-yellow-300 text-black font-black text-xl rounded-2xl border-4 border-yellow-300 hover:bg-yellow-400 transition-colors shadow-[4px_4px_0_rgba(255,255,255,0.15)] text-center"
             >
-              🪳 FILE CANDIDACY →
+              🪳 CONTEST →
             </Link>
           </div>
 

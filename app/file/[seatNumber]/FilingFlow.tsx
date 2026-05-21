@@ -207,7 +207,7 @@ export default function FilingFlow({ seatNumber }: FilingFlowProps) {
       <nav className="sticky top-0 z-50 bg-[#3C3489]/95 backdrop-blur border-b-2 border-[#D4A017] px-4 py-3 flex items-center gap-3">
         <a href="/" className="text-2xl">🪳</a>
         <span className="text-white font-black text-sm">
-          File Candidacy — {headerTitle}
+          Contest — {headerTitle}
         </span>
       </nav>
 

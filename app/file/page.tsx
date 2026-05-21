@@ -113,7 +113,7 @@ export default function FilePickerPage() {
             ← HOME
           </Link>
           <span className="text-white/20">|</span>
-          <span className="text-yellow-300 font-black text-xs uppercase tracking-widest">File Candidacy</span>
+          <span className="text-yellow-300 font-black text-xs uppercase tracking-widest">Contest</span>
         </div>
 
         <div className="flex-1 flex flex-col justify-center px-6 py-10 lg:px-10">
@@ -257,7 +257,7 @@ export default function FilePickerPage() {
               disabled={!selectedSeatNum || !selectedParty}
               className="w-full py-4 bg-yellow-300 text-black font-black text-lg rounded-xl border-4 border-yellow-300 hover:bg-white transition-colors disabled:opacity-25 disabled:cursor-not-allowed shadow-[0_4px_0_rgba(212,173,23,0.4)]"
             >
-              🪳 FILE CANDIDACY →
+              🪳 CONTEST →
             </button>
 
             <p className="text-center text-white/20 font-mono text-xs">

@@ -90,7 +90,7 @@ export default function HomePage() {
                 🪳 FIND YOUR SEAT →
               </a>
               <Link href="/file" className="w-full py-4 bg-white text-black font-black text-base border-4 border-black rounded-2xl shadow-[4px_4px_0_rgba(0,0,0,0.25)] hover:bg-black hover:text-yellow-300 transition-colors text-center">
-                📋 FILE CANDIDACY (free)
+                📋 CONTEST (free)
               </Link>
             </div>
             <p className="text-black/50 text-xs font-mono mt-3">— Samrat Macchar, Supreme Cockroach Commander 👑</p>
@@ -160,7 +160,7 @@ export default function HomePage() {
                 href="/file"
                 className="px-7 py-4 bg-white text-black font-black text-base border-4 border-black rounded-2xl shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:bg-black hover:text-yellow-300 transition-colors"
               >
-                📋 FILE CANDIDACY (free)
+                📋 CONTEST (free)
               </Link>
             </div>
 
@@ -199,7 +199,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { step: '1', emoji: '🪳', title: 'PICK A SEAT',   desc: 'Choose any of 543 Lok Sabha constituencies. Find yours by city, PIN code, or name.' },
-            { step: '2', emoji: '📋', title: 'FILE CANDIDACY', desc: 'Get an auto-generated cockroach identity and a Hinglish manifesto. Party optional.' },
+            { step: '2', emoji: '📋', title: 'CONTEST', desc: 'Get an auto-generated cockroach identity and a Hinglish manifesto. Party optional.' },
             { step: '3', emoji: '🏆', title: 'WIN ON SATURDAY', desc: 'Votes count every Saturday 11PM IST. Most votes wins. Results are forever (ish).' },
           ].map((s) => (
             <div
@@ -453,7 +453,7 @@ export default function HomePage() {
             href="/file"
             className="px-10 py-5 rounded-2xl bg-yellow-300 text-black font-black text-xl border-4 border-yellow-300 hover:bg-yellow-400 transition-colors shadow-[6px_6px_0_rgba(255,255,255,0.15)]"
           >
-            🪳 FILE CANDIDACY (free)
+            🪳 CONTEST (free)
           </Link>
           <Link
             href="/supreme"

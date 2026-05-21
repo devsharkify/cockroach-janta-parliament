@@ -356,7 +356,7 @@ export default function SupremeContent() {
                 el.style.boxShadow = '0 0 20px rgba(212,160,23,0.1)'
               }}
             >
-              📋 FILE CANDIDACY
+              📋 CONTEST
             </Link>
             <Link
               href="/parties/CJP"
