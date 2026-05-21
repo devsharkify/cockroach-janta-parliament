@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPinInfo } from '@/lib/pinToSeat';
+import { CONSTITUENCIES } from '@/lib/constituencies';
 
-type Tab = 'seat' | 'pin' | 'search';
+type Tab = 'state' | 'seat' | 'pin' | 'search';
 
 interface SearchResult {
   seatNumber: number;
@@ -15,11 +16,26 @@ interface SearchResult {
 
 interface SeatFinderProps {
   className?: string;
+  mode?: 'explore' | 'file'; // explore = go to /seat/N, file = go to /file/N
 }
 
-export default function SeatFinder({ className }: SeatFinderProps) {
+export default function SeatFinder({ className, mode = 'explore' }: SeatFinderProps) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>('seat');
+  const [tab, setTab] = useState<Tab>('state');
+
+  // --- Tab 0: State → Constituency ---
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedSeatNum, setSelectedSeatNum] = useState('');
+  const stateSeats = CONSTITUENCIES.find(c => c.state === selectedState)?.seats ?? [];
+
+  const handleStateGo = useCallback(() => {
+    if (!selectedSeatNum) return;
+    const dest = mode === 'file' ? `/file/${selectedSeatNum}` : `/seat/${selectedSeatNum}`;
+    router.push(dest);
+  }, [selectedSeatNum, mode, router]);
+
+  // reset constituency when state changes
+  useEffect(() => { setSelectedSeatNum(''); }, [selectedState]);
 
   // --- Tab 1: Seat Number ---
   const [seatInput, setSeatInput] = useState('');
@@ -32,8 +48,9 @@ export default function SeatFinder({ className }: SeatFinderProps) {
       return;
     }
     setSeatError('');
-    router.push('/seat/' + num);
-  }, [seatInput, router]);
+    const dest = mode === 'file' ? `/file/${num}` : `/seat/${num}`;
+    router.push(dest);
+  }, [seatInput, mode, router]);
 
   const handleSeatKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -57,20 +74,18 @@ export default function SeatFinder({ className }: SeatFinderProps) {
     setPinError('');
     setPinSuccess('');
     setPinLoading(true);
-
     await new Promise((resolve) => setTimeout(resolve, 300));
-
     const info = getPinInfo(pinInput);
     setPinLoading(false);
-
     if (info) {
       setPinSuccess(`Found: ${info.city}, Seat #${info.seat}`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/seat/' + info.seat);
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      const dest = mode === 'file' ? `/file/${info.seat}` : `/seat/${info.seat}`;
+      router.push(dest);
     } else {
-      setPinError('PIN not recognized. Try seat number tab.');
+      setPinError('PIN not recognized. Try the State tab.');
     }
-  }, [pinInput, router]);
+  }, [pinInput, mode, router]);
 
   const handlePinKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -90,10 +105,7 @@ export default function SeatFinder({ className }: SeatFinderProps) {
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
-      setSearchResults([]);
-      setSearchOpen(false);
-      setSearchEmpty(false);
-      setSearchLoading(false);
+      setSearchResults([]); setSearchOpen(false); setSearchEmpty(false); setSearchLoading(false);
       return;
     }
     setSearchLoading(true);
@@ -104,9 +116,7 @@ export default function SeatFinder({ className }: SeatFinderProps) {
       setSearchEmpty(data.length === 0);
       setSearchOpen(true);
     } catch {
-      setSearchResults([]);
-      setSearchEmpty(true);
-      setSearchOpen(true);
+      setSearchResults([]); setSearchEmpty(true); setSearchOpen(true);
     } finally {
       setSearchLoading(false);
     }
@@ -122,16 +132,6 @@ export default function SeatFinder({ className }: SeatFinderProps) {
     [doSearch],
   );
 
-  const handleSearchKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Escape') {
-        setSearchOpen(false);
-      }
-    },
-    [],
-  );
-
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -142,36 +142,72 @@ export default function SeatFinder({ className }: SeatFinderProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
+
+  const selectClass =
+    'w-full border-4 border-black rounded-xl font-mono bg-white px-3 py-2.5 focus:outline-none focus:border-[#7F77DD] appearance-none cursor-pointer';
 
   return (
     <div className={className}>
       {/* Tab Switcher */}
       <div className="flex border-4 border-black rounded-xl overflow-hidden mb-4">
-        <button
-          onClick={() => setTab('seat')}
-          className={`flex-1 py-2 font-black text-sm ${tab === 'seat' ? 'bg-black text-yellow-300' : 'bg-white text-black hover:bg-yellow-50'}`}
-        >
-          # Seat
-        </button>
-        <button
-          onClick={() => setTab('pin')}
-          className={`flex-1 py-2 font-black text-sm border-l-4 border-black ${tab === 'pin' ? 'bg-black text-yellow-300' : 'bg-white text-black hover:bg-yellow-50'}`}
-        >
-          📍 PIN
-        </button>
-        <button
-          onClick={() => setTab('search')}
-          className={`flex-1 py-2 font-black text-sm border-l-4 border-black ${tab === 'search' ? 'bg-black text-yellow-300' : 'bg-white text-black hover:bg-yellow-50'}`}
-        >
-          🔍 Search
-        </button>
+        {([ ['state', '🗺️ State'], ['seat', '# No.'], ['pin', '📍 PIN'], ['search', '🔍 Search'] ] as [Tab, string][]).map(([t, label], i) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`flex-1 py-2 font-black text-xs sm:text-sm ${
+              tab === t ? 'bg-black text-yellow-300' : 'bg-white text-black hover:bg-yellow-50'
+            } ${i > 0 ? 'border-l-4 border-black' : ''}`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
+
+      {/* Tab 0 — State → Constituency */}
+      {tab === 'state' && (
+        <div className="space-y-3">
+          <div className="relative">
+            <select
+              value={selectedState}
+              onChange={e => setSelectedState(e.target.value)}
+              className={selectClass}
+            >
+              <option value="">— Pick a State / UT —</option>
+              {CONSTITUENCIES.map(c => (
+                <option key={c.state} value={c.state}>{c.state}</option>
+              ))}
+            </select>
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50">▾</span>
+          </div>
+
+          {selectedState && (
+            <div className="relative">
+              <select
+                value={selectedSeatNum}
+                onChange={e => setSelectedSeatNum(e.target.value)}
+                className={selectClass}
+              >
+                <option value="">— Pick Constituency ({stateSeats.length} seats) —</option>
+                {stateSeats.map(s => (
+                  <option key={s.number} value={s.number}>
+                    {s.name} (#{s.number})
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50">▾</span>
+            </div>
+          )}
+
+          <button
+            onClick={handleStateGo}
+            disabled={!selectedSeatNum}
+            className="w-full py-3 bg-yellow-300 text-black font-black text-base border-4 border-black rounded-xl hover:bg-black hover:text-yellow-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-[3px_3px_0_black]"
+          >
+            {mode === 'file' ? '🪳 FILE HERE →' : '🗺️ EXPLORE SEAT →'}
+          </button>
+        </div>
+      )}
 
       {/* Tab 1 — Seat Number */}
       {tab === 'seat' && (
@@ -183,10 +219,7 @@ export default function SeatFinder({ className }: SeatFinderProps) {
               max={543}
               placeholder="Seat number 1–543"
               value={seatInput}
-              onChange={(e) => {
-                setSeatInput(e.target.value);
-                setSeatError('');
-              }}
+              onChange={e => { setSeatInput(e.target.value); setSeatError(''); }}
               onKeyDown={handleSeatKeyDown}
               className="flex-1 border-4 border-black rounded-xl font-mono bg-white px-3 py-2 focus:outline-none focus:border-[#7F77DD]"
             />
@@ -197,9 +230,7 @@ export default function SeatFinder({ className }: SeatFinderProps) {
               GO 🪳
             </button>
           </div>
-          {seatError && (
-            <p className="text-red-600 font-bold text-sm mt-2">{seatError}</p>
-          )}
+          {seatError && <p className="text-red-600 font-bold text-sm mt-2">{seatError}</p>}
         </div>
       )}
 
@@ -214,34 +245,20 @@ export default function SeatFinder({ className }: SeatFinderProps) {
               inputMode="numeric"
               placeholder="6-digit PIN (e.g. 110001)"
               value={pinInput}
-              onChange={(e) => {
-                setPinInput(e.target.value.replace(/\D/g, ''));
-                setPinError('');
-                setPinSuccess('');
-              }}
+              onChange={e => { setPinInput(e.target.value.replace(/\D/g, '')); setPinError(''); setPinSuccess(''); }}
               onKeyDown={handlePinKeyDown}
               className="flex-1 border-4 border-black rounded-xl font-mono bg-white px-3 py-2 focus:outline-none focus:border-[#7F77DD]"
             />
             <button
               onClick={handlePinFind}
               disabled={pinLoading}
-              className="px-4 py-2 bg-yellow-300 text-black font-black border-4 border-black rounded-xl hover:bg-black hover:text-yellow-300 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-yellow-300 text-black font-black border-4 border-black rounded-xl hover:bg-black hover:text-yellow-300 transition-colors disabled:opacity-60"
             >
-              {pinLoading ? (
-                <span className="inline-flex items-center gap-1">
-                  <Spinner /> Finding...
-                </span>
-              ) : (
-                'Find Seat'
-              )}
+              {pinLoading ? <span className="inline-flex items-center gap-1"><Spinner /> Finding...</span> : 'Find Seat'}
             </button>
           </div>
-          {pinError && (
-            <p className="text-red-600 font-bold text-sm mt-2">{pinError}</p>
-          )}
-          {pinSuccess && (
-            <p className="text-green-600 font-bold text-sm mt-2">{pinSuccess}</p>
-          )}
+          {pinError && <p className="text-red-600 font-bold text-sm mt-2">{pinError}</p>}
+          {pinSuccess && <p className="text-green-600 font-bold text-sm mt-2">{pinSuccess}</p>}
         </div>
       )}
 
@@ -254,42 +271,30 @@ export default function SeatFinder({ className }: SeatFinderProps) {
               placeholder="Search seat or candidate..."
               value={searchInput}
               onChange={handleSearchChange}
-              onKeyDown={handleSearchKeyDown}
+              onKeyDown={e => { if (e.key === 'Escape') setSearchOpen(false); }}
               className="flex-1 border-4 border-black rounded-xl font-mono bg-white px-3 py-2 focus:outline-none focus:border-[#7F77DD]"
             />
-            {searchLoading && (
-              <span className="shrink-0">
-                <Spinner />
-              </span>
-            )}
+            {searchLoading && <span className="shrink-0"><Spinner /></span>}
           </div>
-
           {searchOpen && (
             <div className="absolute left-0 right-0 top-full mt-1 bg-white border-4 border-black rounded-xl shadow-[4px_4px_0_black] z-50 max-h-64 overflow-y-auto">
               {searchEmpty ? (
-                <div className="px-4 py-3 font-mono text-sm text-gray-500">
-                  No results found.
-                </div>
+                <div className="px-4 py-3 font-mono text-sm text-gray-500">No results found.</div>
               ) : (
                 searchResults.map((result, i) => (
                   <button
                     key={i}
                     onClick={() => {
                       setSearchOpen(false);
-                      router.push('/seat/' + result.seatNumber);
+                      const dest = mode === 'file' ? `/file/${result.seatNumber}` : `/seat/${result.seatNumber}`;
+                      router.push(dest);
                     }}
                     className="w-full flex items-start gap-2 px-4 py-2 hover:bg-yellow-50 text-left border-b last:border-b-0 border-gray-200"
                   >
-                    <span className="text-lg leading-tight mt-0.5">
-                      {result.type === 'seat' ? '🗺️' : '🪳'}
-                    </span>
+                    <span className="text-lg leading-tight mt-0.5">{result.type === 'seat' ? '🗺️' : '🪳'}</span>
                     <span className="flex flex-col">
-                      <span className="font-black text-sm text-black">
-                        {result.label}
-                      </span>
-                      <span className="font-mono text-xs text-gray-500">
-                        {result.secondary}
-                      </span>
+                      <span className="font-black text-sm text-black">{result.label}</span>
+                      <span className="font-mono text-xs text-gray-500">{result.secondary}</span>
                     </span>
                   </button>
                 ))
@@ -304,26 +309,9 @@ export default function SeatFinder({ className }: SeatFinderProps) {
 
 function Spinner() {
   return (
-    <svg
-      className="animate-spin h-4 w-4 text-black inline-block"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      />
+    <svg className="animate-spin h-4 w-4 text-black inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
     </svg>
   );
 }

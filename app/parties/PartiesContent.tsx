@@ -98,7 +98,7 @@ export default function PartiesContent({ parties }: { parties: PartyData[] }) {
                 {/* CTA buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 mt-1">
                   <button
-                    onClick={() => router.push(`/file/1?party=${party.code}`)}
+                    onClick={() => router.push(`/file?party=${party.code}`)}
                     className="flex-1 bg-yellow-300 text-black border-4 border-black font-black text-sm py-2.5 px-4 rounded-xl hover:bg-black hover:text-yellow-300 transition-colors text-center"
                   >
                     JOIN THIS PARTY →

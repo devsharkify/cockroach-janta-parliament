@@ -112,7 +112,7 @@ export default function HomePage() {
               🪳 FIND YOUR SEAT →
             </a>
             <Link
-              href="/file/1"
+              href="/file"
               className="inline-block px-8 py-4 bg-white text-black font-black text-lg border-4 border-black rounded-2xl shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:bg-black hover:text-yellow-300 transition-colors"
             >
               📋 FILE CANDIDACY (free)
@@ -378,7 +378,7 @@ export default function HomePage() {
             </div>
             <div className="mt-4">
               <Link
-                href="/file/1"
+                href="/file"
                 className="block text-center py-3 px-6 rounded-xl font-black text-base border-4 border-yellow-300 text-yellow-300 hover:bg-yellow-300 hover:text-black transition-colors shadow-[3px_3px_0_rgba(212,160,23,0.4)]"
               >
                 🪳 BECOME A STATISTIC — FILE NOW
@@ -407,7 +407,7 @@ export default function HomePage() {
           <FilingFrenzy />
           <div className="text-center mt-5">
             <Link
-              href="/file/1"
+              href="/file"
               className="inline-block px-6 py-3 bg-black text-yellow-300 font-black text-sm border-4 border-black rounded-xl hover:bg-[#7F77DD] transition-colors shadow-[4px_4px_0_rgba(0,0,0,0.25)]"
             >
               🪳 JOIN THE FRENZY — FILE YOUR CANDIDACY
@@ -434,7 +434,7 @@ export default function HomePage() {
 
         <div className="flex flex-wrap gap-4 justify-center">
           <Link
-            href="/file/1"
+            href="/file"
             className="px-10 py-5 rounded-2xl bg-yellow-300 text-black font-black text-xl border-4 border-yellow-300 hover:bg-yellow-400 transition-colors shadow-[6px_6px_0_rgba(255,255,255,0.15)]"
           >
             🪳 FILE CANDIDACY (free)

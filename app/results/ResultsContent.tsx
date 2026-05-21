@@ -256,7 +256,7 @@ export default function ResultsContent({ data }: { data: LeaderboardData }) {
               want to be on this list?
             </p>
             <button
-              onClick={() => router.push('/file/1')}
+              onClick={() => router.push('/file')}
               className="inline-block bg-yellow-300 text-black font-black text-xl px-10 py-4 rounded-2xl border-4 border-yellow-300 hover:bg-yellow-400 transition-colors shadow-[4px_4px_0_rgba(255,255,255,0.15)]"
             >
               FILE YOUR CANDIDACY →

@@ -146,7 +146,7 @@ export default function PartyContent({ party, topCandidates, totalCandidates, to
         {/* CTA */}
         <section className="pb-8">
           <button
-            onClick={() => router.push(`/file/1?party=${party.code}`)}
+            onClick={() => router.push(`/file?party=${party.code}`)}
             className="w-full text-black border-4 border-black font-black text-xl py-5 rounded-2xl transition-colors"
             style={{ background: '#facc15' }}
             onMouseEnter={(e) => {

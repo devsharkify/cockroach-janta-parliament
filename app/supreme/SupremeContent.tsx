@@ -337,7 +337,7 @@ export default function SupremeContent() {
               👑 PLEDGE YOUR VOTE
             </Link>
             <Link
-              href="/file/1"
+              href="/file"
               className="px-8 py-4 rounded-2xl font-black text-lg uppercase border-2 transition-all duration-150"
               style={{
                 background: 'transparent',
